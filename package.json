@@ -12,6 +12,7 @@
     "frames": "node tests/frames.js",
     "portraits": "node tests/portraits.js",
     "sounds": "node tests/sounds.js",
+    "titles": "node tests/titles.js",
     "layout": "node tests/layout.js"
   },
   "devDependencies": {

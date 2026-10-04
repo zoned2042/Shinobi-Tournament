@@ -25,7 +25,7 @@ node tests/frames.js kaguya ult   # contact sheet of stage frames in tests/out/ 
 node tests/frames.js all ult ko   #   one sheet per version; "styles" instead of "all" = first user of each style
 node tests/titles.js              # every Ultimate and signature cut-in title, frozen when fully revealed
 npm run portraits                 # contact sheet of every look to tests/out/portraits.png
-npm run sounds                    # renders every sound effect offline to tests/out/sfx.wav and reports peaks/clipping
+npm run sounds                    # renders every effect + the busiest moments offline to tests/out/sfx.wav, reports peaks/clipping
 npm run layout                    # phone-width screenshots (draft, bracket, arena) + horizontal-overflow check
 ```
 
@@ -44,7 +44,7 @@ Google Fonts through curl so the canvas text uses the real fonts.
 | `LK` / `lookOf` | Per-`base` and per-`id` look: skin `sk`, hair `hr`/`hs` (style), eyes `ey`/`es`, outfit `tp bt sl sv os vs`, headband `bd`, mask `mk`, marks `mr[]`, back item `bk`, glow, `bw` body width. Hokage tag auto-applies robe+hat; `Edo` tag auto-applies cracked grey skin. |
 | `drawHead`, `hairFront/Back`, `drawMarks`, `drawEye`, `drawPortrait`, `faceURL` | Head-frame drawing (origin at head centre, +x forward, -y up). Used by in-fight fighters, both cut-ins and face icons. |
 | `simFight(A,B)` | Pure simulation. Returns `{winner,loser,ko,hpLeft,log,turns,ultW}`. Contains the damage model and the Ultimate gauge. |
-| `Sfx` | Tiny WebAudio synth (no assets), all voices go through one master gain + compressor. |
+| `Sfx` | Tiny WebAudio synth (no assets). `tone(...,at)` schedules on the audio clock. Measured worst case (stacked KO impacts) peaks at ~0.55 of full scale, so there is no limiter. |
 | `class Stage` | Canvas renderer + animation engine. Fighters are skeletons driven by pose angles (`POSES`). Plays log entries as animations. `titleLayout` breaks Ultimate titles into 1-4 lines. |
 | `SIGMAP` / `STYLES` | 32 staged signature moves, keyed by id or base. Unmapped characters fall back to a generic move by `sigType` (currently none). |
 | `ULTMAP` / `ULTS` | 19 Ultimate choreographies, keyed by id or base. Fallback by sigType via `ULTFB`. |
@@ -80,4 +80,27 @@ Targets while tuning: about half of fights contain an Ultimate, 25+ distinct cha
 
 ## State of the work
 
-(updated at the end of this session, see below)
+Verified (Oct 2026):
+- `node tests/moves.js all`: 1,729 runs, 0 failures. Every version's signature, Ultimate, tai, nin and gen moves in
+  hit/dodge/KO/crit plus Skip-mid-move, from both sides: no errors, hangs, leftover fx/props/mood/camera, fighters reset.
+- `npm run test:smoke` (8/16/32/64 brackets, one version per character, skip, replay, new draft mid-fight) passes.
+- Frames of all 91 Ultimates (hit) were looked at, plus dodge/KO/crit sheets of every Ultimate style and KO against an
+  Edo defender. Every Ultimate and signature cut-in title was looked at (`tests/titles.js`), none overflow.
+- Shino/Zetsu/Hanzo/Sai plague swarm redone and checked (it used to read as falling snow).
+- Akatsuki Itachi has a custom signature (`crows`: crow flock + Mangekyo Tsukuyomi), checked in hit/dodge/KO.
+- Sound: `npm run sounds` renders every effect and the busiest stacked moments; worst peak 0.54 of full scale, no
+  clipping. The effects have still never been HEARD by a person: listen to `tests/out/sfx.wav`.
+- Phone layout at 390 and 360 px: no horizontal overflow; squad tray is one scrolling row, the live ticker sits under
+  the canvas instead of covering the fighters. Checked on Chromium's mobile emulation only, not a real device.
+- Balance targets pass: ~51% of fights have an Ultimate, 31 distinct champions / 300 brackets, top fighter ~16-19%.
+
+Worth knowing:
+- Early dodges in staged moves are a Substitution Jutsu (log takes the hit, see `substitute`/`reappear`); the
+  announcer calls the dodge when it visibly happens (`onSay('miss')`), not before the move.
+- `skeleton(pose)` / `jointAt(...)` give joint positions, so effects can attach to a giant's hand or head.
+- Every fight in 5,000 simulations ended by KO (time decisions never happen), and Edo Tensei versions take about
+  half of all titles even though only 10 of 91 versions are Edo. Both are inside the stated targets; flagging them
+  in case they are not intended.
+
+Backlog ideas: custom stat editing, team-vs-team brackets, story mode with a boss, per-character basic-attack
+animations, save/share a bracket, more Edo versions, a spectator "auto-play" mode, a real-device phone pass.

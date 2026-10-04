@@ -11,7 +11,7 @@
 :root{
   color-scheme: dark;
   --bg:#0d171e; --panel:#15242d; --panel2:#1d313d; --ink:#ece6d4; --muted:#93a3a8;
-  --flame:#f2a33a; --flame-ink:#1a1204; --chakra:#54b8e0; --ko:#e5604d; --gen:#a78bd8; --good:#7fcf8e; --line:#2a4250;
+  --flame:#f2a33a; --flame-ink:#1a1204; --chakra:#54b8e0; --ko:#e5604d; --gen:#a78bd8; --good:#7fcf8e; --line:#2a4250; --ready:#ffd84d;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
@@ -20,13 +20,13 @@
   :root:not([data-theme="dark"]){
     color-scheme: light;
     --bg:#e3eaed; --panel:#ffffff; --panel2:#edf2f4; --ink:#13232b; --muted:#566a72;
-    --flame:#c9730a; --flame-ink:#ffffff; --chakra:#1f7ea6; --ko:#c2402d; --gen:#6c4fb0; --good:#2f8a47; --line:#c1d0d6;
+    --flame:#c9730a; --flame-ink:#ffffff; --chakra:#1f7ea6; --ko:#c2402d; --gen:#6c4fb0; --good:#2f8a47; --line:#c1d0d6; --ready:#9a6200;
   }
 }
 :root[data-theme="light"]{
   color-scheme: light;
   --bg:#e3eaed; --panel:#ffffff; --panel2:#edf2f4; --ink:#13232b; --muted:#566a72;
-  --flame:#c9730a; --flame-ink:#ffffff; --chakra:#1f7ea6; --ko:#c2402d; --gen:#6c4fb0; --good:#2f8a47; --line:#c1d0d6;
+  --flame:#c9730a; --flame-ink:#ffffff; --chakra:#1f7ea6; --ko:#c2402d; --gen:#6c4fb0; --good:#2f8a47; --line:#c1d0d6; --ready:#9a6200;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
@@ -159,9 +159,9 @@ details.rules p{margin:8px 0}
 .ubar.r b{margin-left:auto}
 .ubar.ready{box-shadow:0 0 10px #ffd84d}
 .ulbl{font-size:11px;color:var(--muted);font-weight:700}
-.ulbl.ready{color:#ffd84d}
+.ulbl.ready{color:var(--ready)}
 .cf .ultn{flex-basis:100%;color:var(--flame);font-size:11px}
-.ft.ult{border-color:#ffd84d;color:#ffd84d}
+.ft.ult{border-color:var(--ready);color:var(--ready)}
 .hudmid{text-align:center;font-family:"Dela Gothic One",system-ui,sans-serif;color:var(--muted);font-size:18px;line-height:1.2}
 .hudmid small{display:block;font-family:"Zen Kaku Gothic New",system-ui,sans-serif;font-size:11px}
 .stagewrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#000;aspect-ratio:16/9}
@@ -179,7 +179,7 @@ details.rules p{margin:8px 0}
 .log li.nin{border-color:var(--chakra)}
 .log li.gen{border-color:var(--gen)}
 .log li.sig{border-color:var(--ko);font-weight:700}
-.log li.ult{border-color:#ffd84d;font-weight:800;color:#ffd84d}
+.log li.ult{border-color:var(--ready);font-weight:800;color:var(--ready)}
 .log li.heal{border-color:var(--good);color:var(--good)}
 .log li.end{border-color:var(--good);font-weight:700}
 .log li.info{color:var(--muted)}
@@ -213,6 +213,15 @@ details.rules p{margin:8px 0}
   .crest.lg{width:46px;height:46px;font-size:15px}
   .hud{gap:6px}
   .hf .fm{display:none}
+  .tray .slots{flex-wrap:nowrap;overflow-x:auto;flex-basis:100%;scrollbar-width:none;padding-bottom:2px}
+  .tray .slots::-webkit-scrollbar{display:none}
+  .slot{flex:none}
+  .slot.empty{padding:3px 12px}
+  .stagewrap{aspect-ratio:auto}
+  .stagewrap canvas{height:auto;aspect-ratio:16/9}
+  .ticker{position:static;opacity:1;padding:8px 12px;min-height:54px;background:rgba(5,10,16,.94)}
+  .ticker .tt{font-size:13px}
+  .champ{align-items:flex-start}
 }
 @media (prefers-reduced-motion: reduce){
   .hp b,.cbar b,.prog b{transition:none}
@@ -984,10 +993,11 @@ function simFight(A,B){
 const Sfx={
   on:true,ctx:null,
   init(){ if(this.ctx) return; try{ this.ctx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} if(this.ctx&&this.ctx.state==='suspended'){ try{ this.ctx.resume(); }catch(e){} } },
-  tone(f1,f2,dur,type,vol){
+  // at: start offset in seconds on the audio clock
+  tone(f1,f2,dur,type,vol,at){
     if(!this.on||!this.ctx) return;
     try{
-      const c=this.ctx, o=c.createOscillator(), g=c.createGain(), t=c.currentTime;
+      const c=this.ctx, o=c.createOscillator(), g=c.createGain(), t=c.currentTime+(at||0);
       o.type=type; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(Math.max(20,f2),t+dur);
       g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.001,t+dur);
       o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur+0.02);
@@ -1018,7 +1028,7 @@ const Sfx={
       case 'heal': this.tone(520,1040,.3,'sine',.07); break;
       case 'cut': this.tone(900,150,.3,'square',.07); this.noise(.3,.12,5000); break;
       case 'fight': this.tone(220,440,.25,'square',.09); break;
-      case 'chirp': for(let i=0;i<5;i++) setTimeout(()=>this.tone(2600+i*140,3300,.05,'square',.04),i*70); break;
+      case 'chirp': for(let i=0;i<5;i++) this.tone(2600+i*140,3300,.05,'square',.04,i*.07); break;
     }
   }
 };
@@ -1434,12 +1444,12 @@ class Stage{
   /* =================================================================
      ANIMATION SCRIPTS
      ================================================================= */
-  hp(e){ if(this.hpDone) return; this.hpDone=true; if(this.onSay&&e.att!==null&&!e.dodge&&(e.dmg>0||e.mv==='gen')) this.onSay('hit',e); if(this.onHp) this.onHp(e); }
+  hp(e){ if(this.hpDone) return; this.hpDone=true; if(this.onSay&&e.att!==null){ if(e.dodge) this.onSay('miss',e); else if(e.dmg>0||e.mv==='gen') this.onSay('hit',e); } if(this.onHp) this.onHp(e); }
   knock(A,D,px){ this.tween(D,{x:D.x+A.face*px},this.d(90),ease.out); }
   popupDmg(e,D){
     const big=e.mv==='sig'||e.mv==='ult'||e.crit;
     this.popup(`-${e.dmg}`,D.x,GY-196,'#ffffff',e.mv==='ult'?58:(e.crit?48:big?40:30),'#8a1a10');
-    if(e.mv==='ult') this.popup('ULTIMATE!',D.x,GY-256,'#ffd84d',32,'#5a3a00');
+    if(e.mv==='ult') this.popup(e.crit?'CRITICAL ULTIMATE!':'ULTIMATE!',D.x,GY-256,'#ffd84d',e.crit?28:32,'#5a3a00');
     else if(e.crit) this.popup('CRITICAL!',D.x,GY-236,'#ffd84d',26,'#5a3a00');
   }
   guardFx(D){ this.ring(D.x,GY-95,'#7fe3ff',20,70,320,4); this.popup('GUARD',D.x+(D.face*-30),GY-150,'#7fe3ff',20,'#0a3a4a'); }
@@ -1562,7 +1572,7 @@ class Stage{
     if(e.dodge){
       this.burst(x,y,fx.c,22,.7,5); this.ring(x,y,fx.c,6,110,380,4); this.shake(10,200); this.sfx('boom');
       if(o.pd){ await o.pd; await this.reappear(D,A,false); } else await this.evade(D,A);
-      return false;
+      this.hp(e); return false;
     }
     await this.landed(e,A,D,fx,x,y,true,o.knock);
     return true;
@@ -1597,6 +1607,7 @@ class Stage{
       this.scar(x,170); this.bloom(x,y,fx.c,.9,800,620); this.ring(x,y,'#ffffff',10,380,700,9); this.ring(x,y,fx.c,6,300,800,6); this.burst(x,y,fx.c,50,1.2,7); dust(this,x,40);
       this.shake(34,700); this.sfx('boom'); this.popup('EVADED!',x,GY-240,'#cfe8ff',30,'#14304a');
       if(o.pd){ await o.pd; await this.reappear(D,A,true); } else await this.evade(D,A);
+      this.hp(e);
       await this.wait(this.d(300));
       return false;
     }
@@ -1970,7 +1981,7 @@ const SIGMAP={
   boruto:['rasen'],konohamaru:['rasen',{clones:true}],
   sasuke1:['chidori'],sasuke2:['chidori'],sasuke3:['susanoo',{mode:'arrow'}],
   kakashi:['chidori'],darui:['chidori'],raikage:['chidori'],
-  itachi2:['susanoo',{mode:'sword',c:'#c9a8ff'}],madara1:['susanoo',{mode:'arrow'}],
+  itachi1:['crows',{c:'#ff2a3a',c2:'#ffb0b0'}],itachi2:['susanoo',{mode:'sword',c:'#c9a8ff'}],madara1:['susanoo',{mode:'arrow'}],
   madara2:['meteor'],obito1:['kamui'],kaguya:['kamui',{big:true}],obito2:['beastBomb',{c:'#b36bff',c2:'#ffffff'}],hagoromo:['orbs',{merge:false}],
   hashirama:['wood',{kind:'trunk'}],yamato:['wood',{kind:'trunk'}],kimimaro:['wood',{kind:'bone'}],kurenai:['wood',{kind:'vine',c:'#ff8aa0'}],
   tsunade:['smash'],sakura:['smash'],choji2:['smash',{wings:true,c:'#ffb347'}],jugo:['smash',{c:'#e08a2a'}],bee:['smash'],iruka:['smash',{c:'#ffffff'}],
@@ -1988,6 +1999,29 @@ const SIGMAP={
   orochimaru:['snakes'],kabuto:['snakes'],anko:['snakes'],
   onoki:['cube'],kushina:['chains'],yagura:['beastBomb',{c:'#6ab0ff',c2:'#ffffff'}]
 };
+/* a crow in flight, facing dir (+1 right), wings flapping with phase fl */
+function drawCrow(ctx,x,y,s,dir,fl){
+  ctx.save(); ctx.translate(x,y); ctx.scale(dir*s,s); ctx.fillStyle='#0b0a0f'; ctx.strokeStyle='rgba(255,255,255,.18)'; ctx.lineWidth=1;
+  const w=Math.sin(fl)*7;
+  ctx.beginPath(); ctx.moveTo(-2,-1); ctx.lineTo(-6,-8-w); ctx.lineTo(5,-2); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(0,0,8,3.6,-.1,0,TAU); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(8,-1.5,3,0,TAU); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-7,0); ctx.lineTo(-13,-3); ctx.lineTo(-13,3); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-1,0); ctx.lineTo(-4,8+w*.6); ctx.lineTo(6,1); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#ffb000'; ctx.beginPath(); ctx.moveTo(10.5,-2); ctx.lineTo(14,-1); ctx.lineTo(10.5,0); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#ff2a3a'; ctx.beginPath(); ctx.arc(8.8,-2.2,.9,0,TAU); ctx.fill();
+  ctx.restore();
+}
+/* Itachi's Mangekyo Sharingan: three curved blades on red */
+function drawMangekyo(ctx,x,y,R,rot){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(rot);
+  ctx.fillStyle='#c4101e'; ctx.beginPath(); ctx.arc(0,0,R,0,TAU); ctx.fill();
+  ctx.strokeStyle='#14060a'; ctx.lineWidth=Math.max(2,R*.06); ctx.stroke();
+  ctx.fillStyle='#14060a';
+  for(let i=0;i<3;i++){ ctx.save(); ctx.rotate(i*2.0944); ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(R*.55,-R*.42,R*.97,-R*.1); ctx.quadraticCurveTo(R*.62,R*.04,R*.18,R*.16); ctx.closePath(); ctx.fill(); ctx.restore(); }
+  ctx.beginPath(); ctx.arc(0,0,R*.16,0,TAU); ctx.fill();
+  ctx.restore();
+}
 const dust=(S,x,n,col)=>{ for(let i=0;i<n;i++) S.spawn({x:x+rand(-30,30),y:GY-rand(0,8),vx:rand(-.35,.35),vy:-rand(.25,.85),g:.0016,life:rand(600,1000),size:rand(3,7),col:col||pick(['#7a6648','#9a8660','#5f4f3a']),shape:'dot'}); };
 
 const STYLES={
@@ -2478,6 +2512,48 @@ const STYLES={
       else { await sh; this.flash('#ffd9a0',.8); await this.impact(e,A,D,fx,dx,GY-95,{pd,knock:50}); }
     }
     await this.tween(this.mood,{a:0},this.d(300)); this.mood=null; A.aura=0;
+  },
+
+  async crows(e,A,D,fx){
+    // Tsukuyomi: Itachi comes apart into crows, they engulf the target, the Mangekyo opens behind them
+    const f=A.face, dx=D.x, cy=GY-112, st={k:0,c:0,or:170,a:1}, eye={r:0,a:0};
+    const flock=Array.from({length:24},(_,i)=>({a:rand(0,TAU),sp:rand(1.5,2.5)*(i%2?1:-1),r0:rand(40,110),h:rand(10,70),dy:rand(-55,55),s:rand(.9,1.35),ph:rand(0,TAU)}));
+    const pos=(c,t)=>{
+      const a1=c.a+t*c.sp, sx=A.x+Math.cos(a1)*c.r0*st.k, sy=GY-105+Math.sin(a1*1.3)*c.r0*.55*st.k-st.k*c.h;
+      const a2=c.a+t*c.sp*1.7, ox=dx+Math.cos(a2)*st.or*1.15, oy=cy+Math.sin(a2)*st.or*.5+c.dy*st.or/170;
+      const vx=lerp(-Math.sin(a1)*c.sp,-Math.sin(a2)*c.sp,st.c)+(st.c>0&&st.c<1?(dx-A.x)/300:0);
+      return {x:lerp(sx,ox,st.c),y:lerp(sy,oy,st.c),dir:vx>=0?1:-1};
+    };
+    this.pose(A,'gen',this.d(160)); A.eye=1; A.eyeCol='#ff2a3a'; this.sfx('charge');
+    const bg=this.fxAdd(this.d(6000),ctx=>{
+      if(eye.r<=0) return; ctx.save(); ctx.globalAlpha=eye.a;
+      const g=ctx.createRadialGradient(dx,cy,eye.r*.8,dx,cy,eye.r*1.9); g.addColorStop(0,'rgba(255,40,60,.55)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(dx,cy,eye.r*1.9,0,TAU); ctx.fill();
+      drawMangekyo(ctx,dx,cy,eye.r,this.t*.0024); ctx.restore();
+    },true);
+    const ef=this.fxAdd(this.d(6000),ctx=>{
+      if(st.k<=0||st.a<=0) return; const t=this.t/1000; ctx.save(); ctx.globalAlpha=st.a;
+      flock.forEach(c=>{ const p=pos(c,t); drawCrow(ctx,p.x,p.y,c.s,p.dir,t*22+c.ph); });
+      ctx.restore();
+    });
+    await this.wait(this.d(200));
+    const pd=this.pdodge(e,A,D);
+    this.sfx('poof'); this.smoke(A.x,GY-90,6); this.tween(A,{alpha:.12},this.d(360));
+    await this.tween(st,{k:1},this.d(420),ease.out);
+    this.sfx('whoosh'); this.mood={col:'#2a0006',a:0}; this.tween(this.mood,{a:.78},this.d(420));
+    await this.tween(st,{c:1},this.d(560),ease.inout);
+    this.sfx('cut'); this.flash('#ff2a3a',.3); this.shake(6,300);
+    this.tween(eye,{r:150,a:.95},this.d(380),ease.out);
+    if(!e.dodge){ D.flash=1; this.pose(D,'stun',this.d(100)); }
+    await this.tween(st,{or:75},this.d(520),ease.in);
+    for(let i=0;i<3;i++){ if(!e.dodge){ D.flash=1; this.sfx('hit',.6); this.burst(dx+rand(-20,20),cy+rand(-30,30),'#ff2a3a',6,.5,3); } this.shake(5,90); await this.wait(this.d(110)); }
+    // the illusion snaps shut: the crows scatter, Itachi is whole again
+    this.tween(eye,{r:0,a:0},this.d(200),ease.in); this.tween(st,{or:420,a:0},this.d(360),ease.out);
+    this.tween(A,{alpha:1},this.d(200)); this.smoke(A.x,GY-90,4);
+    const fade=this.tween(this.mood,{a:0},this.d(260));
+    this.flash('#ffffff',.6); this.sfx('boom');
+    await this.impact(e,A,D,fx,dx,cy,{pd,knock:20});
+    if(e.stun&&!e.ko&&!e.dodge){ D.dizzy=true; this.popup('TRAPPED!',dx,GY-250,'#ffb0b0',26,'#4a0a10'); }
+    await fade; this.mood=null; A.eye=0; bg.t=bg.dur; ef.t=ef.dur;
   },
 
   async snakes(e,A,D,fx){
@@ -3272,11 +3348,11 @@ class Announcer{
     const v=this.vars(e);
     if(e.type==='heal') return this.fill(this.line('heal'),v);
     if(e.skip) return this.fill(this.line('skip'),v);
-    if(e.dodge){ this.streak[e.att]=0; if(e.mv==='ult') this.ready[e.att]=false; return this.fill(this.line('dodge'),v); }
     if(e.mv==='ult'){ this.ready[e.att]=false; return this.fill(this.line('ultPre'),v); }
     const key=e.mv==='tai'?'taiPre':e.mv==='nin'?'ninPre':e.mv==='gen'?'genPre':'sigPre';
     return this.fill(this.line(key),v);
   }
+  miss(e){ this.streak[e.att]=0; if(e.mv==='ult') this.ready[e.att]=false; return this.fill(this.line('dodge'),this.vars(e)); }
   hit(e){
     const v=this.vars(e); this.hp=e.hp.slice();
     let t;
@@ -3649,7 +3725,7 @@ async function playSim(m,sim,r,real){
   const st=buildArena(m.a,m.b,`${roundName(r)}, ${real?`fight ${state.m+1} of ${state.rounds[r].length}`:'replay'}`,'',hasSquad(m)?'Your fighter is up':'',themeFor(r));
   setHp([100,100],[100,100],[0,0]);
   const ann=new Announcer(m.a,m.b,f=>inSquad(f.id));
-  st.onSay=(k,e)=>{ if(k==='pre') setTicker(ann.pre(e),false); else if(k==='hit') setTicker(ann.hit(e),true); else setTicker(ann.end(e),true); };
+  st.onSay=(k,e)=>{ if(k==='pre') setTicker(ann.pre(e),false); else if(k==='hit') setTicker(ann.hit(e),true); else if(k==='miss') setTicker(ann.miss(e),false); else setTicker(ann.end(e),true); };
   setTicker(ann.intro(roundName(r)),false);
   try{ await st.intro(roundName(r)); }catch(err){ console.error(err); }
   setTicker(ann.matchup(),false);
