@@ -522,8 +522,8 @@ const LK={
   sasuke2:{tp:'#e9edf5',bt:'#e9edf5',ac:'#6b4a8f',bd:null,es:'mangekyo',os:'coat',sc:'#6b4a8f'},
   sasuke3:{tp:'#17161f',bt:'#17161f',ac:'#6b4a8f',bd:null,es:'rinnegan',os:'cloak',col:true,sh:'#111118'},
   kakashi:{sk:'#f3d9c2',hr:'#c8ccd4',hs:'swept',ey:'#1a1a22',es:'sharingan',tp:'#2a3552',bt:'#2a3552',ac:'#3f7a4f',bd:'blue-slant',mk:'#232b44',vs:'#4a6d4a',os:'vest'},
-  itachi:{sk:'#efcdb0',hr:'#18181f',hs:'ptailLow',ey:'#18181f',es:'sharingan',tp:'#15131c',bt:'#15131c',os:'cloak',col:true,cl:true,bd:'slash',mr:['tear'],sh:'#111118'},
-  itachi1:{es:'mangekyo'},
+  itachi:{sk:'#f1d3b9',hr:'#1b1a24',hs:'itachi',ey:'#18181f',es:'sharingan',tp:'#15131c',bt:'#15131c',os:'cloak',col:true,cl:true,bd:'slash',mr:['troughs'],sh:'#111118',hc:true},
+  itachi1:{es:'itachiMS'},
   shisui:{sk:'#efd2b8',hr:'#16161c',hs:'curly',es:'sharingan',tp:'#30406b',bt:'#2a3550',vs:'#4a6d4a',os:'vest',bd:'blue',mr:['tear']},
   gaara:{sk:'#f2dbc9',hr:'#b6361f',hs:'messy',ey:'#4fb7a8',es:'ring',tp:'#6b2f22',bt:'#4a2a22',ac:'#c8a45a',os:'jacket',mr:['gaara','rings'],bk:'gourd',sh:'#2a2220'},
   gaara2:{tp:'#a4412f',bt:'#7a2f22',os:'robe',hat:'#d8c8a0',keep:true,mr:['gaara','rings'],bk:'gourd'},
@@ -627,13 +627,17 @@ function hcap(ctx,R,a0,a1,ext){
 }
 const pr=k=>((k*53+17)%11)/11;
 
-function hairBack(ctx,L,R,hair,dk){
+function hairBack(ctx,L,R,hair,dk,bust){
   ctx.fillStyle=hair; ctx.strokeStyle=dk; ctx.lineWidth=Math.max(.8,R*.06);
   switch(L.hs){
     case 'longStraight': case 'longRed': case 'longWave': case 'veryLong': {
       const len=L.hs==='veryLong'?R*9:R*5.2, w=L.hs==='longWave'?R*.25:0;
       plg(ctx,[[R*.1,-R*1.05],[-R*1.2,-R*.8],[-R*1.7,R*1.4],[-R*1.5+w,len*.55],[-R*1.1-w,len],[-R*.2,len*.95],[R*.1,R*1.1]]); break; }
     case 'longLow': strand(ctx,-R*.7,R*.2,-R*2.6,R*3.2,R*.45,R*.4); ctx.fillStyle='#8a2a2a'; ell(ctx,-R*.85,R*.3,R*.14,R*.2); break;
+    case 'itachi':
+      plg(ctx,[[R*.05,-R*1.06],[-R*.82,-R*.78],[-R*1.1,-R*.05],[-R*1.0,R*.55],[-R*.55,R*.7],[-R*.2,R*.2]]);
+      if(!bust) strand(ctx,-R*.82,R*.42,-R*1.12,R*2.7,R*.2,-R*.18); // on a bust the ponytail hangs behind the body
+      ctx.fillStyle='#4a4652'; ell(ctx,-R*.86,R*.5,R*.12,R*.15); break;
     case 'ptailLow': strand(ctx,-R*.7,R*.2,-R*2.4,R*2.6,R*.4,R*.4); ctx.fillStyle='#2a2a30'; ell(ctx,-R*.85,R*.3,R*.14,R*.2); break;
     case 'ptailHigh': strand(ctx,-R*.45,-R*.85,-R*2.3,R*.4,R*.42,-R*.3); ctx.fillStyle='#e8e4d4'; ell(ctx,-R*.5,-R*.8,R*.16,R*.16); break;
     case 'ptailSpiky': strand(ctx,-R*.45,-R*.85,-R*1.9,-R*.9,R*.38,-R*.2); break;
@@ -676,6 +680,12 @@ function hairFront(ctx,L,R,hair,dk,t){
       hcap(ctx,R,-3.1,-.2); strand(ctx,R*.38,-R*.85,R*.72,R*.75,R*.17,R*.06); strand(ctx,R*.1,-R*.9,R*.3,R*.6,R*.18,R*.05);
       if(hs==='longSide') strand(ctx,R*.7,-R*.7,R*.9,R*1.2,R*.28,R*.1);
       break;
+    case 'itachi':
+      hcap(ctx,R,-3.2,-.42,.05);
+      strand(ctx,R*.22,-R*.95,-R*.02,R*.95,R*.11,-R*.16); // near-side bang, along the cheek in front of the ear
+      strand(ctx,R*.86,-R*.78,R*1.12,R*.86,R*.12,R*.06);  // far-side bang, framing the front of the face
+      if(hair===L.hr){ ctx.strokeStyle='rgba(190,200,230,.35)'; ctx.lineWidth=Math.max(.8,R*.07); ctx.beginPath(); ctx.arc(-R*.05,-R*.05,R*.86,-2.75,-1.55); ctx.stroke(); } // sheen
+      break;
     case 'ptailLow': hcap(ctx,R,-3.1,-.22); strand(ctx,R*.4,-R*.85,R*.78,R*.62,R*.15,R*.05); strand(ctx,R*.1,-R*.9,R*.4,R*.5,R*.14,R*.05); break;
     case 'ptailHigh': hcap(ctx,R,-3.1,-.22); strand(ctx,R*.55,-R*.8,R*.88,R*.35,R*.17,R*.05); break;
     case 'ptailSpiky': hcap(ctx,R,-3.1,-.22); for(let i=0;i<3;i++) spk(ctx,R,-2.2-i*.25,R*.9,.25,-.4); break;
@@ -700,6 +710,7 @@ function drawMarks(ctx,L,R,edo){
     switch(m){
       case 'whisk': ctx.strokeStyle='rgba(60,30,20,.75)'; for(let i=-1;i<=1;i++){ ctx.beginPath(); ctx.moveTo(R*.42,R*.28+i*R*.1); ctx.lineTo(R*.92,R*.2+i*R*.14); ctx.stroke(); } break;
       case 'fang': ctx.fillStyle='#c8281e'; plg(ctx,[[R*.5,R*.12],[R*.7,R*.22],[R*.52,R*.42]],true,false); break;
+      case 'troughs': ctx.strokeStyle='rgba(70,36,36,.8)'; ctx.lineWidth=Math.max(.6,R*.045); ctx.beginPath(); ctx.moveTo(R*.66,R*.2); ctx.quadraticCurveTo(R*.58,R*.36,R*.42,R*.5); ctx.stroke(); break;
       case 'tear': ctx.strokeStyle='rgba(70,30,30,.6)'; ctx.beginPath(); ctx.moveTo(R*.3,R*.2); ctx.quadraticCurveTo(R*.4,R*.45,R*.2,R*.6); ctx.moveTo(R*.55,R*.25); ctx.quadraticCurveTo(R*.62,R*.5,R*.5,R*.62); ctx.stroke(); break;
       case 'brows': ctx.strokeStyle='#14141a'; ctx.lineWidth=R*.15; ctx.beginPath(); ctx.moveTo(R*.2,-R*.42); ctx.lineTo(R*.82,-R*.38); ctx.stroke(); break;
       case 'thick': ctx.strokeStyle='#14141a'; ctx.lineWidth=R*.18; ctx.beginPath(); ctx.moveTo(R*.2,-R*.46); ctx.lineTo(R*.85,-R*.42); ctx.stroke(); break;
@@ -756,6 +767,7 @@ function drawEye(ctx,L,R,o){
   const dot=(c,r)=>{ ctx.fillStyle=c; ctx.beginPath(); ctx.arc(ex+rx*.1,ey,r,0,TAU); ctx.fill(); };
   switch(es){
     case 'sharingan': dot('#d41a1a',ir); ctx.strokeStyle='#14141a'; ctx.lineWidth=Math.max(.5,R*.03); ctx.beginPath(); ctx.arc(ex+rx*.1,ey,ir*.62,0,TAU); ctx.stroke(); dot('#14141a',ir*.2); ctx.fillStyle='#14141a'; for(let i=0;i<3;i++){ const a=i*2.094+.5; ctx.beginPath(); ctx.arc(ex+rx*.1+Math.cos(a)*ir*.62,ey+Math.sin(a)*ir*.62,ir*.13,0,TAU); ctx.fill(); } break;
+    case 'itachiMS': drawMangekyo(ctx,ex+rx*.1,ey,ir,.4); break;
     case 'mangekyo': dot('#d41a1a',ir); ctx.strokeStyle='#14141a'; ctx.lineWidth=Math.max(.8,R*.06); for(let i=0;i<3;i++){ const a=i*2.094; ctx.beginPath(); ctx.arc(ex+rx*.1+Math.cos(a)*ir*.5,ey+Math.sin(a)*ir*.5,ir*.42,a+1.6,a+3.6); ctx.stroke(); } dot('#14141a',ir*.15); break;
     case 'rinnegan': dot('#a07ad8',ir); ctx.strokeStyle='#5a3a8a'; ctx.lineWidth=Math.max(.5,R*.03); for(let i=1;i<=3;i++){ ctx.beginPath(); ctx.arc(ex+rx*.1,ey,ir*i*.3,0,TAU); ctx.stroke(); } dot('#2a1a3a',ir*.12); break;
     case 'byakugan': ctx.strokeStyle='#8a8ab8'; ctx.lineWidth=Math.max(.5,R*.03); ctx.beginPath(); ctx.arc(ex+rx*.1,ey,ir*.75,0,TAU); ctx.stroke(); break;
@@ -781,7 +793,7 @@ function drawHead(ctx,L,R,o){
   const C=c=>tint?tint:(hot?'#ffffff':c);
   const skin=C(L.sk), hair=C(L.hr), dk=C(mix(L.hr,'#000000',.5)), lw=Math.max(.8,R*.06);
   ctx.save(); ctx.lineJoin='round'; ctx.lineCap='round';
-  hairBack(ctx,L,R,hair,dk);
+  hairBack(ctx,L,R,hair,dk,!!o.big);
   ctx.lineWidth=lw; ctx.strokeStyle='rgba(0,0,0,.6)'; ctx.fillStyle=skin;
   ctx.beginPath(); ctx.arc(0,0,R,0,TAU); ctx.fill(); ctx.stroke();
   ctx.fillStyle=C(mix(L.sk,'#000000',.1)); ell(ctx,-R*.22,R*.12,R*.15,R*.22);
@@ -807,7 +819,7 @@ function drawHead(ctx,L,R,o){
     ctx.fillStyle=C('#cfd8e0'); ctx.strokeStyle='rgba(0,0,0,.6)'; ctx.lineWidth=lw;
     if(bd==='horn'){ plg(ctx,[[-R*.3,R*.17],[-R*.3,-R*.17],[-R*.1,-R*.5],[R*.1,-R*.5],[R*.3,-R*.17],[R*.3,R*.17]]); }
     else { ctx.beginPath(); ctx.rect(-R*.3,-R*.18,R*.6,R*.36); ctx.fill(); ctx.stroke(); }
-    if(bd==='slash'){ ctx.strokeStyle='#14141a'; ctx.lineWidth=R*.05; ctx.beginPath(); ctx.moveTo(-R*.28,R*.16); ctx.lineTo(R*.28,-R*.16); ctx.stroke(); }
+    if(bd==='slash'){ ctx.strokeStyle='rgba(60,70,90,.8)'; ctx.lineWidth=R*.05; ctx.beginPath(); ctx.arc(0,0,R*.08,0,5); ctx.stroke(); ctx.strokeStyle='#14141a'; ctx.lineWidth=R*.05; ctx.beginPath(); ctx.moveTo(-R*.28,R*.16); ctx.lineTo(R*.28,-R*.16); ctx.stroke(); }
     else { ctx.strokeStyle='rgba(60,70,90,.8)'; ctx.lineWidth=R*.05; ctx.beginPath(); ctx.arc(0,0,R*.08,0,5); ctx.stroke(); }
     ctx.restore();
   }
@@ -826,6 +838,21 @@ function drawHead(ctx,L,R,o){
   ctx.restore();
 }
 
+/* the Akatsuki cloud: puffy lobes on a flat, rounded base, red with a white rim. s = width in px */
+const CLOUD_LOBES=[[-.29,-.03,.17],[-.06,-.15,.23],[.2,-.1,.2],[.38,.01,.12]];
+function drawCloud(ctx,x,y,s,rot){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(rot||0); ctx.scale(s,s);
+  const blob=pad=>{
+    ctx.beginPath();
+    CLOUD_LOBES.forEach(([cx,cy,r])=>{ ctx.moveTo(cx+r+pad,cy); ctx.arc(cx,cy,r+pad,0,TAU); });
+    for(const sx of [-1,1]){ ctx.moveTo(sx*.37+.11+pad,.09); ctx.arc(sx*.37,.09,.11+pad,0,TAU); }
+    ctx.rect(-.37,-.02-pad,.74,.22+pad*2); ctx.fill();
+  };
+  ctx.fillStyle='#f4f1ec'; blob(.075); ctx.fillStyle='#c8172b'; blob(0);
+  ctx.fillStyle='rgba(255,255,255,.18)'; ctx.beginPath(); ctx.arc(-.06,-.2,.1,0,TAU); ctx.fill();
+  ctx.restore();
+}
+
 /* big bust used on cut-ins and as the small face icons */
 function drawPortrait(ctx,f,cx,cy,R,t,o){
   o=o||{}; const L=f.look||lookOf(f), edo=L.edo;
@@ -839,7 +866,7 @@ function drawPortrait(ctx,f,cx,cy,R,t,o){
   plg(ctx,[[-R*2.0,R*3.2],[-R*1.7,R*1.55],[-R*.5,R*1.0],[R*.5,R*1.0],[R*1.7,R*1.55],[R*2.0,R*3.2]]);
   if(L.vs){ ctx.fillStyle=L.vs; plg(ctx,[[-R*1.9,R*3.2],[-R*1.6,R*1.6],[-R*.5,R*1.1],[-R*.2,R*3.2]]); plg(ctx,[[R*.2,R*3.2],[R*.5,R*1.1],[R*1.6,R*1.6],[R*1.9,R*3.2]]); }
   if(L.os==='robe'||L.os==='cloak'||L.col||L.mk==='#3f4a5a'){ ctx.fillStyle=mix(tp,'#ffffff',.14); plg(ctx,[[-R*1.2,R*1.1],[-R*.6,-R*.15],[-R*.2,R*.1],[-R*.45,R*1.5]]); plg(ctx,[[R*1.2,R*1.1],[R*.75,-R*.2],[R*.38,R*.15],[R*.55,R*1.5]]); ctx.fillStyle=mix(tp,'#000000',.45); plg(ctx,[[-R*.45,R*1.5],[-R*.2,R*.1],[R*.38,R*.15],[R*.55,R*1.5]],true,false); }
-  if(L.cl){ ctx.fillStyle='#d8263a'; ctx.strokeStyle='#ffffff'; ctx.lineWidth=R*.04; ell(ctx,-R*1.15,R*2.5,R*.38,R*.26); ell(ctx,R*1.2,R*2.6,R*.4,R*.28); }
+  if(L.cl){ drawCloud(ctx,-R*1.12,R*2.42,R*1.05,-.12); drawCloud(ctx,R*1.18,R*2.62,R*.92,.1); }
   if(L.os==='armor'){ ctx.fillStyle=L.ac||'#a02a2a'; ctx.strokeStyle='rgba(0,0,0,.6)'; ctx.lineWidth=lw; ell(ctx,-R*1.55,R*1.6,R*.6,R*.4,-.3); ell(ctx,R*1.55,R*1.6,R*.6,R*.4,.3); }
   if(L.sc){ ctx.fillStyle=L.sc; ctx.strokeStyle='rgba(0,0,0,.6)'; plg(ctx,[[-R*.7,R*1.1],[R*.9,R*1.1],[R*.8,R*1.7],[-R*.6,R*1.7]]); }
   if(L.bd==='blue-neck'){ ctx.fillStyle=BAND.blue; ctx.strokeStyle='rgba(0,0,0,.6)'; plg(ctx,[[-R*.55,R*1.0],[R*.7,R*1.0],[R*.65,R*1.3],[-R*.5,R*1.3]]); }
@@ -848,6 +875,12 @@ function drawPortrait(ctx,f,cx,cy,R,t,o){
   ctx.save(); ctx.rotate(-.06);
   drawHead(ctx,L,R,{big:true,t,eyeGlow:o.eyeGlow,noHat:false});
   ctx.restore();
+  if(L.hc){ // high Akatsuki collar standing up to the jaw, red lining along its top edge
+    ctx.fillStyle=mix(tp,'#ffffff',.1); ctx.strokeStyle='rgba(0,0,0,.6)'; ctx.lineWidth=lw;
+    plg(ctx,[[-R*1.05,R*1.6],[-R*.86,R*.52],[-R*.1,R*.86],[R*.62,R*.98],[R*1.12,R*.58],[R*1.3,R*1.6]]);
+    ctx.strokeStyle='#b8142a'; ctx.lineWidth=R*.07; ctx.beginPath(); ctx.moveTo(-R*.84,R*.56); ctx.lineTo(-R*.1,R*.9); ctx.lineTo(R*.62,R*1.02); ctx.lineTo(R*1.1,R*.62); ctx.stroke();
+    ctx.strokeStyle='rgba(0,0,0,.45)'; ctx.lineWidth=lw; ctx.beginPath(); ctx.moveTo(R*.62,R*1.04); ctx.lineTo(R*.5,R*1.6); ctx.stroke();
+  }
   if(edo){ ctx.strokeStyle='rgba(25,20,28,.8)'; ctx.lineWidth=R*.04; ctx.beginPath(); ctx.moveTo(-R*.1,R*.7); ctx.lineTo(R*.1,R*1.0); ctx.lineTo(-R*.05,R*1.3); ctx.stroke(); }
   ctx.restore();
 }
@@ -1400,7 +1433,8 @@ class Stage{
     leg(q.hip,q.bk,q.bf,pantsD);
     if(L.hs==='longStraight'||L.hs==='longRed'||L.hs==='longWave'||L.hs==='veryLong'){ /* hair drawn with head */ }
     // torso and clothing
-    const os=L.os, wb=11*bw, wt=14*bw;
+    const os=L.os, wb=11*bw, wt=14*bw, longWear=os==='cloak';
+    if(longWear) leg(q.hip,q.fk,q.ff,pants); // a long cloak hangs over the front thigh
     const hipL=P(q.hip,0,-wb), hipR=P(q.hip,0,wb), shR=P(q.sh,0,wt), shL=P(q.sh,0,-wt);
     if(os==='bare'){ poly([hipL,hipR,shR,shL],skin); limb([P(q.sh,0,-wt*.7),P(q.hip,0,wb*.7)],col('#2a2a3a'),5); }
     else poly([hipL,hipR,shR,P(q.sh,5,0),shL],top);
@@ -1411,12 +1445,12 @@ class Stage{
     if(L.bd==='blue-waist'&&plain){ poly([P(q.hip,2,-wb-1),P(q.hip,2,wb+1),P(q.hip,9,wb+1),P(q.hip,9,-wb-1)],BAND.blue); }
     if(L.sc&&plain&&L.os==='jacket'){ poly([P(q.sh,-2,-wt-2),P(q.sh,-2,wt+2),P(q.sh,6,wt),P(q.sh,6,-wt)],col(L.sc)); }
     if(os==='cloak'||os==='robe'||os==='dress'||os==='coat'){
-      const len=os==='robe'?58:os==='cloak'?44:os==='coat'?34:36, fl2=os==='robe'?9:os==='cloak'?10:8;
+      const len=os==='robe'?58:os==='cloak'?50:os==='coat'?34:36, fl2=os==='robe'?9:os==='cloak'?11:8;
       const cl=os==='cloak'?top:os==='robe'?top:os==='coat'?top:top;
       poly([P(q.sh,-2,-wt-1),P(q.hip,-len,-wb-fl2),P(q.hip,-len+3,wb+fl2),P(q.sh,-2,wt+1)],cl);
       ctx.strokeStyle='rgba(0,0,0,.5)'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(...P(q.sh,0,wt*.1)); ctx.lineTo(...P(q.hip,-len,wb*.15)); ctx.stroke();
       if(os==='robe'||os==='coat'){ const tr=col(L.ac||mix(L.tp,'#000000',.3)); poly([P(q.hip,-len,-wb-fl2),P(q.hip,-len+3,wb+fl2),P(q.hip,-len+10,wb+fl2),P(q.hip,-len+7,-wb-fl2)],tr); if(os==='robe') poly([P(q.sh,-2,wt*.1),P(q.sh,-2,wt*.1+4),P(q.hip,-len,wb*.15+4),P(q.hip,-len,wb*.15)],tr); }
-      if(L.cl&&plain){ for(let i=0;i<3;i++){ const c0=P(q.hip,-8-i*13,(i%2?7:-7)); ctx.fillStyle='#d8263a'; ctx.strokeStyle='#fff'; ctx.lineWidth=1.3; ctx.beginPath(); ctx.ellipse(c0[0],c0[1],5,3.4,0,0,6.283); ctx.fill(); ctx.stroke(); } }
+      if(L.cl&&plain){ const rot=Math.atan2(ux,-uy); [[q.sh,-17,-2,15],[q.hip,-14,6,14],[q.hip,-37,-6,16]].forEach(([b,au,an,w])=>{ const c=P(b,au,an); drawCloud(ctx,c[0],c[1],w,rot); }); }
     }
     if(L.neck==='jashin'&&plain){ const c0=P(q.sh,-10,0); ctx.strokeStyle='#d8dde4'; ctx.lineWidth=1.6; ctx.beginPath(); ctx.arc(c0[0],c0[1],4,0,6.283); ctx.stroke(); }
     if(L.bd==='blue-neck'&&plain){ poly([P(q.sh,-1,-wt*.5),P(q.sh,-1,wt*.5),P(q.sh,5,wt*.45),P(q.sh,5,-wt*.5)],BAND.blue); }
@@ -1426,9 +1460,9 @@ class Stage{
     if(f.dead&&plain){ ctx.strokeStyle='#14141c'; ctx.lineWidth=1.6; const exx=HR*.5, eyy=-HR*.05; ctx.beginPath(); ctx.moveTo(exx-3,eyy-3); ctx.lineTo(exx+3,eyy+3); ctx.moveTo(exx+3,eyy-3); ctx.lineTo(exx-3,eyy+3); ctx.stroke(); }
     ctx.restore();
     // collar over chin
-    if((L.col||os==='cloak')&&L.os!=='plain'&&plain){ const cc=col(mix(L.tp,'#ffffff',.12)); poly([P(q.sh,-2,wt+1),P(q.sh,11,wt),P(q.sh,13,-wt*.2),P(q.sh,3,-wt*.8)],cc); }
+    if((L.col||os==='cloak')&&L.os!=='plain'&&plain){ const cc=col(mix(L.tp,'#ffffff',.12)); poly([P(q.sh,-2,wt+1),P(q.sh,11,wt),P(q.sh,13,-wt*.2),P(q.sh,3,-wt*.8)],cc); if(L.cl){ ctx.strokeStyle='#b8142a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(...P(q.sh,11,wt-1)); ctx.lineTo(...P(q.sh,13,-wt*.2)); ctx.stroke(); } }
     // front leg and arm
-    leg(q.hip,q.fk,q.ff,pants);
+    if(!longWear) leg(q.hip,q.fk,q.ff,pants);
     arm([q.sh,q.fe,q.fh],sleeve); dot(q.fh,5,col(L.gv||L.sk));
     if(L.os==='suit'&&L.mr.includes('brows')&&plain){ limb([q.fe,q.fh],col('#e8e4d4'),11); dot(q.fh,5,skin); }
     // reanimated cracks

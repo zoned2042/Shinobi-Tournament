@@ -25,6 +25,7 @@ node tests/frames.js kaguya ult   # contact sheet of stage frames in tests/out/ 
 node tests/frames.js all ult ko   #   one sheet per version; "styles" instead of "all" = first user of each style
 node tests/titles.js              # every Ultimate and signature cut-in title, frozen when fully revealed
 npm run portraits                 # contact sheet of every look to tests/out/portraits.png
+node tests/look.js itachi1,pain    # close-up of a look: big portrait, face icon, fighter in 6 poses at 2x
 npm run sounds                    # renders every effect + the busiest moments offline to tests/out/sfx.wav, reports peaks/clipping
 npm run layout                    # phone-width screenshots (draft, bracket, arena) + horizontal-overflow check
 ```
@@ -41,8 +42,8 @@ Google Fonts through curl so the canvas text uses the real fonts.
 | `ROSTER` | `C(id,name,short,base,tags,form,[nin,tai,gen,spd,sta,int],sig,sigType,opts)`. 91 versions of 64 characters. `id` = unique version, `base` = character family, `short` = unique display name. opts: `regen`, `guard` (chance to halve damage), `last` (survive one lethal hit), `mv` (ninjutsu names). Stats 0-130. |
 | `MOVES` | Per-`base` lists: `tm` taijutsu, `mv` ninjutsu, `gj` genjutsu names. Merged into ROSTER at load. `jutsuFx(name,baseFx)` picks projectile visuals from keywords in the name. |
 | `FX` | Per-`base` projectile colours/shape (`orb`, `rasen`, `bolt`, `wave`, `swarm`, `shards`). |
-| `LK` / `lookOf` | Per-`base` and per-`id` look: skin `sk`, hair `hr`/`hs` (style), eyes `ey`/`es`, outfit `tp bt sl sv os vs`, headband `bd`, mask `mk`, marks `mr[]`, back item `bk`, glow, `bw` body width. Hokage tag auto-applies robe+hat; `Edo` tag auto-applies cracked grey skin. |
-| `drawHead`, `hairFront/Back`, `drawMarks`, `drawEye`, `drawPortrait`, `faceURL` | Head-frame drawing (origin at head centre, +x forward, -y up). Used by in-fight fighters, both cut-ins and face icons. |
+| `LK` / `lookOf` | Per-`base` and per-`id` look: skin `sk`, hair `hr`/`hs` (style), eyes `ey`/`es`, outfit `tp bt sl sv os vs`, headband `bd`, mask `mk`, marks `mr[]`, back item `bk`, glow, `bw` body width. Hokage tag auto-applies robe+hat; `Edo` tag auto-applies cracked grey skin. `cl` = Akatsuki clouds (`drawCloud`), `hc` = high collar on the portrait. |
+| `drawHead`, `hairFront/Back`, `drawMarks`, `drawEye`, `drawPortrait`, `faceURL`, `drawCloud` | Head-frame drawing (origin at head centre, +x forward, -y up). Used by in-fight fighters, both cut-ins and face icons. |
 | `simFight(A,B)` | Pure simulation. Returns `{winner,loser,ko,hpLeft,log,turns,ultW}`. Contains the damage model and the Ultimate gauge. |
 | `Sfx` | Tiny WebAudio synth (no assets). `tone(...,at)` schedules on the audio clock. Measured worst case (stacked KO impacts) peaks at ~0.55 of full scale, so there is no limiter. |
 | `class Stage` | Canvas renderer + animation engine. Fighters are skeletons driven by pose angles (`POSES`). Plays log entries as animations. `titleLayout` breaks Ultimate titles into 1-4 lines. |
