@@ -1093,6 +1093,7 @@ class Stage{
   wait(ms){ return new Promise(res=>{ if(this.skipping||ms<=0) return res(); this.timers.push({t:ms,res}); }); }
   tween(obj,props,ms,ez){
     return new Promise(res=>{
+      if(!obj) return res(); // e.g. tweening this.mood after skip() already cleared it
       if(this.skipping||ms<=0){ Object.assign(obj,props); return res(); }
       this.tweens=this.tweens.filter(tw=>{ if(tw.obj===obj&&Object.keys(props).some(k=>k in tw.to)){ tw.res(); return false; } return true; });
       const from={}; for(const k in props) from[k]=obj[k];
@@ -1534,18 +1535,40 @@ class Stage{
       for(let i=0;i<4;i++){ const a=t*18+i*1.5708; ctx.beginPath(); ctx.moveTo(x+Math.cos(a)*r*.8,y+Math.sin(a)*r*.8); ctx.quadraticCurveTo(x+Math.cos(a+.5)*r*2.2,y+Math.sin(a+.5)*r*2.2,x+Math.cos(a+.2)*r*2.8,y+Math.sin(a+.2)*r*2.8); ctx.quadraticCurveTo(x+Math.cos(a-.2)*r*1.8,y+Math.sin(a-.2)*r*1.8,x+Math.cos(a)*r*.8,y+Math.sin(a)*r*.8); ctx.fill(); ctx.stroke(); }
     }
   }
-  pdodge(e,A,D){ return e.dodge?this.evade(D,A):null; }
+  /* early dodge for staged moves: Substitution Jutsu. The defender vanishes in smoke and leaves a log
+     that takes the hit; impact()/ultHit() then call reappear(). The defender stays hidden for the whole
+     windup, so the attack visibly misses instead of passing through a defender who already came back. */
+  pdodge(e,A,D){ return e.dodge?this.substitute(D):null; }
+  async substitute(D){
+    this.smoke(D.x,GY-70,9); this.sfx('poof'); D.alpha=0;
+    if(D.sub){ const j=this.props.indexOf(D.sub); if(j>=0) this.props.splice(j,1); }
+    D.sub={shape:'log',x:D.x}; this.props.push(D.sub);
+    await this.wait(this.d(160));
+  }
+  async reappear(D,A,big){
+    const lg=D.sub;
+    if(lg){
+      D.sub=null; const j=this.props.indexOf(lg); if(j>=0) this.props.splice(j,1);
+      this.burst(lg.x,GY-60,'#a97a48',big?26:16,big?.8:.5,5); this.sparks(lg.x,GY-60,'#d9c9a0',big?14:8);
+      for(let i=0;i<6;i++) this.spawn({x:lg.x+rand(-10,10),y:GY-rand(20,90),vx:rand(-.35,.35),vy:-rand(.3,.7),g:.0018,life:rand(600,900),size:rand(5,9),col:'#7a5230',shape:'paper',rot:rand(0,6.28),vr:rand(-.02,.02)});
+    }
+    D.x=clamp(D.x+A.face*70,70,SW-70); this.smoke(D.x,GY-70,7); D.alpha=1;
+    if(!big) this.popup('MISS',D.x,GY-190,'#cfe8ff',24,'#14304a');
+    await this.wait(this.d(160));
+  }
+  clearSub(D){ if(D.sub){ const j=this.props.indexOf(D.sub); if(j>=0) this.props.splice(j,1); D.sub=null; } }
   async impact(e,A,D,fx,x,y,o){
     o=o||{};
     if(e.dodge){
       this.burst(x,y,fx.c,22,.7,5); this.ring(x,y,fx.c,6,110,380,4); this.shake(10,200); this.sfx('boom');
-      if(o.pd) await o.pd; else await this.evade(D,A);
+      if(o.pd){ await o.pd; await this.reappear(D,A,false); } else await this.evade(D,A);
       return false;
     }
     await this.landed(e,A,D,fx,x,y,true,o.knock);
     return true;
   }
   async sigEnd(A,D,e){
+    this.clearSub(D);
     A.run=false; A.trail=false; A.aura=0; A.eye=0; A.alpha=1; A.face=A.homeFace;
     A.pose.rot=0; if(!D.dead) D.pose.rot=0;
     if(!e.ko&&!D.dead) await Promise.all([this.recover(A),this.recover(D)]); else await this.recover(A);
@@ -1573,11 +1596,12 @@ class Stage{
     if(e.dodge){
       this.scar(x,170); this.bloom(x,y,fx.c,.9,800,620); this.ring(x,y,'#ffffff',10,380,700,9); this.ring(x,y,fx.c,6,300,800,6); this.burst(x,y,fx.c,50,1.2,7); dust(this,x,40);
       this.shake(34,700); this.sfx('boom'); this.popup('EVADED!',x,GY-240,'#cfe8ff',30,'#14304a');
-      if(o.pd) await o.pd; else await this.evade(D,A);
+      if(o.pd){ await o.pd; await this.reappear(D,A,true); } else await this.evade(D,A);
       await this.wait(this.d(300));
       return false;
     }
-    this.flash('#ffffff',1); this.bloom(x,y,fx.c,1,1000,700); this.rays(x,y,fx.c2,900,760,18);
+    const ko=e.ko; // the KO finisher runs in slow motion: keep the glare short so the knockout stays visible
+    this.flash('#ffffff',1); this.bloom(x,y,fx.c,ko?.7:1,ko?380:1000,700); this.rays(x,y,fx.c2,ko?340:900,760,18);
     this.ring(x,y,'#ffffff',10,420,760,11); this.ring(x,y,fx.c,6,320,880,8); this.ring(x,y,fx.c2,4,230,960,5);
     this.burst(x,y,fx.c,80,1.4,8); this.burst(x,y,fx.c2,44,1.0,5); this.sparks(x,y,'#ffffff',34); dust(this,x,40); this.scar(x,150+rand(0,60));
     this.shake(40,900); this.stopFor(280); this.addExcite(1); this.sfx('boom');
@@ -1585,6 +1609,7 @@ class Stage{
     return true;
   }
   async ultEnd(A,D,e){
+    this.clearSub(D);
     A.run=false; A.trail=false; A.aura=0; A.eye=0; A.alpha=1; A.face=A.homeFace; A.scale=1;
     this.mood=null; this.lines=0; this.ts=1; this.fade('vigA',0,this.d(400));
     A.pose.rot=0; if(!D.dead){ D.pose.rot=0; D.dizzy=false; D.scale=1; D.alpha=1; }
@@ -2249,7 +2274,8 @@ const STYLES={
 
   async smash(e,A,D,fx,P){
     const f=A.face, dx=D.x;
-    if(P.wings){ A.aura=1; this.fxAdd(this.d(2400),(ctx,k)=>{ ctx.globalAlpha=.55*Math.sin(Math.PI*Math.min(1,k*1.05)); ctx.fillStyle=fx.c; for(const s of [-1,1]){ ctx.save(); ctx.translate(A.x,GY-A.lift-110); ctx.rotate(s*(-.5+Math.sin(this.t*.012)*.12)); ctx.beginPath(); ctx.ellipse(0,-50,18,64,0,0,6.283); ctx.fill(); ctx.restore(); } },true); }
+    const wg={a:0}; let wf=null;
+    if(P.wings){ A.aura=1; this.tween(wg,{a:.55},this.d(300)); wf=this.fxAdd(this.d(4000),ctx=>{ ctx.globalAlpha=wg.a; ctx.fillStyle=fx.c; for(const s of [-1,1]){ ctx.save(); ctx.translate(A.x,GY-A.lift-110); ctx.rotate(s*(-.5+Math.sin(this.t*.012)*.12)); ctx.beginPath(); ctx.ellipse(0,-50,18,64,0,0,6.283); ctx.fill(); ctx.restore(); } },true); }
     this.sfx('charge');
     await Promise.all([this.pose(A,'up',this.d(220)),this.tween(A,{lift:130},this.d(260),ease.out)]);
     const pd=this.pdodge(e,A,D);
@@ -2261,6 +2287,7 @@ const STYLES={
     dust(this,dx,34); for(let i=0;i<8;i++) this.spawn({x:dx+rand(-40,40),y:GY-6,vx:rand(-.15,.15),vy:-rand(.5,1.1),g:.0018,life:900,size:rand(6,12),col:'#6b5a46',shape:'dot'});
     if(!e.dodge) this.tween(D,{lift:120},this.d(200),ease.out);
     await this.impact(e,A,D,fx,dx,GY-80,{pd,knock:20});
+    if(wf){ await this.tween(wg,{a:0},this.d(250)); wf.t=wf.dur; }
     A.aura=0;
   },
 
@@ -2701,8 +2728,9 @@ const ULTS={
     this.sfx('boom'); this.flash('#ffffff',.8); this.shake(40,1100); this.lines=this.d(700);
     this.tween(beam,{len:SW*1.6},this.d(160),ease.out); this.tween(beam,{th:u.big?260:210},this.d(160),ease.out); this.tween(sp,{s:40},this.d(200));
     await this.wait(this.d(130));
+    this.tween(beam,{th:0},this.d(520),ease.in); this.tween(beast,{a:0},this.d(520));
     await this.ultHit(e,A,D,fx,dx,GY-96,{pd,knock:150});
-    this.tween(beam,{th:0},this.d(500),ease.in); this.tween(beast,{a:0},this.d(500)); await this.wait(this.d(400)); ef.t=ef.dur; eb.t=eb.dur;
+    await this.wait(this.d(200)); ef.t=ef.dur; eb.t=eb.dur;
   },
 
   async planet(e,A,D,fx,u){
@@ -2724,9 +2752,9 @@ const ULTS={
     await this.pose(A,'cast',this.d(100)); A.aura=0; this.sfx('boom');
     this.camTo(dx,GY-150,1.25,700);
     await this.tween(pl,{x:dx,y:GY-90,r:230},this.d(1000),ease.in);
-    await this.ultHit(e,A,D,fx,dx,GY-90,{pd,knock:30});
-    for(let i=0;i<60;i++) this.spawn({x:dx,y:GY-90,vx:rand(-1.4,1.4),vy:rand(-1.4,.3),g:.0012,life:rand(800,1500),size:rand(5,14),col:u.rock?'#6a6270':fx.c,shape:'dot'});
+    for(let i=0;i<60;i++) this.spawn({x:dx+rand(-60,60),y:GY-90+rand(-60,60),vx:rand(-1.4,1.4),vy:rand(-1.4,.3),g:.0012,life:rand(800,1500),size:rand(5,14),col:u.rock?'#6a6270':fx.c,shape:'dot'});
     pl.r=0; ef.t=ef.dur;
+    await this.ultHit(e,A,D,fx,dx,GY-90,{pd,knock:30});
   },
 
   async titan(e,A,D,fx,u){
@@ -2952,9 +2980,10 @@ const ULTS={
     const pd=this.pdodge(e,A,D); this.sfx('whoosh'); this.lines=this.d(500);
     await this.tween(w,{x:dx-f*10,h:390},this.d(720),ease.in);
     this.tween(w,{lv:70},this.d(300)); this.shake(34,900);
+    const roll=this.tween(w,{x:f>0?SW+820:-820,h:120},this.d(600),ease.lin);
     await this.ultHit(e,A,D,fx,dx,GY-110,{pd,knock:150});
     if(lava) for(let i=0;i<50;i++) this.spawn({x:rand(0,SW),y:GY,vx:rand(-.05,.05),vy:-rand(.1,.4),life:rand(700,1300),size:rand(2,5),col:pick(['#ffb347','#ff5a1a']),shape:'glow'});
-    await this.tween(w,{x:f>0?SW+820:-820,h:120},this.d(600),ease.lin);
+    await roll;
     await this.tween(w,{lv:0},this.d(400)); ef.t=ef.dur;
   },
 
@@ -2988,8 +3017,9 @@ const ULTS={
       if(!e.dodge){ await this.tween(D,{lift:0},this.d(240),ease.in); D.pose.rot=0; }
     }
     await dustStorm;
+    const calm=this.tween(w,{tw:0},this.d(400));
     await this.ultHit(e,A,D,fx,dx,GY-95,{pd,knock:60});
-    await this.tween(w,{tw:0},this.d(400)); ef.t=ef.dur;
+    await calm; ef.t=ef.dur;
   },
 
   async supernova(e,A,D,fx){
@@ -3048,8 +3078,8 @@ const ULTS={
     await this.wait(this.d(560));
     this.shake(40,900);
     const burn=(async()=>{ for(let i=0;i<26;i++){ for(let j=0;j<6;j++) this.spawn({x:dx+rand(-70,70),y:GY-rand(0,70),vx:rand(-.04,.04),vy:-rand(.15,.45),life:rand(500,900),size:rand(8,18),grow:-.012,col:pick([fx.c,fx.c2,'#ff5a1a']),shape:'glow'}); await this.wait(this.d(36)); } })();
-    await this.ultHit(e,A,D,fx,dx,GY-95,{pd,knock:100}); fb.s=0; await burn;
-    await this.tween(fw,{lv:0},this.d(500)); ef.t=ef.dur;
+    fb.s=0; const out=this.tween(fw,{lv:0},this.d(500));
+    await this.ultHit(e,A,D,fx,dx,GY-95,{pd,knock:100}); await burn; await out; ef.t=ef.dur;
   },
 
   async rushUlt(e,A,D,fx,u){
@@ -3125,8 +3155,9 @@ const ULTS={
     await this.tween(sn,{len:1},this.d(900),ease.out);
     await this.tween(sn,{bite:1},this.d(300),ease.in);
     for(let i=0;i<8;i++){ if(!e.dodge){ D.flash=1; this.burst(dx+rand(-30,30),GY-95+rand(-40,40),fx.c,8,.6,4); this.sparks(dx,GY-95,'#ffffff',5); this.sfx('hit',.8); } this.shake(10,100); await this.wait(this.d(90)); }
+    const away=this.tween(sn,{a:0},this.d(400));
     await this.ultHit(e,A,D,fx,dx,GY-95,{pd,knock:80});
-    await this.tween(sn,{a:0},this.d(400)); ef.t=ef.dur;
+    await away; ef.t=ef.dur;
   },
 
   async rainUlt(e,A,D,fx,u){
@@ -3169,8 +3200,9 @@ const ULTS={
     await this.wait(this.d(700)); if(!e.dodge){ D.dizzy=true; this.pose(D,'stun',this.d(100)); }
     for(let i=0;i<9;i++){ if(!e.dodge){ D.flash=1; this.sfx('hit',.5); this.burst(dx,GY-95,fx.c,5,.5,3); } this.shake(5,100); await this.wait(this.d(110)); }
     this.tween(pg,{r:30},this.d(500),ease.in); await this.wait(this.d(480)); D.dizzy=false; this.sfx('boom');
+    const gone=this.tween(pg,{a:0},this.d(300));
     await this.ultHit(e,A,D,fx,dx,GY-95,{pd,knock:100});
-    await this.tween(pg,{a:0},this.d(300)); ef.t=ef.dur;
+    await gone; ef.t=ef.dur;
   },
 
   async disintegrate(e,A,D,fx){

@@ -4,6 +4,7 @@
 //   node tests/frames.js all ult ko            -> one sheet per version
 //   node tests/frames.js styles ult crit       -> one sheet per Ultimate style (first user of each)
 // Variants: hit | dodge | ko | crit | guard | surv.  Options: --every 250  --cols 5  --theme 0..3  --att 1
+//   --vs hashiramaE : opponent (default kakashi1)
 //   --at 3000,4400 : only those moments, full size (800 px wide; --tw to change) -> frames_<id>_<mv>_<variant>_at.png
 const { open, writeDataURL, shard } = require('./lib');
 
@@ -28,7 +29,7 @@ const { open, writeDataURL, shard } = require('./lib');
   const every = atList && !flags.every ? 0 : +(flags.every || (mv === 'ult' ? 250 : 120));
   const from = mv === 'ult' ? 2500 : mv === 'sig' ? 950 : 0;
   for (const id of ids) {
-    const r = await page.evaluate(([id, mv, variant, every, from, f]) => T.play(id, T.foe(id), mv, variant, {
+    const r = await page.evaluate(([id, mv, variant, every, from, f]) => T.play(id, f.vs || T.foe(id), mv, variant, {
       every, from, at: f.atList || (mv === 'ult' ? [1900] : mv === 'sig' ? [600] : []), cols: +(f.cols || (f.atList ? Math.min(2, f.atList.length) : 5)),
       tw: +(f.tw || (f.atList ? 800 : 320)), theme: +(f.theme || 0), att: +(f.att || 0), settle: f.atList ? 0 : 600,
       title: `${id} ${mv} ${variant}: ${mv === 'ult' ? ultOf(ROSTER.find(x => x.id === id)).n : ''}`
