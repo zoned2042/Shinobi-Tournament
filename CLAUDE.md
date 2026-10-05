@@ -1,14 +1,15 @@
 # Fantasy Shinobi Tournament
 
-A single-file browser game: draft a squad from Naruto characters, then watch a single-elimination
+A single-file browser game: draft a squad from Naruto characters (or spin for it), then watch a single-elimination
 tournament (8/16/32/64 fighters) play out as animated canvas fights. Fan project, no external art:
-every character, effect and background is drawn in code.
+every character, effect and background is drawn in code. Inspired by Shinobi Life (spins, rarities, levels and ranks);
+the page credits it as an inspiration only. Do not claim it was made by Shinobi Life's creators: it was not.
 
 - Entry point: `index.html` (about 4,600 lines, HTML + CSS + one `<script>`, no build step, no dependencies).
 - Originally built and published as a Claude artifact: https://claude.ai/artifact/Ng4jRYAvPF7r3B9QLgtmZ3
 - Keep it a SINGLE self-contained HTML file. It must keep working when published as an artifact
   (CSP allows scripts only from cdnjs/jsdelivr/jquery, nothing else; fonts come from Google Fonts with fallbacks).
-  Wrap every `localStorage` use in try/catch (keys: `fst_best2` best scores, `fst_theme`, `fst_sound`, `fst_hist` history).
+  Wrap every `localStorage` use in try/catch (keys: `fst_best2` best scores, `fst_theme`, `fst_sound`, `fst_hist` history, `fst_prof` XP/spins/last visit day).
 
 ## Run and test
 
@@ -59,6 +60,7 @@ Google Fonts through curl so the canvas text uses the real fonts.
 | `tell` / `storyFight` / `storyRound` / `storyChampion` / `storyline` | The tournament story: events `{k,t,x,r,mi}` (kind, title, text, round, match index or null for round-level). Shown as the headline strip, the Story tab, ribbons on match cards and round notes. `storyline(a,b)` = pre-fight talking points (defending champ, head-to-head, streaks, upsets, titles, captain). |
 | `spectateLoop` / `worthWatching` | Spectator mode: no squad, auto-runs. Sims each fight first (pure), plays it only if worth watching (quarterfinals on, upsets, Ultimates, close finishes, story fighters, at least one per round), batches the rest "off camera". |
 | `renderHistory` | History screen: tournament cards, champions table, records table (by version or character). |
+| `PROF` / `grantXP` / `RANKS` / `RARITY` / `doSpin` | Ninja profile saved under `fst_prof` `{xp,spins,day}`. XP per finished tournament = squad points + 25 (x2 for a spun squad, 10 for spectating); level L needs `xpAt(L)=30L(L+1)` XP; each level gives 5 spins, a squad title 3, a new day 10 (`dailySpins`). Rarity is the tier: C Common, B Rare, A Legendary, S Mythic. Spin draft (`state.settings.draft='spin'`) rolls rarity by weight (50/30/15/5) among eligible characters not already in the squad, with a reel animation (plain `setTimeout`: UI, not the Stage). |
 
 ## Core contracts
 

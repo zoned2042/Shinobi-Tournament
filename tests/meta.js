@@ -160,7 +160,35 @@ const path = require('path');
   await page.waitForFunction(() => !!state.champion, null, { timeout: 30000 }).catch(() => fail.push('spectate 32: no champion'));
   await page.click('[data-action="newdraft"]');
 
-  // 11. clear history
+  // 11. spin draft: rolls fill the slots with eligible, distinct characters and cost one spin each; XP is doubled
+  await page.evaluate(() => { PROF = { xp: 0, spins: 6, day: today() }; saveProf(); state.squad = []; renderDraft(); });
+  await page.click('[data-action="set"][data-key="size"][data-val="16"]');
+  await page.click('[data-action="mode"][data-val="villains"]');
+  await page.click('[data-action="set"][data-key="draft"][data-val="spin"]');
+  ok(await page.evaluate(() => document.getElementById('toolbar').hidden && document.querySelectorAll('.sslot').length === state.settings.squadSize), 'spin panel not shown');
+  for (let i = 0; i < 4; i++) {
+    const idx = Math.min(i, 2);
+    await page.click(`.sslot[data-i="${idx}"] [data-action="spin"]`);
+    if (i === 0) { await page.waitForTimeout(250); await page.evaluate(() => window.scrollTo(0, 400)); await shot('9_spinning'); }
+    await page.waitForFunction(() => state.spinning === null, null, { timeout: 10000 }).catch(() => fail.push('spin never landed'));
+  }
+  const sp1 = await page.evaluate(() => ({ n: state.squad.length, spins: PROF.spins, ok: state.squad.every(id => eligible(byId(id))), uniq: new Set(state.squad.map(id => byId(id).base)).size, stored: JSON.parse(localStorage.getItem('fst_prof')).spins }));
+  ok(sp1.n === 3 && sp1.spins === 2 && sp1.stored === 2 && sp1.ok && sp1.uniq === 3, 'spin draft ' + JSON.stringify(sp1));
+  await page.evaluate(() => window.scrollTo(0, 300)); await shot('10_spun');
+  await page.click('[data-action="start"]');
+  await page.click('[data-action="simall"]');
+  const xp = await page.evaluate(() => ({ r: state.reward, pts: total(), xp: PROF.xp, txt: (document.querySelector('.reward') || {}).textContent || '' }));
+  ok(xp.r && xp.r.spun && xp.xp === (25 + xp.pts) * 2 && /XP/.test(xp.txt), 'spin XP ' + JSON.stringify(xp));
+  await page.evaluate(() => window.scrollTo(0, 0)); await shot('11_reward');
+  await page.click('[data-action="newdraft"]');
+  // a new day gives 10 spins once
+  const s0 = await page.evaluate(() => { PROF.day = '2000-1-1'; saveProf(); return PROF.spins; });
+  await page.reload(); await page.addScriptTag({ path: path.join(__dirname, 'harness.js') });
+  ok(await page.evaluate(s0 => PROF.spins === s0 + 10 && !!document.querySelector('.toast'), s0), 'daily spins');
+  await page.reload(); await page.addScriptTag({ path: path.join(__dirname, 'harness.js') });
+  ok(await page.evaluate(() => !document.querySelector('.toast')), 'daily spins given twice');
+
+  // 12. clear history
   await page.click('[data-action="history"]');
   await page.click('[data-action="clearhist"]');
   await page.click('[data-action="clearyes"]');

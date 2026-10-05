@@ -30,6 +30,7 @@
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;line-height:1.5;-webkit-text-size-adjust:100%}
 h1,h2,h3{font-family:"Dela Gothic One","Zen Kaku Gothic New",Impact,system-ui,sans-serif;font-weight:400;margin:0;line-height:1.12}
 button,input,select{font:inherit;color:inherit}
@@ -287,6 +288,42 @@ details.rules p{margin:8px 0}
 .hrow select{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:42px}
 .hclear{margin:24px 0 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:14px}
 
+/* spins, rarity, ninja profile */
+.hside{display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:none}
+.prof{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:210px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center}
+.prof .pr{font-size:14px;white-space:nowrap}
+.prof .pr b{color:var(--flame);font-family:"Dela Gothic One","Zen Kaku Gothic New",Impact,system-ui,sans-serif;font-weight:400;margin-right:4px}
+.prof .ps{font-size:13px;color:var(--muted);text-align:right;white-space:nowrap}
+.prof .ps b{color:var(--ink);font-size:15px}
+.xpb{grid-column:1 / -1;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.xpb b{display:block;height:100%;background:linear-gradient(90deg,var(--chakra),var(--good))}
+.toast{margin:14px 0 0;background:var(--panel2);border:1px solid var(--good);border-left:5px solid var(--good);border-radius:12px;padding:10px 14px;font-weight:700;animation:tick .35s ease-out}
+.rar{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--rc);line-height:1.4}
+.reward{color:var(--ink)!important;font-weight:700}
+.reward b{color:var(--good)}
+.credit{margin:28px 0 0;font-size:12px;color:var(--muted);max-width:72ch}
+.spinp{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--panel)}
+.spinhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
+.spinhead h3{font-size:20px}
+.spins{text-align:center;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:6px 14px;flex:none}
+.spins b{display:block;font-family:"Dela Gothic One","Zen Kaku Gothic New",Impact,system-ui,sans-serif;font-weight:400;font-size:28px;color:var(--flame);line-height:1.1}
+.spins span{font-size:11px;color:var(--muted)}
+.spingrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(170px,100%),1fr));gap:10px}
+.sslot{--rc:var(--line);display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:14px 10px;border:2px solid var(--rc);border-radius:14px;background:var(--panel2);background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--rc) 22%,transparent),transparent 70%),var(--panel2);min-height:208px;justify-content:center}
+.sslot.empty{border-style:dashed;--rc:var(--line);background:var(--panel2)}
+.sslot .qm{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font-family:"Dela Gothic One","Zen Kaku Gothic New",Impact,system-ui,sans-serif;font-size:28px;color:var(--muted);border:3px dashed var(--line)}
+.sslot .sn2{font-weight:700;line-height:1.2}
+.sslot .sm2{font-size:12px;color:var(--muted);line-height:1.3}
+.sslot .btn{margin-top:6px}
+.sslot.rolling{animation:none}
+.sslot.rolling .crest{filter:blur(.6px)}
+.sslot.fresh{animation:landed .55s ease-out}
+.sslot.fresh.r-S{animation:landed .55s ease-out,mythic 1.6s ease-in-out 3}
+.sslot.fresh.r-A{animation:landed .55s ease-out,mythic 1.6s ease-in-out 1}
+@keyframes landed{0%{transform:scale(.9)}60%{transform:scale(1.04)}100%{transform:none}}
+@keyframes mythic{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 22px 2px var(--rc)}}
+@media (prefers-reduced-motion: reduce){ .sslot.fresh,.sslot.fresh.r-S,.sslot.fresh.r-A,.toast{animation:none} }
+
 @media (max-width:560px){
   .crest.lg{width:46px;height:46px;font-size:15px}
   .hud{gap:6px}
@@ -301,6 +338,12 @@ details.rules p{margin:8px 0}
   .ticker .tt{font-size:13px}
   .champ{align-items:flex-start}
   .hdr{flex-wrap:wrap}
+  .hside{align-items:stretch;width:100%}
+  .prof{min-width:0}
+  .spingrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sslot{min-height:0;padding:12px 6px}
+  .sslot .sm2{display:none}
+  .spinhead h3{font-size:17px}
   .hf .rec{display:none}
   .ident{align-items:flex-start}
   .emb{width:52px;height:52px}
@@ -1203,6 +1246,8 @@ const Sfx={
       case 'cut': this.tone(900,150,.3,'square',.07); this.noise(.3,.12,5000); break;
       case 'fight': this.tone(220,440,.25,'square',.09); break;
       case 'chirp': for(let i=0;i<5;i++) this.tone(2600+i*140,3300,.05,'square',.04,i*.07); break;
+      case 'tick': this.tone(1300,1000,.035,'square',.025); break;
+      case 'reveal': { const n=[523,659,784,1047,1319]; for(let i=0;i<Math.min(5,p+1);i++) this.tone(n[i],n[i]*1.01,.24,'triangle',.07,i*.08); break; } // p = rarity 0..3
     }
   }
 };
@@ -3583,15 +3628,44 @@ const app=document.getElementById('app');
 const reduced=typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 const state={
   screen:'draft',
-  settings:{mode:'classic',era:'1',size:16,squadSize:3,field:'random',versions:'random',seed:'random'},
+  settings:{mode:'classic',era:'1',draft:'pick',size:16,squadSize:3,field:'random',versions:'random',seed:'random'},
   squad:[],captain:null,squadName:'',filter:'All',q:'',sort:'ovr',
   rounds:[],r:0,m:0,N:16,pts:{},out:{},champion:null,mode:'classic',era:'1',story:[],favorite:null,defending:null,saved:false,
   spectate:false,specAll:false,paused:false,toFinal:false,keep:null,
+  spinning:null,lastSpin:null,draftType:'pick',reward:null,toast:null,
   busy:false,speed:'normal',tab:0,copied:false,best:{},run:0,stage:null,
   prev:'draft',hview:'recent',hgroup:'version',hsort:'t',confirmClear:false
 };
 try{ state.best=JSON.parse(localStorage.getItem('fst_best2')||'{}')||{}; }catch(e){}
 try{ const t=localStorage.getItem('fst_theme'); if(t) document.documentElement.dataset.theme=t; }catch(e){}
+
+/* ---------- ninja profile: level, rank and spins (inspired by Shinobi Life) ---------- */
+const RANKS=[[0,'Academy Student'],[1,'Genin'],[4,'Chunin'],[8,'Jonin'],[13,'ANBU'],[19,'Sannin'],[26,'Kage'],[34,'Sage']];
+const xpAt=L=>30*L*(L+1); // total XP to reach level L: 60 for Lv 1, 900 for Lv 5, 3300 for Lv 10
+const levelOf=xp=>{ let L=0; while(xpAt(L+1)<=xp) L++; return L; };
+const rankOf=L=>{ let r=RANKS[0][1]; RANKS.forEach(([l,n])=>{ if(L>=l) r=n; }); return r; };
+let PROF={xp:0,spins:20,day:''};
+try{ const p=JSON.parse(localStorage.getItem('fst_prof')||'null'); if(p&&typeof p.xp==='number'&&typeof p.spins==='number') PROF=Object.assign(PROF,p); }catch(e){}
+function saveProf(){ try{ localStorage.setItem('fst_prof',JSON.stringify(PROF)); }catch(e){} }
+const today=()=>{ const d=new Date(); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; };
+function dailySpins(){ const k=today(); if(PROF.day===k) return; const back=!!PROF.day; PROF.day=k; if(back){ PROF.spins+=10; state.toast='Daily spins: +10. Welcome back.'; } saveProf(); }
+dailySpins();
+// XP when a tournament ends: squad points + 25, doubled for a spun squad; spectating earns a little. Level-ups pay spins.
+function grantXP(){
+  const L0=levelOf(PROF.xp);
+  const xp=state.spectate?10:(25+total())*(state.draftType==='spin'?2:1);
+  let spins=!state.spectate&&inSquad(state.champion.id)?3:0;
+  PROF.xp+=xp; const L1=levelOf(PROF.xp); spins+=(L1-L0)*5; PROF.spins+=spins; saveProf();
+  state.reward={xp,L0,L1,spins,spun:state.draftType==='spin'};
+}
+function profChip(){
+  const L=levelOf(PROF.xp), a=xpAt(L), b=xpAt(L+1);
+  return `<div class="prof" title="${PROF.xp} XP, ${b-PROF.xp} to the next level"><div class="pr"><b>Lv ${L}</b> ${rankOf(L)}</div><div class="xpb" aria-hidden="true"><b style="width:${Math.round((PROF.xp-a)/(b-a)*100)}%"></b></div><div class="ps"><b>${PROF.spins}</b> spins</div></div>`;
+}
+// rarity = tier, with spin odds
+const RARITY={C:{n:'Common',c:'#9aa7ad',w:50},B:{n:'Rare',c:'#4aa3ff',w:30},A:{n:'Legendary',c:'#f2a33a',w:15},S:{n:'Mythic',c:'#ff4fd8',w:5}};
+const RORDER=['C','B','A','S'];
+const rarTag=f=>`<span class="rar" style="--rc:${RARITY[f.tier].c}">${RARITY[f.tier].n}</span>`;
 
 const byId=id=>ROSTER.find(f=>f.id===id);
 const inSquad=id=>state.squad.includes(id);
@@ -3942,15 +4016,16 @@ function renderDraft(){
     <div class="hdr">
       <div>
         <h1>Fantasy Shinobi Tournament</h1>
-        <p class="lede">Draft a squad from ${BASES.length} characters across ${ROSTER.length} versions, including every Hokage and the big power-up forms. Each character enters the bracket as one version only. Then watch the fights play out live, or just spectate.</p>
+        <p class="lede">Pick a squad from ${BASES.length} characters across ${ROSTER.length} versions, or spin for it, then watch the tournament play out live. Win to earn XP, rank up and get more spins.</p>
       </div>
-      <div class="row hbtn"><button class="btn small" data-action="history">History${HIST.n?` (${HIST.n})`:''}</button><button class="btn small" data-action="theme">Light / dark</button></div>
+      <div class="hside">${profChip()}<div class="row hbtn"><button class="btn small" data-action="history">History${HIST.n?` (${HIST.n})`:''}</button><button class="btn small" data-action="theme">Light / dark</button></div></div>
     </div>
+    ${state.toast?`<div class="toast" role="status">${esc(state.toast)}</div>`:''}
     <section class="panel modes" id="modes"></section>
     <section class="panel settings" id="settings"></section>
     <div class="tray" id="tray"></div>
     <section class="ident" id="ident"></section>
-    <div class="toolbar">
+    <div class="toolbar" id="toolbar">
       <input type="search" id="q" placeholder="Search fighters" aria-label="Search fighters" value="${esc(state.q)}">
       <div class="chips" id="chips"></div>
       <select id="sort" aria-label="Sort fighters">
@@ -3973,12 +4048,16 @@ function renderDraft(){
       <p>Every fighter has an Ultimate gauge that fills as they hit and get hit. When it is full, they can unleash their strongest technique once per fight: it hits far harder than anything else and is very hard to dodge. Edo Tensei versions are reanimated: they regenerate, never tire, and crumble to ash when beaten.</p>
       <p>Your squad can hold only one version of each character, so picking Prime Madara locks the other Madara. Every character enters the bracket as a single version: yours keep the version you drafted (except in Random Chaos), and everyone else is set by the Opponent versions option.</p>
       <p>Stats are 0 to 130. Some fighters also regenerate, guard (a chance to halve incoming damage) or have a last stand (survive one lethal hit). Finished tournaments are saved in this browser: see History for champions and every fighter's record.</p>
+      <p>Spin draft: each spin rolls a random fighter for one slot (Common 50%, Rare 30%, Legendary 15%, Mythic 5%). A spun squad earns double XP. XP is your squad's points plus 25 per finished tournament; every level gives 5 spins, a title for your squad gives 3, and you get 10 free spins each day you come back.</p>
     </details>
+    ${credit()}
     <div class="startbar" id="startbar"></div>`;
+  state.toast=null;
   $('sort').value=state.sort;
   renderModes(); renderSettings(); renderTray(); renderIdent(); renderChips(); renderGrid(); renderStart();
 }
 
+const credit=()=>`<footer class="credit">A fan-made game inspired by Shinobi Life and Naruto. Not made by, or affiliated with, the creators of either.</footer>`;
 function seg(key,label,opts,hint){
   const s=state.settings;
   return `<div><div class="sl">${label}</div><div class="seg" role="radiogroup" aria-label="${label}">${opts.map(o=>`<button role="radio" aria-checked="${String(s[key]===o.v)}" data-action="set" data-key="${key}" data-val="${o.v}" ${o.dis?'disabled':''}>${o.t}</button>`).join('')}</div>${hint?`<div class="sh">${hint}</div>`:''}</div>`;
@@ -3993,6 +4072,7 @@ function renderModes(){
 function renderSettings(){
   const s=state.settings, nb=modeBases(), full=s.size>=nb, mx=maxSize(), chaos=s.mode==='chaos';
   $('settings').innerHTML=
+    seg('draft','How you draft',[{v:'pick',t:'Pick'},{v:'spin',t:'Spin'}],s.draft==='spin'?'Spin for each slot. Double XP.':'Choose any fighter.')+
     seg('size','Bracket size',[8,16,32,64].map(v=>({v,t:v,dis:v>mx})),`${s.size} characters, ${Math.log2(s.size)} rounds`)+
     seg('squadSize','Squad size',[3,5,8].map(v=>({v,t:v,dis:v>s.size/2})))+
     seg('field','Who enters',[{v:'random',t:'Random',dis:full||chaos},{v:'strong',t:'Strongest',dis:full||chaos}],full?`All ${nb} characters enter.`:chaos?'Chaos picks the field.':s.mode==='edo'?'Edo Tensei versions enter first.':'Your squad always enters.')+
@@ -4008,7 +4088,7 @@ function renderTray(){
     else slots.push(`<span class="slot empty">Open slot</span>`);
   }
   $('tray').innerHTML=`<div class="slots">${slots.join('')}</div>
-    <div class="row"><button class="btn small" data-action="random">Random squad</button><button class="btn small" data-action="clear">Clear</button></div>`;
+    <div class="row">${state.settings.draft==='spin'?'':'<button class="btn small" data-action="random">Random squad</button>'}<button class="btn small" data-action="clear">Clear</button></div>`;
 }
 function renderIdent(){
   const el=$('ident'); if(!el) return;
@@ -4041,12 +4121,14 @@ function cardHTML(f){
   const sel=inSquad(f.id), full=state.squad.length>=state.settings.squadSize&&!sel, lock=lockedBy(f);
   const tags=[]; if(f.tags.includes('Edo')) tags.push('Edo Tensei'); if(f.regen) tags.push('Regen'); if(f.guard) tags.push('Guard'); if(f.last) tags.push('Last stand');
   return `<button class="card ${sel?'sel':''} ${full?'dim':''} ${lock?'locked':''}" data-action="toggle" data-id="${f.id}" aria-pressed="${String(sel)}" ${lock?'disabled':''}>
-    <div class="ch">${crest(f)}<div class="ct"><div class="cname">${f.short}</div><div class="cform">${f.form}</div></div><div class="tier ${f.tier}" title="Overall ${f.ovr}">${f.tier}</div></div>
+    <div class="ch">${crest(f)}<div class="ct"><div class="cname">${f.short}</div><div class="cform">${f.form}</div>${rarTag(f)}</div><div class="tier ${f.tier}" title="${RARITY[f.tier].n}, overall ${f.ovr}">${f.tier}</div></div>
     <div class="cs">${STATS.map(([k,l])=>`<div class="st"><span>${l}</span><i><b style="width:${Math.min(100,f[k]/130*100)}%"></b></i><u>${f[k]}</u></div>`).join('')}</div>
     <div class="cf"><span class="sig">${f.sig}</span><span class="ultn">Ultimate: ${ultOf(f).n}</span>${repTag(f)}<span>Overall ${f.ovr}</span>${tags.map(t=>`<span class="tg">${t}</span>`).join('')}${lock?`<span class="lk">Locked: ${lock.short} is on your squad</span>`:''}</div>
   </button>`;
 }
 function renderGrid(){
+  const tb=$('toolbar'); if(tb) tb.hidden=state.settings.draft==='spin';
+  if(state.settings.draft==='spin'){ renderSpin(); return; }
   const list=listFiltered();
   const fams=new Map();
   list.forEach(f=>{ if(!fams.has(f.base)) fams.set(f.base,[]); fams.get(f.base).push(f); });
@@ -4068,9 +4150,56 @@ function renderGrid(){
   const el=ROSTER.filter(f=>eligible(f)).length;
   $('count').textContent=`${list.length} of ${el} versions`;
 }
+/* ---------- spin draft: roll each slot, like spinning for a bloodline ---------- */
+function spinSlot(i){
+  if(i<state.squad.length){ const f=byId(state.squad[i]), last=state.lastSpin&&state.lastSpin.id===f.id;
+    return `<div class="sslot r-${f.tier} ${last?'fresh':''}" style="--rc:${RARITY[f.tier].c}" data-i="${i}">${crest(f,'lg')}<div class="sn2">${f.short}</div>${rarTag(f)}<div class="sm2">${f.form}, overall ${f.ovr}</div>
+      <button class="btn small" data-action="spin" data-i="${i}" ${PROF.spins&&state.spinning===null?'':'disabled'} title="Costs 1 spin">Respin</button></div>`; }
+  return `<div class="sslot empty" data-i="${i}"><div class="qm" aria-hidden="true">?</div><div class="sm2">Slot ${i+1}</div><button class="btn primary" data-action="spin" data-i="${i}" ${PROF.spins&&state.spinning===null?'':'disabled'}>Spin</button></div>`;
+}
+function renderSpin(){
+  const n=state.settings.squadSize, slots=[];
+  for(let i=0;i<n;i++) slots.push(spinSlot(i));
+  $('grid').innerHTML=`<section class="spinp">
+    <div class="spinhead"><div><h3>Spin for your squad</h3><p class="sh">Every spin rolls a random ${dmode().id==='classic'?'':modeLabel(state.settings.mode,state.settings.era)+' '}fighter for one slot. Common 50%, Rare 30%, Legendary 15%, Mythic 5%. A spun squad earns double XP.</p></div>
+      <div class="spins"><b>${PROF.spins}</b><span>spins left</span></div></div>
+    <div class="spingrid">${slots.join('')}</div>
+    ${PROF.spins?'':'<p class="sh">Out of spins. Level up, win a title, or come back tomorrow for 10 more. You can still switch to Pick.</p>'}
+  </section>`;
+  $('count').textContent='';
+}
+function doSpin(i){
+  if(state.spinning!==null||PROF.spins<=0||state.screen!=='draft') return;
+  const keep=state.squad.filter((_,j)=>j!==i), used=new Set(keep.map(id=>byId(id).base));
+  const pool=ROSTER.filter(f=>eligible(f)&&!used.has(f.base)); if(!pool.length) return;
+  const tier=weighted(RORDER.filter(t=>pool.some(f=>f.tier===t)).map(t=>({t,w:RARITY[t].w}))).t;
+  const res=pick(pool.filter(f=>f.tier===tier));
+  PROF.spins--; saveProf(); Sfx.init();
+  state.spinning=i; renderSpin(); renderStart();
+  const finish=()=>{
+    state.spinning=null;
+    if(i<state.squad.length){ const old=state.squad[i]; state.squad[i]=res.id; if(state.captain===old) state.captain=res.id; }
+    else state.squad.push(res.id);
+    state.lastSpin={id:res.id};
+    Sfx.play('reveal',RORDER.indexOf(res.tier));
+    if(state.screen==='draft'){ draftChanged(); const h=document.querySelector('.hside .prof'); if(h) h.outerHTML=profChip(); }
+  };
+  if(reduced){ finish(); return; }
+  // the reel: faces flick past, slowing down, then the result lands
+  let k=0; const steps=16;
+  const tick=()=>{
+    const el=document.querySelector(`.sslot[data-i="${i}"]`);
+    if(k>=steps||!el||state.screen!=='draft'){ finish(); return; }
+    const f=pick(pool), last=k===steps-1;
+    el.className=`sslot rolling r-${f.tier}`; el.style.setProperty('--rc',RARITY[f.tier].c);
+    el.innerHTML=`${crest(f,'lg')}<div class="sn2">${f.short}</div>${rarTag(f)}<div class="sm2">Spinning...</div>`;
+    Sfx.play('tick'); k++; setTimeout(tick,last?60:45+k*k*1.6);
+  };
+  tick();
+}
 function renderStart(){
   const need=state.settings.squadSize-state.squad.length;
-  $('startbar').innerHTML=`<div class="sbrow"><button class="btn primary" data-action="start" ${need===0?'':'disabled'}>${need===0?`Start ${state.settings.size}-fighter tournament`:`Draft ${need} more to start`}</button><button class="btn spect" data-action="spectate" title="No squad, no scoring: watch the tournament run by itself">Spectate</button></div>`;
+  $('startbar').innerHTML=`<div class="sbrow"><button class="btn primary" data-action="start" ${need===0&&state.spinning===null?'':'disabled'}>${need===0?`Start ${state.settings.size}-fighter tournament`:`Draft ${need} more to start`}</button><button class="btn spect" data-action="spectate" title="No squad, no scoring: watch the tournament run by itself">Spectate</button></div>`;
 }
 function draftChanged(){ if(!state.squad.includes(state.captain)) state.captain=state.squad[0]||null; renderTray(); renderIdent(); renderGrid(); renderStart(); }
 
@@ -4117,7 +4246,7 @@ function startTournament(spec){
   }
   if(state.spectate){ state.squad=[]; state.captain=null; }
   const s=state.settings;
-  state.mode=s.mode; state.era=s.era; state.N=s.size;
+  state.mode=s.mode; state.era=s.era; state.N=s.size; state.draftType=state.spectate?'none':s.draft; state.reward=null;
   if(state.mode==='chaos'){
     // your characters stay, their versions are rolled
     const re={}; state.squad=state.squad.map(id=>{ const n=pick(ROSTER.filter(f=>f.base===byId(id).base)).id; re[id]=n; return n; });
@@ -4216,6 +4345,7 @@ function renderChamp(){
       <h2>${c.short} wins the tournament</h2>
       <p>${state.spectate?`Tournament #${T?T.n:HIST.n} is in the books.`:`${mine?'Your fighter took the title. ':''}${esc(squadName())} finished with ${t} points${t>0&&t>=best?', a new best for this bracket.':'.'}`}</p>
       ${facts.length?`<p class="facts">${facts.join(' · ')}</p>`:''}
+      ${state.reward?`<p class="reward">+${state.reward.xp} XP${state.reward.spun?' (double for a spun squad)':''}${state.reward.L1>state.reward.L0?`. <b>Level up: Lv ${state.reward.L1} ${rankOf(state.reward.L1)}!</b>`:''}${state.reward.spins?` +${state.reward.spins} spins.`:'.'}</p>`:''}
       <div class="row">
         <button class="btn primary" data-action="again">${state.spectate?'Run another tournament':'Play again with the same squad'}</button>
         <button class="btn" data-action="copy">${state.copied?'Copied':'Copy recap'}</button>
@@ -4445,7 +4575,7 @@ function finalize(m,sim){
       state.champion=sim.winner;
       storyRound(r); storyChampion();
       if(!state.spectate){ const t=total(), k=bestKey(); if(t>(state.best[k]||0)){ state.best[k]=t; try{ localStorage.setItem('fst_best2',JSON.stringify(state.best)); }catch(e){} } }
-      recordTournament();
+      recordTournament(); grantXP();
     } else {
       state.rounds.push(makeRound(state.rounds[r].map(x=>x.winner)));
       storyRound(r);
@@ -4587,7 +4717,7 @@ function renderHistory(){
   app.innerHTML=`
     <div class="hdr">
       <div><h1>Tournament History</h1><p class="lede">Every finished tournament is saved in this browser: champions, upsets, and the record of every fighter who has stepped into the bracket.</p></div>
-      <div class="row hbtn"><button class="btn small" data-action="back">${state.prev==='tournament'?'Back to the tournament':'Back to the draft'}</button><button class="btn small" data-action="theme">Light / dark</button></div>
+      <div class="hside">${profChip()}<div class="row hbtn"><button class="btn small" data-action="back">${state.prev==='tournament'?'Back to the tournament':'Back to the draft'}</button><button class="btn small" data-action="theme">Light / dark</button></div></div>
     </div>
     <div class="score">${histStats()}</div>
     <div class="row hseg">
@@ -4595,7 +4725,8 @@ function renderHistory(){
       ${v==='recent'?'':`<div class="seg" role="radiogroup" aria-label="Group by">${opt('hgroup','version','Versions')}${opt('hgroup','character','Characters')}</div>`}
     </div>
     <div id="hbody">${v==='recent'?histRecent():histTable(v==='champs')}</div>
-    <div class="hclear">${HIST.n?(state.confirmClear?`<span>Delete all ${HIST.n} tournaments and every record?</span><button class="btn small" data-action="clearyes">Delete history</button><button class="btn small" data-action="clearno">Keep it</button>`:'<button class="btn small" data-action="clearhist">Clear history</button>'):''}</div>`;
+    <div class="hclear">${HIST.n?(state.confirmClear?`<span>Delete all ${HIST.n} tournaments and every record?</span><button class="btn small" data-action="clearyes">Delete history</button><button class="btn small" data-action="clearno">Keep it</button>`:'<button class="btn small" data-action="clearhist">Clear history</button>'):''}</div>
+    ${credit()}`;
 }
 
 /* ---------- events ---------- */
@@ -4605,6 +4736,7 @@ app.addEventListener('click',e=>{
   if(a==='theme') toggleTheme();
   else if(a==='toggle'){
     const id=t.dataset.id;
+    if(state.spinning!==null||(state.settings.draft==='spin'&&!inSquad(id))) return;
     if(inSquad(id)) state.squad=state.squad.filter(x=>x!==id);
     else if(state.squad.length<state.settings.squadSize&&!lockedBy(byId(id))) state.squad.push(id);
     draftChanged();
@@ -4614,17 +4746,20 @@ app.addEventListener('click',e=>{
     for(const f of shuffle(ROSTER.filter(x=>eligible(x)))){ if(picks.length>=state.settings.squadSize) break; if(!bases.has(f.base)){ bases.add(f.base); picks.push(f.id); } }
     state.squad=picks; state.captain=null; draftChanged();
   }
-  else if(a==='clear'){ state.squad=[]; draftChanged(); }
+  else if(a==='clear'){ if(state.spinning===null){ state.squad=[]; draftChanged(); } }
   else if(a==='filter'){ state.filter=v; renderChips(); renderGrid(); }
+  else if(a==='spin') doSpin(+t.dataset.i);
   else if(a==='mode'||a==='set'){
     const s=state.settings, k=a==='mode'?'mode':t.dataset.key;
+    if(state.spinning!==null) return;
+    if(k==='draft'&&v==='spin'&&s.draft!=='spin'){ state.squad=[]; state.captain=null; state.lastSpin=null; } // a spun squad has to be spun
     s[k]=(k==='size'||k==='squadSize')?+v:v;
     if(k==='size'){ const ok=[3,5,8].filter(x=>x<=s.size/2); if(!ok.includes(s.squadSize)) s.squadSize=ok[ok.length-1]; }
     fitSettings();
     renderModes(); renderSettings(); draftChanged();
   }
-  else if(a==='start'){ if(state.squad.length===state.settings.squadSize){ Sfx.init(); startTournament(false); } }
-  else if(a==='spectate'){ Sfx.init(); startTournament(true); }
+  else if(a==='start'){ if(state.squad.length===state.settings.squadSize&&state.spinning===null){ Sfx.init(); startTournament(false); } }
+  else if(a==='spectate'){ if(state.spinning===null){ Sfx.init(); startTournament(true); } }
   else if(a==='watch') watchNext();
   else if(a==='simround') simRound();
   else if(a==='simall') simAll();
