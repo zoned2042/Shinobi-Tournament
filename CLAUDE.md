@@ -2,8 +2,11 @@
 
 A single-file browser game: draft a squad from Naruto characters (or spin for it), then watch a single-elimination
 tournament (8/16/32/64 fighters) play out as animated canvas fights. Fan project, no external art:
-every character, effect and background is drawn in code. Inspired by Shinobi Life (spins, rarities, levels and ranks);
-the page credits it as an inspiration only. Do not claim it was made by Shinobi Life's creators: it was not.
+every character, effect and background is drawn in code. Same creator as Shinobi Life
+(https://github.com/zoned2042/shinobi-life, a BitLife-style Naruto life sim): the page says "From the creator of
+Shinobi Life" and the footer links that repo. The UI follows Shinobi Life's look: its "Deep Field" palette (near-black,
+amber `#e08a3c` accent) and "Old Scroll" light theme, Georgia serif titles, spaced-caps kicker lines, film grain and
+rising embers. CSS tokens live on `:root` (`--serif`, `--soft`, `--glow`, `--edge`); the canvas keeps its own fonts.
 
 - Entry point: `index.html` (about 4,600 lines, HTML + CSS + one `<script>`, no build step, no dependencies).
 - Originally built and published as a Claude artifact: https://claude.ai/artifact/Ng4jRYAvPF7r3B9QLgtmZ3
