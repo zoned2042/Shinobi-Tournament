@@ -147,7 +147,8 @@ details.rules p{margin:8px 0}
 .hf.r{align-items:flex-end;text-align:right}
 .hf .who{display:flex;gap:10px;align-items:center;min-width:0}
 .hf.r .who{flex-direction:row-reverse}
-.hf .nm{font-weight:700;line-height:1.2;overflow-wrap:anywhere}
+.hf .nm{font-weight:700;line-height:1.2;overflow-wrap:break-word}
+.hf .who>div{min-width:0}
 .hf .fm{font-size:12px;color:var(--muted);line-height:1.3}
 .hf .mine{font-size:11px;color:var(--flame);font-weight:700}
 .hf.lost{opacity:.55}
@@ -328,10 +329,44 @@ details.rules p{margin:8px 0}
 @keyframes mythic{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 22px 2px var(--rc)}}
 @media (prefers-reduced-motion: reduce){ .sslot.fresh,.sslot.fresh.r-S,.sslot.fresh.r-A,.toast{animation:none} }
 
+/* fight it yourself: the command bar */
+.cmd{background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:12px;transition:box-shadow .2s ease,border-color .2s ease}
+.cmd.live{border-color:var(--flame);box-shadow:0 0 0 1px var(--flame),0 0 26px rgba(224,138,60,.18)}
+.cmdh{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:baseline;font-size:13px;color:var(--muted);margin:0 0 10px}
+.cmdh b{color:var(--ink)}
+.cmdh .you b{color:var(--flame)}
+.cmdh .cmds{flex-basis:100%;color:var(--ink);font-weight:700;font-size:14px}
+.cmdg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.cbtn{--mc:var(--line);position:relative;text-align:left;display:flex;flex-direction:column;gap:2px;padding:10px 12px 10px 40px;min-height:62px;border-radius:12px;border:1px solid var(--edge);border-left:4px solid var(--mc);background:var(--panel2);color:var(--ink);min-width:0}
+.cbtn b{font-size:14px;line-height:1.2;overflow-wrap:anywhere}
+.cbtn small{font-size:12px;color:var(--muted);line-height:1.25}
+.cbtn kbd{position:absolute;left:10px;top:10px;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font:700 12px ui-monospace,monospace;background:var(--bg);border:1px solid var(--edge);color:var(--muted)}
+.cbtn:hover:not(:disabled){border-color:var(--mc);transform:translateY(-2px)}
+.cbtn:disabled{opacity:.42;cursor:not-allowed}
+.cbtn.tai{--mc:var(--flame)} .cbtn.nin{--mc:var(--chakra)} .cbtn.gen{--mc:var(--gen)} .cbtn.sig{--mc:var(--ko)} .cbtn.foc{--mc:var(--good)}
+.cbtn.ult{--mc:var(--ready)}
+.cbtn.ult:not(:disabled){background:linear-gradient(135deg,rgba(226,178,74,.22),var(--panel2) 70%);box-shadow:0 0 18px rgba(226,178,74,.25)}
+.cbtn.ult:not(:disabled) b{color:var(--ready)}
+.cmdr{margin-top:10px}
+#cmdslot:not(:empty){margin-top:10px}
+.arena.duel .stagewrap{max-width:max(320px,min(100%,calc((100vh - 470px) * 16 / 9)));margin:0 auto}
+.arena.duel .hud{max-width:max(320px,min(100%,calc((100vh - 470px) * 16 / 9)));margin-left:auto;margin-right:auto}
+.btn.qf{border-color:var(--flame);color:var(--flame)}
+.vsp{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;margin:20px 0 14px}
+.vsp label{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1 1 200px}
+.vsp select{background:var(--panel2);border:1px solid var(--edge);border-radius:10px;padding:9px 10px;min-height:42px;color:var(--ink);max-width:100%}
+.vsp .vsx{font-family:var(--serif);font-weight:700;font-size:22px;color:var(--flame);align-self:center}
+#controls .reward{margin:0 0 10px}
+@media (hover:none){ .cmdh .kh,.cbtn kbd{display:none} .cbtn{padding-left:12px} }
+
 @media (max-width:560px){
   .crest.lg{width:46px;height:46px;font-size:15px}
   .hud{gap:6px}
   .hf .fm{display:none}
+  .hf .crest{width:34px;height:34px;border-width:2px}
+  .hf .who{gap:6px}
+  .hf .nm{font-size:14px}
+  .hudmid small{max-width:60px;margin:0 auto;line-height:1.25}
   .tray .slots{flex-wrap:nowrap;overflow-x:auto;flex-basis:100%;scrollbar-width:none;padding-bottom:2px}
   .tray .slots::-webkit-scrollbar{display:none}
   .slot{flex:none}
@@ -345,6 +380,16 @@ details.rules p{margin:8px 0}
   .hside{align-items:stretch;width:100%}
   .prof{min-width:0}
   .spingrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cmd{padding:10px}
+  .cmdh{gap:2px 12px;margin-bottom:8px}
+  .cmdh .kh{display:none}
+  .cmdg{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .cbtn{padding:7px 9px;min-height:50px}
+  .cbtn kbd{display:none}
+  .cbtn b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cbtn small{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cmdr{gap:6px}
+  .cmdr .seg button{padding:6px 10px;min-height:38px}
   .sslot{min-height:0;padding:12px 6px}
   .sslot .sm2{display:none}
   .spinhead h3{font-size:17px}
@@ -1137,7 +1182,9 @@ function jointAt(k,x,face,p,scale,lift){ const j=skeleton(p)[k]; return {x:x+j[0
 /* =====================================================================
    FIGHT SIMULATION
    ===================================================================== */
-function simFight(A,B){
+// A duel steps one action at a time, so the same rules drive both the instant simulation (simFight)
+// and fights the player controls. act(i) without a choice is the AI; with a choice it is the player's move.
+function makeDuel(A,B){
   const maxCh=d=>40+Math.min(d.sta,130)*0.6;
   const f=[A,B].map((d,i)=>({d,i,hp:100,ch:maxCh(d),stun:0,cd:0,used:false,um:0,usedUlt:false,ultLanded:false,form:0.82+Math.random()*0.36}));
   const log=[];
@@ -1147,10 +1194,17 @@ function simFight(A,B){
   const gain=(att,def,dmg)=>{ att.um=Math.min(100,att.um+dmg*.46); def.um=Math.min(100,def.um+dmg*.67); };
   const say=(text,type,x)=>log.push(Object.assign({text,type,hp:snap(),ch:chs(),um:ums(),tgt:null,dmg:0,win:null,att:null,mv:null,name:'',dodge:false,crit:false,guard:false,stun:false,surv:false,ko:false,skip:false,resist:false,who:null,st:null,heal:0},x||{}));
 
-  function act(att,def){
+  const dodgeOf=(att,def)=>clamp(0.1+(def.d.spd-att.d.spd)/300+(def.d.int-att.d.int)/700,0.04,0.38);
+  function act(att,def,choice){
     const a=att.d.short, d=def.d.short, st=att.d.sigType;
     if(att.stun>0){ att.stun--; say(`${a} is caught in an illusion and loses the turn.`,'gen',{att:att.i,skip:true}); return; }
-    if(att.um>=100&&!att.usedUlt&&Math.random()<.85){
+    if(choice&&!canUse(att,def,choice)) choice='tai';
+    if(choice==='focus'){
+      const g=Math.round(Math.min(30,maxCh(att.d)-att.ch)); att.ch+=g;
+      say(`${a} steps back and focuses, gathering ${g} chakra.`,'focus',{att:att.i,who:att.i,heal:g});
+      return;
+    }
+    if(choice?choice==='ult':(att.um>=100&&!att.usedUlt&&Math.random()<.85)){
       const u=ultOf(att.d); att.usedUlt=true; att.um=0; att.ch=Math.max(0,att.ch-20);
       const dg=clamp(0.1+(def.d.spd-att.d.spd)/300+(def.d.int-att.d.int)/700,0.04,0.38)*0.2;
       if(Math.random()<dg){ say(`${d} somehow evades ${a}'s ultimate, ${u.n}!`,'ult',{att:att.i,mv:'ult',name:u.n,dodge:true,st}); return; }
@@ -1170,7 +1224,7 @@ function simFight(A,B){
       {k:'gen',w:(att.ch>=8&&def.stun===0)?att.d.gen*0.7:0},
       {k:'sig',w:(att.ch>=28&&att.cd<=0)?55:0}
     ];
-    const m=weighted(opts).k;
+    const m=choice||weighted(opts).k;
     let base,pow,name;
     if(m==='tai'){ base=9; pow=att.d.tai; name=pick(att.d.tm||TAI_MOVES); att.ch=Math.min(maxCh(att.d),att.ch+3); }
     else if(m==='nin'){ base=12; pow=att.d.nin; name=pick(att.d.mv||NIN_MOVES); att.ch-=10; }
@@ -1206,16 +1260,33 @@ function simFight(A,B){
     }
   }
 
-  say(`${A.short} and ${B.short} step into the arena.`,'info');
-  let turn=0;
-  while(turn<28&&f[0].hp>0&&f[1].hp>0){
-    turn++;
-    const s0=A.spd*(0.75+Math.random()*0.5), s1=B.spd*(0.75+Math.random()*0.5);
-    const order=s0>=s1?[0,1]:[1,0];
-    for(const i of order){
-      if(f[0].hp<=0||f[1].hp<=0) break;
-      act(f[i],f[1-i]);
-    }
+  function canUse(att,def,k){
+    if(k==='tai') return true;
+    if(k==='nin') return att.ch>=10;
+    if(k==='gen') return att.ch>=8&&def.stun===0;
+    if(k==='sig') return att.ch>=28&&att.cd<=0;
+    if(k==='ult') return att.um>=100&&!att.usedUlt;
+    if(k==='focus') return att.ch<maxCh(att.d)-1;
+    return false;
+  }
+  const D={f,log,turn:0,say,maxCh};
+  D.act=(i,choice)=>act(f[i],f[1-i],choice);
+  D.over=()=>D.turn>=28||f[0].hp<=0||f[1].hp<=0;
+  D.order=()=>{ const s0=A.spd*(0.75+Math.random()*0.5), s1=B.spd*(0.75+Math.random()*0.5); return s0>=s1?[0,1]:[1,0]; };
+  // what fighter i can do right now, with the odds the rules use (for the command bar)
+  D.options=i=>{
+    const att=f[i], def=f[1-i], dg=dodgeOf(att,def), pct=x=>Math.round(x*100);
+    return {
+      tai:{ok:true,hit:pct(1-dg)},
+      nin:{ok:canUse(att,def,'nin'),hit:pct(1-dg),cost:10},
+      gen:{ok:canUse(att,def,'gen'),trap:pct((1-dg)*clamp(0.3+(att.d.gen-def.d.int)/150,0.08,0.8)),cost:8,stunned:def.stun>0},
+      sig:{ok:canUse(att,def,'sig'),hit:pct(1-dg*0.6),cost:28,cd:att.cd},
+      ult:{ok:canUse(att,def,'ult'),hit:pct(1-dg*0.2),gauge:Math.round(att.um),used:att.usedUlt},
+      focus:{ok:canUse(att,def,'focus'),gain:Math.round(Math.min(30,maxCh(att.d)-att.ch))},
+      ch:Math.round(att.ch),max:Math.round(maxCh(att.d)),stun:att.stun>0
+    };
+  };
+  D.endTurn=()=>{
     f.forEach(x=>{
       x.ch=Math.min(maxCh(x.d),x.ch+5); x.um=Math.min(100,x.um+1.2); if(x.cd>0) x.cd--;
       if(x.hp>0&&x.d.regen&&x.hp<100&&f[0].hp>0&&f[1].hp>0){
@@ -1223,7 +1294,8 @@ function simFight(A,B){
         say(`${x.d.short} regenerates ${h} HP.`,'heal',{who:x.i,heal:h});
       }
     });
-  }
+  };
+  D.result=()=>{
   let w;
   if(f[0].hp<=0) w=1; else if(f[1].hp<=0) w=0;
   else if(Math.round(f[0].hp)===Math.round(f[1].hp)) w=A.int>=B.int?0:1;
@@ -1232,7 +1304,19 @@ function simFight(A,B){
   const hpLeft=Math.max(0,Math.round(f[w].hp));
   if(ko) say(`${f[w].d.short} wins by knockout.`,'end',{win:w,ko:true});
   else say(`Time. ${f[w].d.short} takes the decision, ${hpLeft} HP to ${Math.max(0,Math.round(f[1-w].hp))}.`,'end',{win:w});
-  return {winner:f[w].d,loser:f[1-w].d,ko,hpLeft,log,turns:turn,ultW:f[w].ultLanded,ultL:f[1-w].ultLanded};
+  return {winner:f[w].d,loser:f[1-w].d,ko,hpLeft,log,turns:D.turn,ultW:f[w].ultLanded,ultL:f[1-w].ultLanded};
+  };
+  return D;
+}
+function simFight(A,B){
+  const D=makeDuel(A,B);
+  D.say(`${A.short} and ${B.short} step into the arena.`,'info');
+  while(!D.over()){
+    D.turn++;
+    for(const i of D.order()){ if(D.f[0].hp<=0||D.f[1].hp<=0) break; D.act(i); }
+    D.endTurn();
+  }
+  return D.result();
 }
 
 /* =====================================================================
@@ -2034,6 +2118,7 @@ class Stage{
     if(this.onSay) this.onSay('pre',e);
     try{
       if(e.type==='heal') await this.heal(e);
+      else if(e.type==='focus') await this.focus(e);
       else if(e.skip) await this.stunSkip(e);
       else if(e.att!==null&&e.mv){
         const A=this.f[e.att], D=this.f[1-e.att];
@@ -2059,6 +2144,15 @@ class Stage{
     else for(let i=0;i<8;i++) this.spawn({x:f.x+rand(-26,26),y:GY-rand(20,120),vy:-rand(.05,.1),life:rand(500,800),size:rand(4,7),col:'#7fe3a0',shape:'plus'});
     this.popup('+'+e.heal,f.x,GY-190,'#7fe3a0',24,'#0a4a22'); this.sfx('heal');
     await this.wait(this.d(260));
+  }
+  async focus(e){
+    const A=this.f[e.att], c=A.look.glow||A.fx.c; this.front=A.i;
+    this.pose(A,'charge',this.d(160)); A.aura=1; this.sfx('charge');
+    this.ring(A.x,GY-70,c,16,96,this.d(560),3);
+    for(let i=0;i<16;i++){ const a=rand(0,6.283), r=rand(60,120); this.spawn({x:A.x+Math.cos(a)*r,y:GY-80+Math.sin(a)*r*.6,vx:-Math.cos(a)*r/460,vy:-Math.sin(a)*r*.6/460,life:460,size:rand(2,4),col:c,shape:'dot'}); }
+    this.popup(`+${e.heal} CHAKRA`,A.x,GY-190,'#7fd0ff',22,'#0a2a4a');
+    await this.wait(this.d(620));
+    A.aura=0; await this.pose(A,'idle',this.d(140));
   }
   async stunSkip(e){
     const A=this.f[e.att]; A.dizzy=true; this.pose(A,'stun',this.d(120));
@@ -3597,7 +3691,8 @@ const LINES={
   ko:['AND THAT IS IT! {d} is down!','KNOCKOUT! {a} ends it!'],
   ultPre:['THE ULTIMATE GAUGE IS FULL! {a} goes all in: {move}!','This is it! {a} unleashes {move}!','Everything on the line! {move}!'],
   hitUlt:['ULTIMATE CONNECTS! {dmg} damage! {d} is at {hp} HP.','DEVASTATING! {dmg} off {d}, down to {hp} HP.','{d} takes the full force: {dmg} damage!'],
-  ultReady:['{x} has a full ultimate gauge!','Careful. {x} can go for the ultimate!']
+  ultReady:['{x} has a full ultimate gauge!','Careful. {x} can go for the ultimate!'],
+  focus:['{x} steps back to gather chakra.','{x} focuses: +{h} chakra.','{x} takes a breath and refills, +{h} chakra.']
 };
 class Announcer{
   constructor(a,b,isMine){ this.d=[a,b]; this.isMine=isMine||(()=>false); this.hp=[100,100]; this.streak=[0,0]; this.lead=-1; this.lastIdx={}; this.ready=[false,false]; }
@@ -3618,6 +3713,7 @@ class Announcer{
   pre(e){
     const v=this.vars(e);
     if(e.type==='heal') return this.fill(this.line('heal'),v);
+    if(e.type==='focus') return this.fill(this.line('focus'),v);
     if(e.skip) return this.fill(this.line('skip'),v);
     if(e.mv==='ult'){ this.ready[e.att]=false; return this.fill(this.line('ultPre'),v); }
     const key=e.mv==='tai'?'taiPre':e.mv==='nin'?'ninPre':e.mv==='gen'?'genPre':'sigPre';
@@ -3662,7 +3758,7 @@ const state={
   settings:{mode:'classic',era:'1',draft:'pick',size:16,squadSize:3,field:'random',versions:'random',seed:'random'},
   squad:[],captain:null,squadName:'',filter:'All',q:'',sort:'ovr',
   rounds:[],r:0,m:0,N:16,pts:{},out:{},champion:null,mode:'classic',era:'1',story:[],favorite:null,defending:null,saved:false,
-  spectate:false,specAll:false,paused:false,toFinal:false,keep:null,
+  spectate:false,specAll:false,paused:false,toFinal:false,keep:null,duel:null,vs:null,
   spinning:null,lastSpin:null,draftType:'pick',reward:null,toast:null,
   busy:false,speed:'normal',tab:0,copied:false,best:{},run:0,stage:null,
   prev:'draft',hview:'recent',hgroup:'version',hsort:'t',confirmClear:false
@@ -4050,7 +4146,7 @@ function renderDraft(){
         <h1 class="title">Fantasy Shinobi<br><em>Tournament</em></h1>
         <p class="lede">Pick a squad from ${BASES.length} characters across ${ROSTER.length} versions, or spin for it, then watch the tournament play out live. Win to earn XP, rank up and get more spins.</p>
       </div>
-      <div class="hside">${profChip()}<div class="row hbtn"><button class="btn small" data-action="history">History${HIST.n?` (${HIST.n})`:''}</button><button class="btn small" data-action="theme">Light / dark</button></div></div>
+      <div class="hside">${profChip()}<div class="row hbtn"><button class="btn small qf" data-action="quick">Quick fight</button><button class="btn small" data-action="history">History${HIST.n?` (${HIST.n})`:''}</button><button class="btn small" data-action="theme">Light / dark</button></div></div>
     </div>
     ${state.toast?`<div class="toast" role="status">${esc(state.toast)}</div>`:''}
     <section class="panel modes" id="modes"></section>
@@ -4405,6 +4501,9 @@ const speedSeg=()=>`<div class="seg" role="radiogroup" aria-label="Playback spee
     </div>`;
 function renderControls(){
   const el=$('controls'); if(!el) return;
+  if(state.screen==='versus'){ renderVsControls(); return; }
+  if(state.duel){ renderTop(); renderDuel(); return; }
+  const sl=$('cmdslot'); if(sl) sl.innerHTML='';
   renderTop();
   if(state.champion){ el.innerHTML=`<div class="row"><button class="btn small" data-action="sound">Sound: ${Sfx.on?'on':'off'}</button></div>`; return; }
   if(state.spectate){
@@ -4424,7 +4523,8 @@ function renderControls(){
   const alive=aliveSquad().length, mineNow=hasSquad(curMatch());
   const skipSquad=alive>0&&!mineNow;
   el.innerHTML=`<div class="row">
-    <button class="btn primary" data-action="watch" ${state.busy?'disabled':''}>Watch next fight</button>
+    ${mineNow?`<button class="btn primary" data-action="playme" ${state.busy?'disabled':''} title="Choose every move yourself">Fight it yourself</button>`:''}
+    <button class="btn ${mineNow?'':'primary'}" data-action="watch" ${state.busy?'disabled':''}>Watch next fight</button>
     ${skipSquad?`<button class="btn" data-action="simsquad" ${state.busy?'disabled':''}>Skip to my next fight</button>`:''}
     <button class="btn" data-action="simround" ${state.busy?'disabled':''}>Sim this round</button>
     <button class="btn" data-action="simall" ${state.busy?'disabled':''}>Sim to the end</button>
@@ -4457,6 +4557,7 @@ function renderMatches(){
     const evs=state.story.filter(e=>e.r===state.tab&&e.mi===mi);
     let ribs=evs.map(e=>`<span class="rib k-${e.k}">${esc(e.t)}</span>`).join('');
     if(done&&m.upset&&!evs.some(e=>e.k==='upset')) ribs=`<span class="rib k-upset">Upset</span>`+ribs;
+    if(m.played) ribs=`<span class="rib k-squad">You fought</span>`+ribs;
     let foot='';
     if(done) foot=`<span class="ft ${m.result.ko?'ko':''}">${m.result.ko?'KO':'Decision'}</span><span class="ft">${m.result.hpLeft} HP left</span>${m.result.ultW?'<span class="ft ult">Ultimate</span>':''}${m.award?`<span class="ft pts">+${m.award} pts${m.capB?', captain':''}${m.styleB?', style':''}</span>`:''}`;
     else if(now) foot='<span class="ft pts">Up next</span>';
@@ -4482,6 +4583,7 @@ function buildArena(a,b,label,intro,note,theme){
   $('arena').innerHTML=`<div class="label"><span>${label}</span>${note?`<span class="up">${note}</span>`:''}</div>
     <div class="hud">${hudSide(a,'A')}<div class="hudmid">VS<small>Overall ${a.ovr} vs ${b.ovr}</small></div>${hudSide(b,'B')}</div>
     <div class="stagewrap"><canvas id="stage" role="img" aria-label="Animated fight between ${a.short} and ${b.short}"></canvas><div class="ticker" id="ticker" aria-hidden="true"><span class="live">LIVE</span><span class="tt" id="tickt"></span></div></div>
+    <div id="cmdslot"></div>
     <ul class="log" id="log" aria-live="polite">${lines.map(t=>`<li class="info">${esc(t)}</li>`).join('')}</ul>`;
   const st=new Stage($('stage'),a,b,{theme:theme||0,mul:state.speed==='fast'?.55:1,calm:reduced});
   st.paused=state.paused;
@@ -4629,6 +4731,166 @@ function afterSim(last){
   if(state.champion){ const fm=state.rounds[nRounds()-1][0]; showFinal(fm,nRounds()-1); }
   else showUpcoming();
 }
+
+/* ---------- fight it yourself: you pick each move, the opponent uses the same AI as the simulation ---------- */
+const MOVE_KEYS=['tai','nin','gen','sig','ult','focus'];
+function duelPanel(){
+  const S=state.duel, D=S.D, o=D.options(S.me), me=D.f[S.me].d, foe=D.f[1-S.me].d, w=S.waiting;
+  const b=(k,i,cls,title,sub,ok)=>`<button class="cbtn ${cls}" data-action="move" data-val="${k}" ${w&&ok?'':'disabled'} aria-keyshortcuts="${i+1}"><kbd>${i+1}</kbd><b>${title}</b><small>${sub}</small></button>`;
+  const head=S.done?'Fight over.':w?(S.auto?'The AI is fighting for you.':`Your move, turn ${D.turn}.<span class="kh"> Pick a technique or press 1 to 6.</span>`):o.stun?`${me.short} is trapped in a genjutsu and loses this turn...`:`Turn ${D.turn} is playing out...`;
+  return `<div class="cmd ${w?'live':''}">
+    <div class="cmdh"><span class="you">You: <b>${me.short}</b></span><span>Chakra <b>${o.ch}</b>/${o.max}</span><span>Ultimate <b>${o.ult.used?'used':o.ult.gauge+'%'}</b></span><span class="cmds">${head}</span></div>
+    <div class="cmdg">
+      ${b('tai',0,'tai','Taijutsu',`Hit ${o.tai.hit}%, +3 chakra`,o.tai.ok)}
+      ${b('nin',1,'nin','Ninjutsu',o.nin.ok?`10 chakra, hit ${o.nin.hit}%`:'Needs 10 chakra',o.nin.ok)}
+      ${b('gen',2,'gen','Genjutsu',o.gen.stunned?`${foe.short} is already trapped`:o.gen.ok?`8 chakra, trap ${o.gen.trap}%`:'Needs 8 chakra',o.gen.ok)}
+      ${b('sig',3,'sig',me.sig,o.sig.cd>0?`Ready in ${o.sig.cd} turn${o.sig.cd>1?'s':''}`:o.sig.ok?`28 chakra, hit ${o.sig.hit}%`:'Needs 28 chakra',o.sig.ok)}
+      ${b('ult',4,'ult','ULTIMATE',`${o.ult.used?'Used':o.ult.ok?`READY, hit ${o.ult.hit}%`:`Gauge ${o.ult.gauge}%`}: ${ultOf(me).n}`,o.ult.ok)}
+      ${b('focus',5,'foc','Focus',o.focus.ok?`Skip the attack, +${o.focus.gain} chakra`:'Chakra is full',o.focus.ok)}
+    </div>
+    <div class="row cmdr">
+      ${speedSeg()}
+      <button class="btn small" data-action="sound">Sound: ${Sfx.on?'on':'off'}</button>
+      ${!w&&!S.done?'<button class="btn small" data-action="skip">Skip animation</button>':''}
+      ${S.done?'':`<button class="btn small" data-action="autofight">${S.auto?'Take back control':'Let the AI finish'}</button>`}
+    </div>
+  </div>`;
+}
+// the command bar sits right under the canvas so the fight and the buttons fit on one screen
+function renderDuel(){
+  const el=$('cmdslot'), c=$('controls'); if(!el||!state.duel) return;
+  el.innerHTML=duelPanel();
+  if(c&&c.innerHTML) c.innerHTML='';
+}
+// resolves with the chosen move (or undefined for the AI, or null if the fight was abandoned)
+function askMove(){
+  const S=state.duel;
+  if(S.auto) return Promise.resolve(undefined);
+  return new Promise(res=>{ S.waiting=true; S.choose=k=>{ S.waiting=false; S.choose=null; res(k); }; renderDuel(); setTicker(`Your move: pick a technique for ${S.D.f[S.me].d.short}.`,false); });
+}
+function chooseMove(k){
+  const S=state.duel; if(!S||!S.waiting||!S.choose) return;
+  if(k&&!S.D.options(S.me)[k].ok) return;
+  S.choose(k);
+}
+function abandonDuel(){ const S=state.duel; if(S&&S.choose) S.choose(null); state.duel=null; }
+// play one fight with the player controlling side `me` (0 = a, 1 = b). Returns the simFight-style result, or null if abandoned.
+async function playControlled(a,b,me,o){
+  const run=state.run, D=makeDuel(a,b);
+  state.busy=true; state.paused=false;
+  state.duel={D,me,waiting:false,choose:null,auto:false,done:false};
+  const st=buildArena(a,b,o.label,o.notes||[],`You control ${[a,b][me].short}`,o.theme);
+  const ar=$('arena'); if(ar){ ar.classList.add('duel'); ar.scrollIntoView({block:'start',behavior:reduced?'auto':'smooth'}); }
+  setHp([100,100],[100,100],[0,0]); renderDuel(); renderTop();
+  const ann=new Announcer(a,b,f=>f===[a,b][me]);
+  st.onSay=(k,e)=>{ if(k==='pre') setTicker(ann.pre(e),false); else if(k==='hit') setTicker(ann.hit(e),true); else if(k==='miss') setTicker(ann.miss(e),false); else setTicker(ann.end(e),true); };
+  const gone=()=>state.run!==run||state.stage!==st||!state.duel||state.duel.D!==D;
+  let ptr=0;
+  const playNew=async()=>{
+    while(ptr<D.log.length){
+      const e=D.log[ptr++]; if(gone()) return false;
+      addLine(e); if(e.type==='info') continue;
+      try{ await Promise.race([e.type==='end'?st.finale(e):st.playEntry(e),stageGuard(st,12000)]); }catch(err){ console.error(err); }
+      setHp(e.hp,e.ch,e.um); if(e.type==='end') markWinner(e.win);
+    }
+    return !gone();
+  };
+  D.say(`${a.short} and ${b.short} step into the arena. You control ${[a,b][me].short}.`,'info');
+  setTicker(ann.intro(o.round),false);
+  try{ await st.intro(o.round); }catch(err){ console.error(err); }
+  if(!await playNew()) return null;
+  while(!D.over()){
+    D.turn++;
+    st.skipping=false;
+    let choice;
+    if(D.f[me].stun>0){ renderDuel(); }
+    else { choice=await askMove(); if(choice===null||gone()) return null; }
+    renderDuel();
+    for(const i of D.order()){ if(D.f[0].hp<=0||D.f[1].hp<=0) break; D.act(i,i===me?choice:undefined); if(!await playNew()) return null; }
+    D.endTurn(); if(!await playNew()) return null;
+  }
+  const res=D.result(); st.skipping=false;
+  if(!await playNew()) return null;
+  state.duel.done=true; renderDuel();
+  return res;
+}
+async function fightYourself(){
+  if(state.busy||state.champion||state.spectate) return;
+  const m=curMatch(); if(!hasSquad(m)) return;
+  Sfx.init();
+  const r=state.r, me=inSquad(m.a.id)?0:1;
+  const res=await playControlled(m.a,m.b,me,{label:`${roundName(r)}, fight ${state.m+1} of ${state.rounds[r].length}`,round:roundName(r),theme:themeFor(r),notes:storyline(m.a,m.b).slice(0,2)});
+  if(!res) return;
+  m.played=true; m.watched=true;
+  const n0=state.story.length;
+  finalize(m,res);
+  state.busy=false; state.duel=null; state.paused=false;
+  refreshAll(); announceStory(n0);
+}
+
+/* ---------- quick fight: any two fighters, you control the first ---------- */
+function renderVersus(){
+  destroyStage(); abandonDuel();
+  state.screen='versus';
+  const V=state.vs, opts=sel=>ROSTER.slice().sort((x,y)=>x.short.localeCompare(y.short)).map(f=>`<option value="${f.id}" ${f.id===sel?'selected':''}>${f.short} (${f.ovr})</option>`).join('');
+  app.innerHTML=`
+    <div class="hdr">
+      <div><div class="kicker">From the creator of Shinobi Life</div><h1 class="title small">Quick<br><em>Fight</em></h1>
+        <p class="lede">Pick any two fighters and fight it out yourself, one technique at a time. A win is worth 15 XP.</p></div>
+      <div class="hside">${profChip()}<div class="row hbtn"><button class="btn small" data-action="back">Back to the draft</button><button class="btn small" data-action="theme">Light / dark</button></div></div>
+    </div>
+    <section class="panel vsp">
+      <label><span class="sl">You</span><select id="vsme" aria-label="Your fighter">${opts(V.me)}</select></label>
+      <button class="btn small" data-action="vsrand" data-val="me">Random</button>
+      <span class="vsx">VS</span>
+      <label><span class="sl">Opponent</span><select id="vsfoe" aria-label="Opponent">${opts(V.foe)}</select></label>
+      <button class="btn small" data-action="vsrand" data-val="foe">Random</button>
+    </section>
+    <div class="arena" id="arena"></div>
+    <div id="controls"></div>
+    ${credit()}`;
+  vsPreview();
+}
+function vsPreview(){
+  const a=byId(state.vs.me), b=byId(state.vs.foe);
+  buildArena(a,b,'Quick fight',['Press Fight! and choose every move for '+a.short+'.'],'',state.vs.theme);
+  setTicker(new Announcer(a,b,()=>false).preview('Quick fight'),false);
+  renderVsControls();
+}
+function renderVsControls(){
+  const el=$('controls'); if(!el) return;
+  if(state.duel){ renderDuel(); return; }
+  const R=state.vs.last, sl=$('cmdslot'); if(sl) sl.innerHTML='';
+  el.innerHTML=`${R?`<p class="reward">${R.won?`You won with ${R.hp} HP left! +15 XP.`:`${R.foe} beat you this time.`}</p>`:''}<div class="row">
+    <button class="btn primary" data-action="vsfight">${R?'Rematch':'Fight!'}</button>
+    <button class="btn" data-action="vsrand" data-val="foe">${R?'New opponent':'Random opponent'}</button>
+    ${speedSeg()}<button class="btn small" data-action="sound">Sound: ${Sfx.on?'on':'off'}</button></div>`;
+}
+async function vsFight(){
+  if(state.busy) return;
+  Sfx.init();
+  const a=byId(state.vs.me), b=byId(state.vs.foe);
+  state.vs.last=null;
+  const res=await playControlled(a,b,0,{label:'Quick fight',round:'Quick fight',theme:state.vs.theme});
+  if(!res||state.screen!=='versus') return;
+  const won=res.winner===a;
+  if(won){ const L0=levelOf(PROF.xp); PROF.xp+=15; const L1=levelOf(PROF.xp); PROF.spins+=(L1-L0)*5; saveProf(); }
+  state.vs.last={won,hp:res.hpLeft,foe:b.short};
+  state.busy=false; state.duel=null; state.paused=false;
+  const h=document.querySelector('.hside .prof'); if(h) h.outerHTML=profChip();
+  renderVsControls();
+}
+function startVersus(){
+  const pickOther=id=>{ const base=id&&byId(id).base; return pick(ROSTER.filter(f=>f.base!==base)).id; };
+  const me=state.captain||state.squad[0]||pick(ROSTER).id;
+  state.vs={me,foe:pickOther(me),theme:Math.floor(Math.random()*4),last:null};
+  renderVersus(); window.scrollTo(0,0);
+}
+document.addEventListener('keydown',e=>{
+  if(!state.duel||!state.duel.waiting||e.ctrlKey||e.metaKey||e.altKey) return;
+  const t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='SELECT'||t.tagName==='TEXTAREA')) return;
+  const k=MOVE_KEYS[+e.key-1]; if(k){ e.preventDefault(); chooseMove(k); }
+});
 
 /* ---------- spectator mode: the tournament runs itself ---------- */
 // is this fight worth putting on camera? (the sim is pure, so we know the outcome before showing it)
@@ -4794,6 +5056,12 @@ app.addEventListener('click',e=>{
   else if(a==='start'){ if(state.squad.length===state.settings.squadSize&&state.spinning===null){ Sfx.init(); startTournament(false); } }
   else if(a==='spectate'){ if(state.spinning===null){ Sfx.init(); startTournament(true); } }
   else if(a==='watch') watchNext();
+  else if(a==='playme') fightYourself();
+  else if(a==='move') chooseMove(v);
+  else if(a==='autofight'){ const S=state.duel; if(S){ S.auto=!S.auto; if(S.auto&&S.waiting) chooseMove(undefined); renderDuel(); } }
+  else if(a==='quick'){ if(state.spinning===null){ Sfx.init(); startVersus(); } }
+  else if(a==='vsfight') vsFight();
+  else if(a==='vsrand'){ if(!state.busy){ const other=v==='me'?state.vs.foe:state.vs.me; state.vs[v]=pick(ROSTER.filter(f=>f.base!==byId(other).base)).id; state.vs.last=null; renderVersus(); } }
   else if(a==='simround') simRound();
   else if(a==='simall') simAll();
   else if(a==='simsquad') simSquad();
@@ -4808,13 +5076,13 @@ app.addEventListener('click',e=>{
   else if(a==='copy') copyRecap();
   else if(a==='again'){ Sfx.init(); startTournament(); }
   else if(a==='history'){ if(!state.busy){ state.confirmClear=false; renderHistory(); window.scrollTo(0,0); } }
-  else if(a==='back'){ if(state.prev==='tournament'&&state.rounds.length) renderTournament(); else renderDraft(); window.scrollTo(0,0); }
+  else if(a==='back'){ if(state.screen==='versus'){ abandonDuel(); state.run++; state.busy=false; state.paused=false; renderDraft(); } else if(state.prev==='tournament'&&state.rounds.length) renderTournament(); else renderDraft(); window.scrollTo(0,0); }
   else if(a==='hview'||a==='hgroup'){ state[a]=v; renderHistory(); }
   else if(a==='clearhist'){ state.confirmClear=true; renderHistory(); }
   else if(a==='clearno'){ state.confirmClear=false; renderHistory(); }
   else if(a==='clearyes'){ HIST=emptyHist(); saveHist(); state.confirmClear=false; renderHistory(); }
   else if(a==='newdraft'){
-    state.run++; state.busy=false; state.paused=false; state.toFinal=false;
+    abandonDuel(); state.run++; state.busy=false; state.paused=false; state.toFinal=false;
     if(state.spectate){ const k=state.keep||{squad:[],captain:null}; state.squad=k.squad; state.captain=k.captain; state.keep=null; state.spectate=false; }
     else { state.squad=[]; state.captain=null; state.squadName=''; }
     renderDraft();
@@ -4825,6 +5093,13 @@ app.addEventListener('input',e=>{
   else if(e.target.id==='sqname'){ const I=squadIdent(state.squad); state.squadName=I&&e.target.value.trim()===I.name?'':e.target.value; }
 });
 app.addEventListener('change',e=>{
+  if(e.target.id==='vsme'||e.target.id==='vsfoe'){
+    if(state.busy){ e.target.value=state.vs[e.target.id==='vsme'?'me':'foe']; return; }
+    const k=e.target.id==='vsme'?'me':'foe', other=state.vs[k==='me'?'foe':'me'];
+    state.vs[k]=e.target.value; state.vs.last=null;
+    if(byId(state.vs[k]).base===byId(other).base) state.vs[k==='me'?'foe':'me']=pick(ROSTER.filter(f=>f.base!==byId(e.target.value).base)).id;
+    renderVersus(); return;
+  }
   if(e.target.id==='sort'){ state.sort=e.target.value; renderGrid(); }
   else if(e.target.id==='cap'){ state.captain=e.target.value; renderTray(); renderIdent(); }
   else if(e.target.id==='hsort'){ state.hsort=e.target.value; renderHistory(); }

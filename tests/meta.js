@@ -188,7 +188,56 @@ const path = require('path');
   await page.reload(); await page.addScriptTag({ path: path.join(__dirname, 'harness.js') });
   ok(await page.evaluate(() => !document.querySelector('.toast')), 'daily spins given twice');
 
-  // 12. clear history
+  // 12. fight it yourself: in the tournament, pick moves with the keyboard; the result lands in the bracket
+  const playOut = async () => {
+    const t0 = Date.now(); let moves = 0;
+    while (Date.now() - t0 < 120000) {
+      const s = await page.evaluate(() => ({ duel: !!state.duel, waiting: !!(state.duel && state.duel.waiting), done: !!(state.duel && state.duel.done), busy: state.busy }));
+      if ((!s.duel && !s.busy) || s.done) break;
+      if (s.waiting) {
+        const o = await page.evaluate(() => state.duel.D.options(state.duel.me));
+        await page.keyboard.press(o.ult.ok ? '5' : o.sig.ok ? '4' : o.focus.ok && o.ch < 10 ? '6' : o.nin.ok ? '2' : '1'); moves++;
+      } else await page.click('#cmdslot [data-action="skip"]').catch(() => {});
+      await page.waitForTimeout(120);
+    }
+    return moves;
+  };
+  await page.evaluate(() => { state.settings.mode = 'classic'; state.settings.draft = 'pick'; state.settings.size = 8; state.squad = ['lee2', 'gaara2', 'kakashi1']; state.captain = 'lee2'; renderDraft(); });
+  await page.click('[data-action="start"]');
+  await page.click('[data-action="speed"][data-val="fast"]');
+  await page.evaluate(() => { while (!hasSquad(curMatch())) finalize(curMatch(), simFight(curMatch().a, curMatch().b)); refreshAll(); showUpcoming(); });
+  const m0 = await page.evaluate(() => state.m);
+  await page.click('[data-action="playme"]');
+  const moves = await playOut();
+  await page.waitForFunction(() => !state.busy && !state.duel, null, { timeout: 20000 }).catch(() => fail.push('controlled fight did not hand back'));
+  const pm = await page.evaluate(m0 => { const m = state.rounds[0][m0]; return { played: !!m.played, done: !!m.result, next: state.m, end: m.result && m.result.log[m.result.log.length - 1].type, ribbon: /You fought/.test(document.getElementById('mgrid').textContent) }; }, m0);
+  ok(moves >= 1 && pm.played && pm.done && pm.next === m0 + 1 && pm.end === 'end' && pm.ribbon, `fight it yourself: moves ${moves} ${JSON.stringify(pm)}`);
+  // the controlled fight can be replayed like any other
+  await page.click(`.mc.done[data-m="${m0}"]`);
+  await page.waitForFunction(() => state.busy, null, { timeout: 5000 }).catch(() => {});
+  await page.click('[data-action="skip"]').catch(() => {});
+  await page.waitForFunction(() => !state.busy, null, { timeout: 20000 }).catch(() => fail.push('replay of a controlled fight did not finish'));
+  await page.click('[data-action="newdraft"]');
+
+  // 13. quick fight: pick two fighters, play, rematch; abandoning mid-fight is clean
+  const xp0 = await page.evaluate(() => PROF.xp);
+  await page.click('[data-action="quick"]');
+  ok(await page.evaluate(() => state.screen === 'versus' && !!document.getElementById('vsme')), 'quick fight screen');
+  await page.selectOption('#vsme', 'guy2'); await page.selectOption('#vsfoe', 'iruka');
+  await page.click('[data-action="speed"][data-val="fast"]');
+  await page.click('[data-action="vsfight"]');
+  await page.waitForFunction(() => state.duel && state.duel.waiting, null, { timeout: 15000 }).catch(() => fail.push('quick fight never asked for a move'));
+  await page.evaluate(() => document.getElementById('arena').scrollIntoView()); await shot('12_quickfight');
+  await playOut();
+  await page.waitForFunction(() => !state.busy && state.vs.last, null, { timeout: 20000 }).catch(() => fail.push('quick fight did not finish'));
+  const qf = await page.evaluate(() => ({ last: state.vs.last, xp: PROF.xp, btn: !!document.querySelector('[data-action="vsfight"]') }));
+  ok(qf.last && qf.btn && qf.xp === xp0 + (qf.last.won ? 15 : 0), 'quick fight result ' + JSON.stringify(qf));
+  await page.click('[data-action="vsfight"]');
+  await page.waitForFunction(() => state.duel && state.duel.waiting, null, { timeout: 15000 }).catch(() => fail.push('rematch never asked for a move'));
+  await page.click('[data-action="back"]');
+  ok(await page.evaluate(() => state.screen === 'draft' && !state.duel && !state.busy && !state.stage), 'leaving a quick fight mid-fight');
+
+  // 14. clear history
   await page.click('[data-action="history"]');
   await page.click('[data-action="clearhist"]');
   await page.click('[data-action="clearyes"]');

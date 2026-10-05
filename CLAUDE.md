@@ -1,7 +1,8 @@
 # Fantasy Shinobi Tournament
 
 A single-file browser game: draft a squad from Naruto characters (or spin for it), then watch a single-elimination
-tournament (8/16/32/64 fighters) play out as animated canvas fights. Fan project, no external art:
+tournament (8/16/32/64 fighters) play out as animated canvas fights, or fight your squad's matches yourself
+(turn-based: you pick each technique). Quick fight lets you play any two fighters against each other. Fan project, no external art:
 every character, effect and background is drawn in code. Same creator as Shinobi Life
 (https://github.com/zoned2042/shinobi-life, a BitLife-style Naruto life sim): the page says "From the creator of
 Shinobi Life" and the footer links that repo. The UI follows Shinobi Life's look: its "Deep Field" palette (near-black,
@@ -22,8 +23,9 @@ npx playwright install chromium   # skip if a Chromium build is already present 
 npm run serve                     # or just open index.html in a browser
 npm run test:smoke                # all bracket sizes, one-version-per-character, skip mid-fight, replay, new draft mid-fight
 npm run test:meta                 # tournament types (every size/seed/field), squad names, story, history + reload,
-                                  #   spectator (pause, skip to the final), clear history; screenshots in tests/out/meta_*.png
-node tests/moves.js all           # every version x {sig,ult,tai,nin,gen} x {hit,dodge,ko,crit,skip}, checks for errors,
+                                  #   spectator (pause, skip to the final), spins/XP, fight it yourself, quick fight,
+                                  #   clear history; screenshots in tests/out/meta_*.png
+node tests/moves.js all           # every version x {sig,ult,tai,nin,gen,focus} x {hit,dodge,ko,crit,skip}, checks for errors,
                                   #   hangs, leftover fx/props/mood/camera and fighters not reset (~2,300 runs, ~1 min;
                                   #   split with: node tests/moves.js ult 0 3 / 1 3 / 2 3, or name ids: node tests/moves.js sig itachi1)
 npm run test:balance              # Ultimate rate, KO rate, upsets, champion spread (exits 1 if a target is missed)
@@ -50,7 +52,7 @@ Google Fonts through curl so the canvas text uses the real fonts.
 | `FX` | Per-`base` projectile colours/shape (`orb`, `rasen`, `bolt`, `wave`, `swarm`, `shards`). |
 | `LK` / `lookOf` | Per-`base` and per-`id` look: skin `sk`, hair `hr`/`hs` (style), eyes `ey`/`es`, outfit `tp bt sl sv os vs`, headband `bd`, mask `mk`, marks `mr[]`, back item `bk`, glow, `bw` body width. Hokage tag auto-applies robe+hat; `Edo` tag auto-applies cracked grey skin. `cl` = Akatsuki clouds (`drawCloud`), `hc` = high collar on the portrait, `chk` = glowing chakra-cloak body with seal markings (Kurama/Baryon/Six Paths Naruto), `nohat` = Hokage without the auto hat, `bd:'helmet'`, `mk:'bandage'`, `bk:'cleaver'`, `sv:'warm'` (arm warmers). |
 | `drawHead`, `hairFront/Back`, `drawMarks`, `drawEye`, `drawPortrait`, `faceURL`, `drawCloud` | Head-frame drawing (origin at head centre, +x forward, -y up). Used by in-fight fighters, both cut-ins and face icons. |
-| `simFight(A,B)` | Pure simulation. Returns `{winner,loser,ko,hpLeft,log,turns,ultW,ultL}` (Ultimate landed by winner / loser). Contains the damage model and the Ultimate gauge. |
+| `makeDuel(A,B)` / `simFight(A,B)` | `makeDuel` is the rules, one action at a time: `act(i,choice)` (no choice = the AI's weighted pick; `tai nin gen sig ult focus` = the player's), `order()` (speed roll per turn), `endTurn()` (chakra, gauge, cooldown, regen), `over()`, `options(i)` (what is usable + hit/trap odds for the command bar), `result()`. `simFight` loops it with the AI on both sides and returns `{winner,loser,ko,hpLeft,log,turns,ultW,ultL}`. `focus` (+30 chakra, no attack) exists only for the player; log type `'focus'`. |
 | `Sfx` | Tiny WebAudio synth (no assets). `tone(...,at)` schedules on the audio clock. Measured worst case (stacked KO impacts) peaks at ~0.55 of full scale, so there is no limiter. |
 | `class Stage` | Canvas renderer + animation engine. Fighters are skeletons driven by pose angles (`POSES`). Plays log entries as animations. `titleLayout` breaks Ultimate titles into 1-4 lines. |
 | `SIGMAP` / `STYLES` | 32 staged signature moves, keyed by id or base. Unmapped characters fall back to a generic move by `sigType` (currently none). |
@@ -63,6 +65,7 @@ Google Fonts through curl so the canvas text uses the real fonts.
 | `tell` / `storyFight` / `storyRound` / `storyChampion` / `storyline` | The tournament story: events `{k,t,x,r,mi}` (kind, title, text, round, match index or null for round-level). Shown as the headline strip, the Story tab, ribbons on match cards and round notes. `storyline(a,b)` = pre-fight talking points (defending champ, head-to-head, streaks, upsets, titles, captain). |
 | `spectateLoop` / `worthWatching` | Spectator mode: no squad, auto-runs. Sims each fight first (pure), plays it only if worth watching (quarterfinals on, upsets, Ultimates, close finishes, story fighters, at least one per round), batches the rest "off camera". |
 | `renderHistory` | History screen: tournament cards, champions table, records table (by version or character). |
+| `playControlled` / `duelPanel` / `fightYourself` / `renderVersus` | Fights you control. `playControlled(a,b,me,o)` steps a `makeDuel`, asks for your move (`askMove`, buttons or keys 1-6), lets the opponent's AI answer, and plays every new log entry on the Stage; returns a `simFight`-style result, so `finalize`, replays, history and story treat it like any fight. The command bar renders into `#cmdslot` under the canvas; the stage shrinks (`.arena.duel`) so both fit on a laptop screen. "Fight it yourself" appears when your squad member is up; Quick fight (`state.vs`) is its own screen, a win gives 15 XP. "Let the AI finish" hands the rest of the fight to the AI. |
 | `PROF` / `grantXP` / `RANKS` / `RARITY` / `doSpin` | Ninja profile saved under `fst_prof` `{xp,spins,day}`. XP per finished tournament = squad points + 25 (x2 for a spun squad, 10 for spectating); level L needs `xpAt(L)=30L(L+1)` XP; each level gives 5 spins, a squad title 3, a new day 10 (`dailySpins`). Rarity is the tier: C Common, B Rare, A Legendary, S Mythic. Spin draft (`state.settings.draft='spin'`) rolls rarity by weight (50/30/15/5) among eligible characters not already in the squad, with a reel animation (plain `setTimeout`: UI, not the Stage). |
 
 ## Core contracts
@@ -79,6 +82,7 @@ where `mv` is `tai|nin|gen|sig|ult`, `att/tgt` are 0/1, `st` is the attacker's s
 - Coordinates: stage is 800x450, ground line `GY=372`, fighter homes x=240 (left, face +1) and x=560 (right, face -1). Fighters are drawn ground-fit; `lift` raises them; `pose.rot` rotates around the hip.
 - `state.run` is bumped on new tournament/draft so stale async playback stops. Do not call `buildArena` while a fight is playing.
 - `stage.paused` freezes the stage clock (the frame loop passes dt=0); `playSim`'s per-entry time limit (`stageGuard`) stops counting while paused.
+- A controlled fight resets `stage.skipping=false` before every turn, so "Skip animation" only skips the turn that is playing.
 
 ## Recipes
 
@@ -99,7 +103,7 @@ Targets while tuning: about half of fights contain an Ultimate, 25+ distinct cha
 ## State of the work
 
 Verified (Oct 2026):
-- `node tests/moves.js all`: 1,729 runs, 0 failures. Every version's signature, Ultimate, tai, nin and gen moves in
+- `node tests/moves.js all`: 1,911 runs (Focus included), 0 failures. Every version's signature, Ultimate, tai, nin and gen moves in
   hit/dodge/KO/crit plus Skip-mid-move, from both sides: no errors, hangs, leftover fx/props/mood/camera, fighters reset.
 - `npm run test:smoke` (8/16/32/64 brackets, one version per character, skip, replay, new draft mid-fight) passes.
 - Frames of all 91 Ultimates (hit) were looked at, plus dodge/KO/crit sheets of every Ultimate style and KO against an

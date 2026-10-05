@@ -7,6 +7,8 @@ window.T = {
   /* a log entry shaped exactly like the ones simFight() produces */
   entry(A, D, att, mv, variant) {
     const v = variant || 'hit';
+    if (mv === 'focus') return { text: '', type: 'focus', hp: [70, 70], ch: [50, 50], um: [0, 0], att, tgt: null, mv: null, name: '', dmg: 0,
+      dodge: false, crit: false, guard: false, stun: false, surv: false, ko: false, skip: false, resist: false, who: att, st: A.sigType, heal: 25, win: null };
     const name = mv === 'ult' ? ultOf(A).n : mv === 'sig' ? A.sig : mv === 'nin' ? (A.mv && A.mv[0]) || 'a Fireball Jutsu'
       : mv === 'gen' ? ((A.gj && A.gj[0]) || 'an illusion') : (A.tm && A.tm[0]) || 'a rapid combo';
     const dmg = v === 'dodge' ? 0 : v === 'ko' ? 58 : v === 'crit' ? 44 : mv === 'gen' ? 3 : 27;
