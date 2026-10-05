@@ -209,6 +209,84 @@ details.rules p{margin:8px 0}
 .ft.up{border-color:var(--gen);color:var(--gen)}
 .ft.pts{border-color:var(--flame);color:var(--flame)}
 
+/* tournament types, squad identity, story, history */
+.modes{margin:20px 0 0}
+.modes + .settings{margin-top:12px}
+.mchips{display:flex;flex-wrap:wrap;gap:6px}
+.chip[aria-checked="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.md{margin:10px 0 0;font-size:14px;color:var(--muted);max-width:80ch}
+.md b{color:var(--ink)}
+.era{margin-top:12px}
+.hbtn{justify-content:flex-end}
+.ident{display:flex;gap:14px;align-items:center;margin:12px 0 0}
+.ident:empty{display:none}
+.emb{width:64px;height:64px;flex:none;display:block}
+.idt{flex:1;min-width:0}
+.sqname{width:100%;max-width:440px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-family:"Dela Gothic One","Zen Kaku Gothic New",Impact,system-ui,sans-serif;font-size:18px;min-height:42px;text-transform:uppercase;letter-spacing:.02em}
+.idm{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:6px;font-size:13px;color:var(--muted);align-items:center}
+.idm b{color:var(--ink)}
+.idm select{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 6px;min-height:38px;margin-left:4px;color:var(--ink)}
+.capt{display:inline-block;background:var(--flame);color:var(--flame-ink);border-radius:4px;font-size:10px;line-height:15px;padding:0 4px;margin-left:5px;vertical-align:2px;font-weight:800}
+.sbrow{display:flex;gap:10px;width:min(560px,100%);pointer-events:auto}
+.startbar .sbrow .btn{min-width:0}
+.sbrow .btn.primary{flex:1}
+.btn.spect{background:var(--panel);border-color:var(--chakra);color:var(--ink)}
+.rep{flex-basis:100%;color:var(--chakra);font-weight:700}
+.mtag{font-size:13px;color:var(--muted);font-weight:700;margin-top:3px}
+.squadbar{display:flex;gap:12px;align-items:center;margin:14px 0 0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+.squadbar .emb{width:54px;height:54px}
+.squadbar .sbt{min-width:0}
+.squadbar .sn{font-family:"Dela Gothic One","Zen Kaku Gothic New",Impact,system-ui,sans-serif;font-size:clamp(17px,3.4vw,22px);text-transform:uppercase;line-height:1.15;overflow-wrap:anywhere}
+.squadbar .sm{font-size:13px;color:var(--muted)}
+.squadbar .sm b{color:var(--ink)}
+.squadbar.spec{border-color:var(--chakra)}
+.squadbar.spec .sn{color:var(--chakra)}
+.facts{font-size:13px}
+.k-upset{--kc:var(--gen)} .k-squad{--kc:var(--flame)} .k-round{--kc:var(--chakra)} .k-champ{--kc:var(--ready)} .k-streak{--kc:var(--ko)} .k-war{--kc:var(--ko)} .k-ko{--kc:var(--good)}
+.headline{display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline;width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);border-left:5px solid var(--kc);border-radius:12px;padding:10px 14px;margin:0 0 10px;animation:tick .35s ease-out;min-height:44px}
+.headline:hover{border-color:var(--kc)}
+.headline .ht,.rnote .ht{font-family:"Dela Gothic One","Zen Kaku Gothic New",Impact,system-ui,sans-serif;text-transform:uppercase;font-size:15px;color:var(--kc);letter-spacing:.02em}
+.headline .hx{flex:1;min-width:min(220px,100%)}
+.headline .hm{font-size:12px;color:var(--muted)}
+#rhead{display:flex;flex-direction:column;gap:6px;margin:0 0 10px}
+#rhead:empty{display:none}
+.rnote{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--kc);border-radius:10px;padding:8px 12px;font-size:14px}
+.rnote .ht{font-size:13px;margin-right:6px}
+.ribs{display:flex;flex-wrap:wrap;gap:4px;padding:2px 4px 4px}
+.rib{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--kc);border:1px solid var(--kc);border-radius:5px;padding:0 5px;line-height:17px}
+.mc.sq{border-color:var(--flame)}
+.mr .gone{font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ko);text-decoration:none;flex:none}
+.storyw{display:block}
+.story{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-width:760px}
+.story li{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--kc);border-radius:10px;padding:8px 12px}
+.story .sr{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.story .stt{font-family:"Dela Gothic One","Zen Kaku Gothic New",Impact,system-ui,sans-serif;text-transform:uppercase;color:var(--kc);font-size:15px;line-height:1.3}
+.hf .rec{font-size:11px;color:var(--chakra);font-weight:700}
+.hseg{margin:4px 0 14px}
+.hcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:10px}
+.hcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.hcard .hh{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted)}
+.hcard .hc{display:flex;gap:10px;align-items:center}
+.hcard .hk{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ready);font-weight:800}
+.hcard .hn{font-weight:700;font-size:18px;line-height:1.2}
+.hcard dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0;font-size:13px}
+.hcard dt{color:var(--muted)}
+.hcard dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.hstory{margin:0;padding:8px 0 0;border-top:1px solid var(--line);list-style:none;font-size:13px;display:flex;flex-direction:column;gap:3px;color:var(--muted)}
+.hstory b{color:var(--ink)}
+.sc .p .crest{margin-top:2px}
+.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.htab{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+.htab th,.htab td{padding:6px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+.htab th:first-child,.htab td:first-child{text-align:left}
+.htab th{font-size:12px;color:var(--muted);font-weight:700;position:sticky;top:0;background:var(--panel)}
+.htab tr:last-child td{border-bottom:0}
+.htab .fn{display:flex;gap:8px;align-items:center}
+.hrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 10px}
+.hrow .sl{margin:0}
+.hrow select{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:42px}
+.hclear{margin:24px 0 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:14px}
+
 @media (max-width:560px){
   .crest.lg{width:46px;height:46px;font-size:15px}
   .hud{gap:6px}
@@ -222,6 +300,12 @@ details.rules p{margin:8px 0}
   .ticker{position:static;opacity:1;padding:8px 12px;min-height:54px;background:rgba(5,10,16,.94)}
   .ticker .tt{font-size:13px}
   .champ{align-items:flex-start}
+  .hdr{flex-wrap:wrap}
+  .hf .rec{display:none}
+  .ident{align-items:flex-start}
+  .emb{width:52px;height:52px}
+  .squadbar .emb{width:44px;height:44px}
+  .sbrow .btn{padding:10px 12px}
 }
 @media (prefers-reduced-motion: reduce){
   .hp b,.cbar b,.prog b{transition:none}
@@ -1074,7 +1158,7 @@ function simFight(A,B){
   const hpLeft=Math.max(0,Math.round(f[w].hp));
   if(ko) say(`${f[w].d.short} wins by knockout.`,'end',{win:w,ko:true});
   else say(`Time. ${f[w].d.short} takes the decision, ${hpLeft} HP to ${Math.max(0,Math.round(f[1-w].hp))}.`,'end',{win:w});
-  return {winner:f[w].d,loser:f[1-w].d,ko,hpLeft,log,turns:turn,ultW:f[w].ultLanded};
+  return {winner:f[w].d,loser:f[1-w].d,ko,hpLeft,log,turns:turn,ultW:f[w].ultLanded,ultL:f[1-w].ultLanded};
 }
 
 /* =====================================================================
@@ -1161,7 +1245,7 @@ class Stage{
     o=o||{};
     this.cv=cv; this.ctx=cv.getContext('2d');
     this.theme=o.theme||0; this.mul=o.mul||1; this.calm=!!o.calm;
-    this.t=0; this.rt=0; this.skipping=false; this.running=true; this.hpDone=false; this.onHp=null;
+    this.t=0; this.rt=0; this.skipping=false; this.paused=false; this.running=true; this.hpDone=false; this.onHp=null;
     this.scars=[]; this.vigA=0; this.ultCut=null; this.efx=[]; this.timers=[]; this.tweens=[]; this.parts=[]; this.projs=[]; this.bolts=[]; this.spirals=[]; this.props=[]; this.ghosts=[]; this.pops=[]; this.banners=[];
     this.cap=null; this.cut=null; this.mood=null; this.flashA=0; this.flashC='#ffffff'; this.shakeA=0; this.shakeT=0; this.shakeD=1; this.lines=0;
     this.cam={zoom:1,x:SW/2,y:SH/2}; this.ts=1; this.stopT=0; this.excite=0; this.front=0; this.auraT=0;
@@ -1171,7 +1255,7 @@ class Stage{
     this.sc=1; this.resize();
     if(o.auto!==false&&typeof requestAnimationFrame==='function'){
       this.last=performance.now();
-      const loop=n=>{ if(!this.running) return; const dt=Math.min(50,Math.max(0,n-this.last)); this.last=n; this.update(dt); this.draw(); this.raf=requestAnimationFrame(loop); };
+      const loop=n=>{ if(!this.running) return; const dt=Math.min(50,Math.max(0,n-this.last)); this.last=n; this.update(this.paused?0:dt); this.draw(); this.raf=requestAnimationFrame(loop); };
       this.raf=requestAnimationFrame(loop);
     }
     if(typeof ResizeObserver==='function'){ this.ro=new ResizeObserver(()=>this.resize()); this.ro.observe(cv); }
@@ -3486,6 +3570,7 @@ class Announcer{
     const w=this.d[e.win], l=this.d[1-e.win], wh=e.hp[e.win], lh=e.hp[1-e.win];
     let t=e.ko?`${w.short} wins by knockout!`:`Time! ${w.short} takes the decision, ${wh} HP to ${lh}.`;
     if(w.ovr+6<=l.ovr) t+=' What an upset!';
+    if(this.st0){ const sw=this.st0[e.win], sl=this.st0[1-e.win], n=sw>0?sw+1:1; if(n>=3) t+=` That is ${n} straight tournament wins for ${w.short}.`; if(sl>=4) t+=` ${l.short}'s ${sl}-fight winning streak is over.`; }
     if(this.isMine(w)) t+=` ${w.short} advances for your squad.`; else if(this.isMine(l)) t+=` ${l.short} is out of your squad's run.`;
     return t;
   }
@@ -3498,10 +3583,12 @@ const app=document.getElementById('app');
 const reduced=typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 const state={
   screen:'draft',
-  settings:{size:16,squadSize:3,field:'random',versions:'random',seed:'random'},
-  squad:[],filter:'All',q:'',sort:'ovr',
-  rounds:[],r:0,m:0,N:16,pts:{},out:{},champion:null,
-  busy:false,speed:'normal',tab:0,copied:false,best:{},run:0,stage:null
+  settings:{mode:'classic',era:'1',size:16,squadSize:3,field:'random',versions:'random',seed:'random'},
+  squad:[],captain:null,squadName:'',filter:'All',q:'',sort:'ovr',
+  rounds:[],r:0,m:0,N:16,pts:{},out:{},champion:null,mode:'classic',era:'1',story:[],favorite:null,defending:null,saved:false,
+  spectate:false,specAll:false,paused:false,toFinal:false,keep:null,
+  busy:false,speed:'normal',tab:0,copied:false,best:{},run:0,stage:null,
+  prev:'draft',hview:'recent',hgroup:'version',hsort:'t',confirmClear:false
 };
 try{ state.best=JSON.parse(localStorage.getItem('fst_best2')||'{}')||{}; }catch(e){}
 try{ const t=localStorage.getItem('fst_theme'); if(t) document.documentElement.dataset.theme=t; }catch(e){}
@@ -3511,6 +3598,12 @@ const inSquad=id=>state.squad.includes(id);
 const gcol=f=>GC[f.tags[0]]||GC.Other;
 const initials=f=>{ const w=f.name.split(' '); return (w.length>1?w[0][0]+w[1][0]:f.name.slice(0,2)).toUpperCase(); };
 const crest=(f,size)=>{ const u=faceURL(f); return `<div class="crest ${size||''}" style="--h:${f.hue};--ring:${gcol(f)}" aria-hidden="true">${u?`<img src="${u}" alt="">`:initials(f)}</div>`; };
+const crestId=(id,size)=>{ const f=byId(id); return f?crest(f,size):`<div class="crest ${size||''}" aria-hidden="true">?</div>`; };
+const shortOf=id=>{ const f=byId(id); return f?f.short:'Unknown fighter'; };
+// a character's name across all versions ("Naruto Uzumaki"); single-version characters keep their display name ("Raikage A")
+const cname=f=>ROSTER.filter(x=>x.base===f.base).length>1?f.name:f.short;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ord=n=>n+((n%100>=11&&n%100<=13)?'th':(['th','st','nd','rd'][n%10]||'th'));
 const total=()=>state.squad.reduce((s,id)=>s+(state.pts[id]||0),0);
 const nRounds=()=>Math.log2(state.N);
 const remain=i=>state.N/Math.pow(2,i);
@@ -3519,6 +3612,8 @@ const themeFor=r=>[3,2,1,0][Math.min(3,nRounds()-1-r)];
 const curMatch=()=>state.rounds[state.r][state.m];
 const hasSquad=m=>inSquad(m.a.id)||inSquad(m.b.id);
 const aliveSquad=()=>state.squad.filter(id=>!state.out[id]);
+const doneFights=()=>state.rounds.flat().filter(m=>m.result);
+const fieldOf=()=>state.rounds.length?state.rounds[0].flatMap(m=>[m.a,m.b]):[];
 function makeRound(list){ const ms=[]; for(let i=0;i<list.length;i+=2) ms.push({a:list[i],b:list[i+1],result:null,winner:null,upset:false,award:0}); return ms; }
 const $=id=>document.getElementById(id);
 function destroyStage(){ if(state.stage){ state.stage.destroy(); state.stage=null; } }
@@ -3530,6 +3625,315 @@ function toggleTheme(){
   try{ localStorage.setItem('fst_theme',nx); }catch(e){}
 }
 
+/* ---------- tournament types ---------- */
+const ERAS=[{v:'1',t:'Part I'},{v:'S',t:'Shippuden'},{v:'W',t:'Fourth War'},{v:'N',t:'Next Generation'}];
+// which eras of the story each version belongs to: 1 Part I, S Shippuden, W Fourth Great Ninja War, N Boruto era
+const ERA={
+  hiruzen:'1',tsunade:'1SW',kakashi6:'N',naruto7:'N',danzo:'S',naruto1:'1',narutosage:'S',narutokcm:'W',narutobary:'N',narutosix:'W',
+  sasuke1:'1',sasuke2:'S',sasuke3:'WN',kakashi1:'1SW',itachi1:'1S',itachi2:'W',gaara1:'1',gaara2:'SWN',temari:'1SWN',kankuro:'1SWN',chiyo:'S',rasa:'1',
+  lee1:'1SWN',lee2:'1SW',guy1:'1SW',guy2:'W',neji:'1SW',hinata1:'1',hinata2:'SWN',sakura1:'1',sakura2:'SWN',choji1:'1S',choji2:'SWN',kiba:'1SWN',iruka:'1SWN',
+  shikamaru:'1SWN',shino:'1SWN',tenten:'1SWN',ino:'1SWN',asuma:'1S',yamato:'SWN',sai:'SWN',anko:'1SW',kurenai:'1S',konohamaru:'1SN',boruto:'N',
+  jiraiya:'1S',orochimaru:'1SWN',kabuto:'W',pain:'S',konan:'S',kisame:'1S',deidara:'S',sasori:'S',hidan:'S',kakuzu:'S',obito1:'SW',zetsu:'W',
+  hashiramaE:'W',tobiramaE:'W',hiruzenE:'W',minatoE:'W',zabuzaE:'W',hakuE:'W',kimimaroE:'W',kakuzuE:'W',deidaraE:'W',sasoriE:'W',
+  madara1:'W',madara2:'W',obito2:'W',kaguya:'W',hagoromo:'W',raikage:'SW',bee:'SWN',onoki:'SW',mei:'SW',darui:'SWN',
+  zabuza:'1',haku:'1',kimimaro:'1',suigetsu:'SWN',jugo:'SWN',mifune:'SW',hanzo:'W'
+};
+const VILLAINS=['orochimaru','kabuto','pain','konan','kisame','deidara','deidaraE','sasori','sasoriE','hidan','kakuzu','kakuzuE','obito1','obito2','zetsu',
+  'madara1','madara2','kaguya','itachi1','zabuza','zabuzaE','haku','hakuE','kimimaro','kimimaroE','danzo','hanzo','sasuke2','gaara1','yagura','suigetsu','jugo'];
+const LEADERS=['pain','hanzo','mifune'];
+const AKA_BASES=new Set(ROSTER.filter(f=>f.tags.includes('Akatsuki')).map(f=>f.base));
+const isEdo=f=>f.tags.includes('Edo');
+const MODES=[
+  {id:'classic',t:'Classic',d:'Every character can enter. The standard tournament.'},
+  {id:'legends',t:'Legends',d:'S and A-tier versions only (overall 85 and up).',ok:f=>f.ovr>=85},
+  {id:'kage',t:'Kage Clash',d:'Every Kage version, plus the leaders of the Rain and the Land of Iron.',ok:f=>f.tags.includes('Hokage')||f.tags.includes('Kage')||LEADERS.includes(f.id)},
+  {id:'akatsuki',t:'Akatsuki War',d:'Half the bracket is Akatsuki, half is the Allied Forces, and every first-round fight is Akatsuki against the Alliance.',max:16},
+  {id:'edo',t:'Edo Rising',d:'Every character with a reanimated version enters as Edo Tensei. The living fill the rest of the bracket.'},
+  {id:'underdogs',t:'Underdogs',d:'B and C-tier versions only (overall under 85).',ok:f=>f.ovr<85},
+  {id:'chaos',t:'Random Chaos',d:'Versions are rolled for everyone when the bracket is drawn, your squad included. Random field, random seeds.'},
+  {id:'canon',t:'Canon',d:'Only the versions that fit one era of the story.',ok:(f,era)=>(ERA[f.id]||'').includes(era)},
+  {id:'villains',t:'Villains',d:'Antagonists and rogue ninja only.',ok:f=>VILLAINS.includes(f.id)},
+  {id:'tai',t:'Taijutsu Masters',d:'Fighters who settle it hand to hand.',ok:f=>f.sigType==='tai'||(f.tai>=85&&f.tai>=f.nin+5)||(f.tai>=95&&f.tai>=f.nin)}
+];
+const modeById=id=>MODES.find(x=>x.id===id)||MODES[0];
+const dmode=()=>modeById(state.settings.mode);
+const tmode=()=>modeById(state.mode);
+const eligible=(f,mid,era)=>{ const M=modeById(mid===undefined?state.settings.mode:mid); return !M.ok||M.ok(f,era===undefined?state.settings.era:era); };
+const modeBases=()=>new Set(ROSTER.filter(f=>eligible(f)).map(f=>f.base)).size;
+function maxSize(){ const n=Math.min(64,modeBases()), M=dmode(); let s=8; while(s*2<=n) s*=2; return M.max?Math.min(M.max,s):s; }
+const modeLabel=(mid,era)=>{ const M=modeById(mid); return M.id==='canon'?`Canon: ${(ERAS.find(e=>e.v===era)||ERAS[0]).t}`:M.t; };
+// keep size, squad size and picks valid after the tournament type changes
+function fitSettings(){
+  const s=state.settings, mx=maxSize();
+  if(s.size>mx) s.size=mx;
+  const ok=[3,5,8].filter(x=>x<=s.size/2); if(!ok.includes(s.squadSize)) s.squadSize=ok[ok.length-1];
+  state.squad=state.squad.filter(id=>eligible(byId(id))).slice(0,s.squadSize);
+  if(!state.squad.includes(state.captain)) state.captain=state.squad[0]||null;
+}
+
+/* ---------- squad identity ---------- */
+const TEAMS=[ // name, character bases, how many of them the squad needs, emblem, colour
+  ['Team 7',['naruto','sasuke','sakura','kakashi'],3,'leaf','#7fcf8e'],
+  ['The Legendary Sannin',['jiraiya','tsunade','orochimaru'],3,'three','#a78bd8'],
+  ['The Sand Siblings',['gaara','temari','kankuro'],3,'sand','#d6b46a'],
+  ['Ino-Shika-Cho',['ino','shikamaru','choji'],3,'leaf','#7fcf8e'],
+  ['Team Guy',['guy','lee','neji','tenten'],3,'gates','#4fb36a'],
+  ['Team 8',['kurenai','hinata','kiba','shino'],3,'leaf','#7fcf8e'],
+  ['Team Hawk',['sasuke','suigetsu','jugo'],3,'uchiha','#e5604d'],
+  ['The Seven Swordsmen',['zabuza','kisame','suigetsu'],2,'blade','#7fb8d8'],
+  ['The Senju Clan',['hashirama','tobirama','tsunade'],2,'fire','#f2a33a'],
+  ['The Otsutsuki Clan',['kaguya','hagoromo'],2,'rinne','#c9b8ff'],
+  ['The Uzumaki Clan',['naruto','kushina','boruto','pain'],2,'swirl','#e5604d'],
+  ['The Hyuga Clan',['neji','hinata'],2,'eye','#c8c8e8'],
+  ['The Uchiha Dynasty',['madara','itachi','sasuke','obito','shisui'],2,'uchiha','#e5604d']
+];
+const FACTIONS=[ // name, test, emblem, colour, needs every member (else a majority)
+  ['The Reanimated',isEdo,'edo','#b8b0c8'],
+  ['The Akatsuki',f=>f.tags.includes('Akatsuki'),'cloud','#e5604d'],
+  ['The Hokage Council',f=>f.tags.includes('Hokage'),'fire','#f2a33a'],
+  ['The Kage Summit',f=>f.tags.includes('Hokage')||f.tags.includes('Kage'),'hat','#54b8e0'],
+  ['The Living Legends',f=>f.tags.includes('Legends'),'rinne','#e86bb0'],
+  ['The Hidden Sand',f=>f.tags.includes('Sand'),'sand','#d6b46a'],
+  ['The Rogue Ninja',f=>VILLAINS.includes(f.id),'slash','#93a3a8'],
+  ['The Will of Fire',f=>f.tags.includes('Leaf'),'leaf','#7fcf8e',true]
+];
+const STYLE_ADJ={nin:['Storm','Thunder','Blazing','Tempest'],tai:['Iron','Stone','Hurricane','Rampaging'],gen:['Phantom','Crimson','Silent','Midnight']};
+const STYLE_NOUN=['Fangs','Blades','Foxes','Hawks','Serpents','Crows','Tigers','Wolves','Dragons','Lotus','Shadows','Hornets'];
+const STYLE_NAME={nin:'Ninjutsu',tai:'Taijutsu',gen:'Genjutsu',spd:'Speed',sta:'Endurance',int:'Tactics'};
+const STYLE_WIN={nin:'ends with a ninjutsu blow',tai:'ends with a taijutsu blow',gen:'traps the opponent in a genjutsu or ends with one'};
+const AVG={}; ['nin','tai','gen','spd','sta','int'].forEach(k=>{ AVG[k]=ROSTER.reduce((s,f)=>s+f[k],0)/ROSTER.length; });
+function squadIdent(ids){
+  const fs=ids.map(byId).filter(Boolean), n=fs.length; if(!n) return null;
+  const bases=new Set(fs.map(f=>f.base)), mean=k=>fs.reduce((s,f)=>s+f[k],0)/n;
+  const best=(ks,vote)=>ks.slice().sort((a,b)=>(vote?vote(b)-vote(a):0)||mean(b)/AVG[b]-mean(a)/AVG[a])[0];
+  // the fighting style is what most of the squad's signature moves are; stats break ties
+  const prim=best(['nin','tai','gen'],k=>fs.filter(f=>f.sigType===k).length), sec=best(['spd','sta','int']);
+  let name=null, sym=null, col=null, top=0;
+  TEAMS.forEach(([t,bs,need,sy,c])=>{ const k=bs.filter(b=>bases.has(b)).length; if(k>=need&&k*2>=n&&k>top){ top=k; name=t; sym=sy; col=c; } });
+  if(!name) for(const [t,test,sy,c,all] of FACTIONS){ const k=fs.filter(test).length; if(all?(k===n&&n>=3):k*2>n){ name=t; sym=sy; col=c; break; } }
+  if(!name){
+    let h=7; ids.slice().sort().join(',').split('').forEach(ch=>{ h=(h*31+ch.charCodeAt(0))>>>0; });
+    name=`The ${STYLE_ADJ[prim][h%4]} ${STYLE_NOUN[(h>>>4)%STYLE_NOUN.length]}`;
+    sym={tai:'gates',gen:'tomoe',nin:'swirl'}[prim]; col={tai:'#f2a33a',gen:'#a78bd8',nin:'#54b8e0'}[prim];
+  }
+  return {name,sym,col,prim,sec,style:`${STYLE_NAME[prim]} / ${STYLE_NAME[sec]}`,rating:Math.round(fs.reduce((s,f)=>s+f.ovr,0)/n*10)/10};
+}
+const squadName=()=>{ const I=squadIdent(state.squad); return (state.squadName||'').trim()||(I?I.name:''); };
+// did this win match the squad's style? (scoring bonus)
+function styleHit(prim,m,sim){
+  const wi=sim.winner.id===m.a.id?0:1, mine=sim.log.filter(e=>e.att===wi&&e.mv&&!e.skip&&!e.dodge);
+  const kind=e=>e.mv==='sig'||e.mv==='ult'?e.st:e.mv;
+  const last=mine.slice().reverse().find(e=>e.dmg>0);
+  if(prim==='gen') return mine.some(e=>e.stun&&kind(e)==='gen')||!!(last&&kind(last)==='gen');
+  return !!(last&&kind(last)===prim);
+}
+
+/* squad emblem, drawn in code like everything else */
+const _emCache={};
+function drawEmblem(g,sym,col,R){
+  const bg=g.createRadialGradient(0,-R*.35,R*.1,0,0,R);
+  bg.addColorStop(0,mix(col,'#000000',.5)); bg.addColorStop(1,mix(col,'#000000',.84));
+  g.fillStyle=bg; g.beginPath(); g.arc(0,0,R,0,TAU); g.fill();
+  g.strokeStyle=col; g.lineWidth=R*.1; g.beginPath(); g.arc(0,0,R*.92,0,TAU); g.stroke();
+  g.strokeStyle=mix(col,'#ffffff',.45); g.lineWidth=R*.025; g.beginPath(); g.arc(0,0,R*.78,0,TAU); g.stroke();
+  const s=R*.52, ink='#f4efe2';
+  g.save(); g.strokeStyle=ink; g.fillStyle=ink; g.lineCap='round'; g.lineJoin='round';
+  const spiral=(turns,r0,r1,rot)=>{ g.beginPath(); for(let i=0;i<=60;i++){ const t=i/60, a=rot+t*turns*TAU, r=r0+(r1-r0)*t; const x=Math.cos(a)*r, y=Math.sin(a)*r; i?g.lineTo(x,y):g.moveTo(x,y); } g.stroke(); };
+  switch(sym){
+    case 'leaf': // Hidden Leaf: a spiral whose outer turn runs out into a leaf point
+      g.lineWidth=s*.15; spiral(1.3,s*.04,s*.5,.9);
+      { const tip=2.36, a0=tip+.5, a1=tip-.5+TAU, R=s*.8, T=s*1.3;
+        g.beginPath(); g.arc(0,0,R,a0,a1); g.lineTo(Math.cos(tip)*T,Math.sin(tip)*T); g.closePath(); g.stroke(); }
+      break;
+    case 'swirl':
+      g.lineWidth=s*.18; spiral(2.1,s*.04,s*.9,0); break;
+    case 'sand': // Hidden Sand: a pinched hourglass
+      g.lineWidth=s*.15;
+      g.beginPath(); g.moveTo(-s*.62,-s*.9); g.lineTo(s*.62,-s*.9); g.quadraticCurveTo(s*.58,-s*.25,s*.12,0); g.quadraticCurveTo(s*.58,s*.25,s*.62,s*.9); g.lineTo(-s*.62,s*.9); g.quadraticCurveTo(-s*.58,s*.25,-s*.12,0); g.quadraticCurveTo(-s*.58,-s*.25,-s*.62,-s*.9); g.stroke();
+      g.beginPath(); g.moveTo(-s*.9,0); g.lineTo(-s*.42,0); g.moveTo(s*.42,0); g.lineTo(s*.9,0); g.stroke();
+      break;
+    case 'cloud': drawCloud(g,0,s*.1,s*2,0); break;
+    case 'fire': drawFireKanji(g,0,s*.05,s*.95,ink); break;
+    case 'uchiha': // the clan fan
+      g.fillStyle='#d8323c'; g.beginPath(); g.arc(0,-s*.18,s*.66,Math.PI,0); g.closePath(); g.fill();
+      g.fillStyle=ink; g.beginPath(); g.arc(0,-s*.18,s*.66,0,Math.PI); g.closePath(); g.fill();
+      g.fillRect(-s*.1,s*.4,s*.2,s*.6);
+      g.strokeStyle='rgba(0,0,0,.35)'; g.lineWidth=s*.05; g.beginPath(); g.arc(0,-s*.18,s*.66,0,TAU); g.stroke();
+      break;
+    case 'rinne':
+      g.fillStyle='#b9a6e8'; g.beginPath(); g.arc(0,0,s*.95,0,TAU); g.fill();
+      g.strokeStyle='#2a2240'; g.lineWidth=s*.07; [.24,.46,.68,.9].forEach(k=>{ g.beginPath(); g.arc(0,0,s*k,0,TAU); g.stroke(); });
+      g.fillStyle='#2a2240'; g.beginPath(); g.arc(0,0,s*.1,0,TAU); g.fill();
+      break;
+    case 'tomoe': // sharingan
+      g.fillStyle='#d8323c'; g.beginPath(); g.arc(0,0,s*.95,0,TAU); g.fill();
+      g.strokeStyle='#15131c'; g.lineWidth=s*.06; g.beginPath(); g.arc(0,0,s*.58,0,TAU); g.stroke();
+      g.fillStyle='#15131c'; g.beginPath(); g.arc(0,0,s*.2,0,TAU); g.fill();
+      for(let i=0;i<3;i++){ const a=i*TAU/3-Math.PI/2, x=Math.cos(a)*s*.58, y=Math.sin(a)*s*.58; g.beginPath(); g.arc(x,y,s*.15,0,TAU); g.fill(); g.beginPath(); g.moveTo(x+Math.cos(a+1.6)*s*.15,y+Math.sin(a+1.6)*s*.15); g.quadraticCurveTo(x+Math.cos(a+1)*s*.4,y+Math.sin(a+1)*s*.4,x+Math.cos(a+2.2)*s*.36,y+Math.sin(a+2.2)*s*.36); g.lineTo(x+Math.cos(a-1.2)*s*.12,y+Math.sin(a-1.2)*s*.12); g.fill(); }
+      break;
+    case 'eye': // byakugan
+      g.lineWidth=s*.12; g.beginPath(); g.moveTo(-s*.95,0); g.quadraticCurveTo(0,-s*.95,s*.95,0); g.quadraticCurveTo(0,s*.95,-s*.95,0); g.closePath(); g.stroke();
+      g.fillStyle='#d8d4f0'; g.beginPath(); g.arc(0,0,s*.36,0,TAU); g.fill();
+      g.lineWidth=s*.06; [-1,1].forEach(d=>{ g.beginPath(); g.moveTo(d*s*.6,-s*.42); g.lineTo(d*s*.82,-s*.75); g.moveTo(d*s*.7,-s*.36); g.lineTo(d*s*1.02,-s*.55); g.stroke(); });
+      break;
+    case 'gates': // the eight gates: a burst
+      g.lineWidth=s*.14;
+      for(let i=0;i<8;i++){ const a=i*TAU/8; g.beginPath(); g.moveTo(Math.cos(a)*s*.42,Math.sin(a)*s*.42); g.lineTo(Math.cos(a)*s*.95,Math.sin(a)*s*.95); g.stroke(); }
+      g.beginPath(); g.arc(0,0,s*.26,0,TAU); g.fill();
+      break;
+    case 'blade': // executioner's blade
+      g.rotate(-.7);
+      g.beginPath(); g.moveTo(-s*.3,-s*1.05); g.lineTo(s*.3,-s*1.05); g.lineTo(s*.3,s*.35); g.lineTo(-s*.3,s*.35); g.closePath();
+      g.moveTo(s*.02+s*.13,-s*.7); g.arc(s*.02,-s*.7,s*.13,0,TAU,true); g.fill('evenodd');
+      g.fillRect(-s*.07,s*.35,s*.14,s*.62);
+      break;
+    case 'edo': // a summoning talisman
+      g.fillStyle='#ece4cf'; g.fillRect(-s*.36,-s*.95,s*.72,s*1.9);
+      g.strokeStyle='#8a1b24'; g.lineWidth=s*.08;
+      g.beginPath(); g.moveTo(-s*.2,-s*.7); g.lineTo(s*.2,-s*.7); g.moveTo(0,-s*.82); g.lineTo(0,s*.75); g.moveTo(-s*.2,-s*.25); g.lineTo(s*.2,-s*.05); g.moveTo(s*.2,-s*.25); g.lineTo(-s*.2,-s*.05); g.moveTo(-s*.22,s*.35); g.lineTo(s*.22,s*.35); g.stroke();
+      break;
+    case 'hat': // kage hat
+      g.beginPath(); g.moveTo(0,-s*.85); g.lineTo(s*.98,s*.42); g.quadraticCurveTo(0,s*.62,-s*.98,s*.42); g.closePath(); g.fill();
+      g.fillStyle='#c8323c'; g.beginPath(); g.moveTo(-s*.5,s*-.2); g.lineTo(s*.5,s*-.2); g.lineTo(s*.62,s*.02); g.lineTo(-s*.62,s*.02); g.closePath(); g.fill();
+      break;
+    case 'slash': // scratched-out headband
+      g.fillStyle='#c9ccd2'; g.beginPath(); g.roundRect?g.roundRect(-s*.9,-s*.42,s*1.8,s*.84,s*.15):g.rect(-s*.9,-s*.42,s*1.8,s*.84); g.fill();
+      g.strokeStyle='#5a5e66'; g.lineWidth=s*.08; spiral(1,s*.04,s*.24,0);
+      g.strokeStyle='#d8323c'; g.lineWidth=s*.13; g.beginPath(); g.moveTo(-s*.8,s*.32); g.lineTo(s*.8,-s*.32); g.stroke();
+      break;
+    case 'three': // the kanji for three
+      g.lineWidth=s*.2; [[-.55,.5],[0,.32],[.6,.72]].forEach(([y,w])=>{ g.beginPath(); g.moveTo(-s*w,s*y); g.lineTo(s*w,s*y); g.stroke(); });
+      break;
+  }
+  g.restore();
+}
+function emblemURL(sym,col){
+  const k=sym+col; if(_emCache[k]!==undefined) return _emCache[k];
+  try{ const c=document.createElement('canvas'); c.width=c.height=128; const g=c.getContext('2d'); g.translate(64,64); drawEmblem(g,sym,col,62); _emCache[k]=c.toDataURL('image/png'); }
+  catch(e){ _emCache[k]=''; }
+  return _emCache[k];
+}
+const emblem=(I,cls)=>{ const u=emblemURL(I.sym,I.col); return u?`<img class="emb ${cls||''}" src="${u}" alt="">`:''; };
+
+/* ---------- history: saved locally, fighter records and past tournaments ---------- */
+const newRec=()=>({w:0,l:0,ko:0,u:0,up:0,t:0,fi:0,sf:0,e:0,b:0,st:0,bs:0});
+const emptyHist=()=>({v:1,n:0,list:[],f:{},h2h:{},my:{p:0,t:0}});
+let HIST=emptyHist();
+try{ const h=JSON.parse(localStorage.getItem('fst_hist')||'null'); if(h&&h.v===1&&Array.isArray(h.list)&&h.f&&typeof h.f==='object') HIST=Object.assign(emptyHist(),h); }catch(e){}
+function saveHist(){ try{ localStorage.setItem('fst_hist',JSON.stringify(HIST)); }catch(e){} }
+function applyFight(R,m){
+  const W=m.winner.id, Lo=m.result.loser.id, rw=R[W]||(R[W]=newRec()), rl=R[Lo]||(R[Lo]=newRec());
+  rw.w++; rl.l++; if(m.result.ko) rw.ko++; if(m.result.ultW) rw.u++; if(m.result.ultL) rl.u++; if(m.upset) rw.up++;
+  rw.st=rw.st>0?rw.st+1:1; rw.bs=Math.max(rw.bs,rw.st); rl.st=rl.st<0?rl.st-1:-1;
+}
+// a fighter's record including the tournament in progress (that is only saved when it ends)
+function liveRec(id){
+  const R={}; R[id]=Object.assign(newRec(),HIST.f[id]||{});
+  if(!state.saved) doneFights().forEach(m=>{ if(m.winner.id===id||m.result.loser.id===id) applyFight(R,m); });
+  return R[id];
+}
+const h2hKey=(a,b)=>a<b?a+'|'+b:b+'|'+a;
+function h2h(a,b){ const v=HIST.h2h[h2hKey(a.base,b.base)]; if(!v) return null; return a.base<b.base?{a:v[0],b:v[1]}:{a:v[1],b:v[0]}; }
+function finishOf(id){
+  if(state.champion&&state.champion.id===id) return 1;
+  for(let r=0;r<state.rounds.length;r++) for(const m of state.rounds[r]) if(m.result&&m.result.loser.id===id) return remain(r);
+  return 0;
+}
+const finishName=n=>n===1?'Champion':n===2?'Final':n===4?'Semifinal':n===8?'Quarterfinal':n?`Round of ${n}`:'None';
+function recordTournament(){
+  if(state.saved) return;
+  const fights=doneFights(), field=fieldOf(), last=nRounds()-1, fm=state.rounds[last][0];
+  const ups=fights.filter(m=>m.upset).map(m=>({w:m.winner.id,l:m.result.loser.id,d:m.result.loser.ovr-m.winner.ovr})).sort((a,b)=>b.d-a.d);
+  const kos={}, wins={}; fights.forEach(m=>{ wins[m.winner.id]=(wins[m.winner.id]||0)+1; if(m.result.ko) kos[m.winner.id]=(kos[m.winner.id]||0)+1; });
+  const topKo=Object.keys(kos).sort((a,b)=>kos[b]-kos[a])[0];
+  const runs=field.filter(f=>(wins[f.id]||0)>=2).sort((a,b)=>a.ovr-b.ovr);
+  const prio={squad:0,upset:1,streak:2,war:3,ko:4,round:5,champ:9};
+  const heads=state.story.filter(e=>e.k!=='champ'&&e.k!=='round').sort((a,b)=>prio[a.k]-prio[b.k]).slice(0,3).map(e=>[e.t,e.x]);
+  const sum={n:HIST.n+1,at:Date.now(),N:state.N,mode:state.mode,era:state.era,champ:state.champion.id,runner:fm.result.loser.id,
+    semis:state.N>=4?state.rounds[last-1].map(m=>m.result.loser.id):[],
+    upset:ups[0]||null,ko:topKo?{id:topKo,n:kos[topKo]}:null,run:runs[0]?{id:runs[0].id,n:wins[runs[0].id]}:null,
+    ults:fights.reduce((s,m)=>s+(m.result.ultW?1:0)+(m.result.ultL?1:0),0),ups:ups.length,
+    spec:state.spectate,squad:state.squad.slice(),cap:state.captain,name:state.spectate?'':squadName(),score:state.spectate?0:total(),heads};
+  fights.forEach(m=>{
+    applyFight(HIST.f,m);
+    const k=h2hKey(m.a.base,m.b.base), v=HIST.h2h[k]||(HIST.h2h[k]=[0,0]); v[k.split('|')[0]===m.winner.base?0:1]++;
+  });
+  field.forEach(f=>{ const R=HIST.f[f.id]||(HIST.f[f.id]=newRec()), fin=finishOf(f.id); R.e++; if(fin&&(!R.b||fin<R.b)) R.b=fin; if(fin===1) R.t++; if(fin&&fin<=2) R.fi++; if(fin&&fin<=4) R.sf++; });
+  if(!state.spectate){ HIST.my.p++; if(inSquad(state.champion.id)) HIST.my.t++; }
+  HIST.n++; HIST.list.unshift(sum); if(HIST.list.length>60) HIST.list.length=60;
+  saveHist(); state.saved=true;
+}
+
+/* ---------- the tournament story ---------- */
+function tell(k,t,x,r,mi){ state.story.push({k,t,x,r,mi:mi===undefined?null:mi}); }
+function storyFight(m,r,mi,pre){
+  const w=m.winner, l=m.result.loser, aW=w.id===m.a.id;
+  const ups=doneFights().filter(x=>x.upset), wUp=ups.filter(x=>x.winner.id===w.id).length;
+  const sw=pre[aW?0:1], sl=pre[aW?1:0], nw=sw>0?sw+1:1;
+  if(m.upset){
+    const d=l.ovr-w.ovr;
+    if(ups.length===1) tell('upset','The first upset',`${w.short} (${w.ovr}) beats ${l.ovr}-rated ${l.short}.`,r,mi);
+    else if(wUp>=2) tell('upset',wUp===2?'The run continues':'Giant killer',`${w.short} has now beaten ${wUp} higher-rated opponents.`,r,mi);
+    else if(d>=20) tell('upset','Shock result',`${w.short} beats ${l.short}, who is rated ${d} points higher.`,r,mi);
+  }
+  if(l.id===state.favorite) tell('upset','The favorite falls',`${l.short}, the top-rated fighter in the bracket, is out in the ${roundName(r)}.`,r,mi);
+  if(l.id===state.defending) tell('upset','The champion is dethroned',`${w.short} knocks out defending champion ${l.short}.`,r,mi);
+  if(nw>=5&&nw%5===0) tell('streak','On fire',`${w.short} has won ${nw} tournament fights in a row.`,r,mi);
+  if(sl>=5) tell('streak','Streak snapped',`${w.short} ends ${l.short}'s ${sl}-fight winning streak.`,r,mi);
+  if(m.result.hpLeft>=100) tell('ko','Flawless',`${w.short} wins without losing a single HP.`,r,mi);
+  if(inSquad(l.id)){
+    const left=aliveSquad().length;
+    if(!left) tell('squad','Your squad has fallen',`${l.short} was your last fighter standing.`,r,mi);
+    else if(l.id===state.captain) tell('squad','Your captain falls',`${l.short} is out in the ${roundName(r)}. ${left} of your fighters ${left===1?'is':'are'} still in.`,r,mi);
+  }
+}
+function warReport(r){
+  const ak=state.mode==='akatsuki', test=ak?f=>AKA_BASES.has(f.base):isEdo;
+  const start=fieldOf(), sa=start.filter(test).length; if(!sa||sa===start.length) return;
+  const before=state.rounds[r].flatMap(m=>[m.a,m.b]), after=state.rounds[r+1]?state.rounds[r+1].flatMap(m=>[m.a,m.b]):[state.champion];
+  const pa=before.filter(test).length, pb=before.length-pa, na=after.filter(test).length, nb=after.length-na;
+  if(r===0&&after.length>1) tell('war','War report',ak?`After the first round: Akatsuki ${na}, Alliance ${nb}.`:`After the first round: ${na} reanimated, ${nb} living.`,r+1);
+  if(pa&&!na) tell('war',ak?'The Akatsuki is wiped out':'The reanimated are sealed',ak?`No Akatsuki member got past the ${roundName(r)}.`:`Every Edo Tensei fighter is out after the ${roundName(r)}.`,r+1);
+  if(pb&&!nb) tell('war',ak?'The Alliance is broken':'The living are gone',ak?'Only Akatsuki members are left.':'Only the reanimated are left.',r+1);
+}
+function storyRound(r){
+  if(state.mode==='akatsuki'||state.mode==='edo') warReport(r);
+  const nx=state.rounds[r+1]; if(!nx) return;
+  const left=nx.flatMap(m=>[m.a,m.b]);
+  if(left.length===4){
+    const by=left.slice().sort((a,b)=>a.ovr-b.ovr), lo=by[0], hi=by[3];
+    left.filter(f=>inSquad(f.id)).forEach(f=>tell('squad','Squad member, final four',`${f.short} is into the semifinals for your squad.`,r,state.rounds[r].findIndex(m=>m.winner.id===f.id)));
+    tell('round','The final four',`${left.map(f=>f.short).join(', ')}.${hi.ovr-lo.ovr>=10?` ${lo.short} (${lo.ovr}) is the lowest-rated fighter left, two wins from the title.`:''}`,r+1);
+  }
+  if(left.length===2){
+    const [a,b]=left, h=h2h(a,b); let x=`${a.short} against ${b.short} for the title.`;
+    if(h&&h.a+h.b>0) x+=h.a===h.b?` ${cname(a)} and ${cname(b)} are level at ${h.a}-${h.b} in past tournaments.`:` In past tournaments ${cname(h.a>h.b?a:b)} leads ${Math.max(h.a,h.b)}-${Math.min(h.a,h.b)}.`;
+    left.filter(f=>inSquad(f.id)).forEach(f=>tell('squad','Squad member in the final',`${f.short} is one win from the title.`,r,state.rounds[r].findIndex(m=>m.winner.id===f.id)));
+    tell('round','The final',x,r+1);
+  }
+}
+function storyChampion(){
+  const c=state.champion, r=nRounds()-1, prevT=(HIST.f[c.id]||{}).t||0, field=fieldOf();
+  const rank=field.filter(f=>f.ovr>c.ovr).length+1;
+  let x=`${c.short} wins the ${state.mode==='classic'?'':modeLabel(state.mode,state.era)+' '}tournament${prevT?`, title number ${prevT+1}`:''}.`;
+  if(rank>state.N/2) x+=` ${c.short} went in rated ${ord(rank)} of ${state.N}.`;
+  if(state.mode==='akatsuki') x+=AKA_BASES.has(c.base)?' The Akatsuki wins the war.':' The Alliance wins the war.';
+  if(inSquad(c.id)) x+=' A title for your squad.';
+  tell('champ',state.defending===c.id?'Back-to-back':'Champion',x,r,0);
+}
+// talking points before a fight, most interesting first
+function storyline(a,b){
+  const out=[], up=f=>doneFights().filter(x=>x.upset&&x.winner.id===f.id).length;
+  [a,b].forEach(f=>{ if(f.id===state.defending) out.push(`${f.short} is the defending champion.`); });
+  const h=h2h(a,b); if(h&&h.a+h.b>=2) out.push(h.a===h.b?`${cname(a)} and ${cname(b)} are level at ${h.a}-${h.b} in past tournaments.`:`${cname(h.a>h.b?a:b)} leads this matchup ${Math.max(h.a,h.b)}-${Math.min(h.a,h.b)} in past tournaments.`);
+  [a,b].forEach(f=>{ const R=liveRec(f.id); if(R.st>=3) out.push(`${f.short} has won ${R.st} tournament fights in a row.`); else if(R.st<=-4) out.push(`${f.short} has lost ${-R.st} tournament fights in a row.`); });
+  [a,b].forEach(f=>{ const n=up(f); if(n>=2) out.push(`${f.short} has already pulled off ${n} upsets in this tournament.`); });
+  [a,b].forEach(f=>{ const R=HIST.f[f.id]; if(!R||f.id===state.defending) return; if(R.t>=2) out.push(`${f.short} has won ${R.t} titles.`); else if(R.t===1) out.push(`${f.short} is a former champion.`); });
+  [a,b].forEach(f=>{ if(f.id===state.captain) out.push(`${f.short} is your captain.`); });
+  return out;
+}
+const recLine=id=>{ const R=liveRec(id); if(!R.w&&!R.l) return ''; return `Record ${R.w}-${R.l}${R.t?`, ${R.t} title${R.t>1?'s':''}`:''}`; };
+
 /* ---------- draft screen ---------- */
 function renderDraft(){
   destroyStage();
@@ -3538,14 +3942,16 @@ function renderDraft(){
     <div class="hdr">
       <div>
         <h1>Fantasy Shinobi Tournament</h1>
-        <p class="lede">Draft a squad from ${BASES.length} characters across ${ROSTER.length} versions, including every Hokage and the big power-up forms. Each character enters the bracket as one version only. Then watch the fights play out live.</p>
+        <p class="lede">Draft a squad from ${BASES.length} characters across ${ROSTER.length} versions, including every Hokage and the big power-up forms. Each character enters the bracket as one version only. Then watch the fights play out live, or just spectate.</p>
       </div>
-      <button class="btn small" data-action="theme">Light / dark</button>
+      <div class="row hbtn"><button class="btn small" data-action="history">History${HIST.n?` (${HIST.n})`:''}</button><button class="btn small" data-action="theme">Light / dark</button></div>
     </div>
+    <section class="panel modes" id="modes"></section>
     <section class="panel settings" id="settings"></section>
     <div class="tray" id="tray"></div>
+    <section class="ident" id="ident"></section>
     <div class="toolbar">
-      <input type="search" id="q" placeholder="Search fighters" aria-label="Search fighters" value="${state.q}">
+      <input type="search" id="q" placeholder="Search fighters" aria-label="Search fighters" value="${esc(state.q)}">
       <div class="chips" id="chips"></div>
       <select id="sort" aria-label="Sort fighters">
         <option value="ovr">Highest overall</option>
@@ -3554,6 +3960,7 @@ function renderDraft(){
         <option value="tai">Best taijutsu</option>
         <option value="nin">Best ninjutsu</option>
         <option value="gen">Best genjutsu</option>
+        <option value="wins">Most tournament wins</option>
       </select>
       <span class="count" id="count"></span>
     </div>
@@ -3562,167 +3969,266 @@ function renderDraft(){
       <summary>How scoring works</summary>
       <p>A win scores more the later the round: 4 in the Round of 64, 6 in the Round of 32, 10 in the Round of 16, 20 in the quarterfinals, 35 in the semifinals and 60 in the final.</p>
       <p>Bonuses: +5 for a knockout, +5 for winning with 80 or more HP left, +8 for an upset (winning against a fighter rated at least 6 points higher overall), +10 if your fighter lands an Ultimate in the win, and +25 if your fighter wins the whole tournament.</p>
+      <p>Your squad has a style, worked out from its stats. A win in that style earns +4: Ninjutsu squads when the final blow is ninjutsu, Taijutsu squads when it is taijutsu, Genjutsu squads when the winner traps the opponent in a genjutsu. Your captain's points are then multiplied by 1.5.</p>
       <p>Every fighter has an Ultimate gauge that fills as they hit and get hit. When it is full, they can unleash their strongest technique once per fight: it hits far harder than anything else and is very hard to dodge. Edo Tensei versions are reanimated: they regenerate, never tire, and crumble to ash when beaten.</p>
-      <p>Your squad can hold only one version of each character, so picking Prime Madara locks the other Madara. Every character enters the bracket as a single version: yours keep the version you drafted, and everyone else is set by the Opponent versions option.</p>
-      <p>Stats are 0 to 130. Some fighters also regenerate, guard (a chance to halve incoming damage) or have a last stand (survive one lethal hit).</p>
+      <p>Your squad can hold only one version of each character, so picking Prime Madara locks the other Madara. Every character enters the bracket as a single version: yours keep the version you drafted (except in Random Chaos), and everyone else is set by the Opponent versions option.</p>
+      <p>Stats are 0 to 130. Some fighters also regenerate, guard (a chance to halve incoming damage) or have a last stand (survive one lethal hit). Finished tournaments are saved in this browser: see History for champions and every fighter's record.</p>
     </details>
     <div class="startbar" id="startbar"></div>`;
   $('sort').value=state.sort;
-  renderSettings(); renderTray(); renderChips(); renderGrid(); renderStart();
+  renderModes(); renderSettings(); renderTray(); renderIdent(); renderChips(); renderGrid(); renderStart();
 }
 
 function seg(key,label,opts,hint){
   const s=state.settings;
   return `<div><div class="sl">${label}</div><div class="seg" role="radiogroup" aria-label="${label}">${opts.map(o=>`<button role="radio" aria-checked="${String(s[key]===o.v)}" data-action="set" data-key="${key}" data-val="${o.v}" ${o.dis?'disabled':''}>${o.t}</button>`).join('')}</div>${hint?`<div class="sh">${hint}</div>`:''}</div>`;
 }
+function renderModes(){
+  const s=state.settings, M=dmode(), vs=ROSTER.filter(f=>eligible(f)).length;
+  $('modes').innerHTML=`<div class="sl">Tournament</div>
+    <div class="mchips" role="radiogroup" aria-label="Tournament type">${MODES.map(x=>`<button class="chip" role="radio" aria-checked="${String(x.id===s.mode)}" data-action="mode" data-val="${x.id}">${x.t}</button>`).join('')}</div>
+    <p class="md"><b>${modeLabel(s.mode,s.era)}.</b> ${M.d}${M.ok?` ${vs} versions of ${modeBases()} characters can enter, so the biggest bracket is ${maxSize()}.`:''}</p>
+    ${M.id==='canon'?`<div class="era"><div class="sl">Era</div><div class="mchips" role="radiogroup" aria-label="Era">${ERAS.map(e=>`<button class="chip" role="radio" aria-checked="${String(s.era===e.v)}" data-action="set" data-key="era" data-val="${e.v}">${e.t}</button>`).join('')}</div></div>`:''}`;
+}
 function renderSettings(){
-  const s=state.settings, full=s.size>=BASES.length;
+  const s=state.settings, nb=modeBases(), full=s.size>=nb, mx=maxSize(), chaos=s.mode==='chaos';
   $('settings').innerHTML=
-    seg('size','Bracket size',[8,16,32,64].map(v=>({v,t:v})),`${s.size} characters, ${Math.log2(s.size)} rounds`)+
+    seg('size','Bracket size',[8,16,32,64].map(v=>({v,t:v,dis:v>mx})),`${s.size} characters, ${Math.log2(s.size)} rounds`)+
     seg('squadSize','Squad size',[3,5,8].map(v=>({v,t:v,dis:v>s.size/2})))+
-    seg('field','Who enters',[{v:'random',t:'Random',dis:full},{v:'strong',t:'Strongest',dis:full}],full?`All ${BASES.length} characters enter.`:'Your squad always enters.')+
-    seg('versions','Opponent versions',[{v:'random',t:'Random'},{v:'strongest',t:'Strongest'}],'One version per character. Your picks keep theirs.')+
-    seg('seed','Seeding',[{v:'random',t:'Random'},{v:'rating',t:'By rating'}],s.seed==='rating'?'Top seeds meet late.':'Matchups are shuffled.');
+    seg('field','Who enters',[{v:'random',t:'Random',dis:full||chaos},{v:'strong',t:'Strongest',dis:full||chaos}],full?`All ${nb} characters enter.`:chaos?'Chaos picks the field.':s.mode==='edo'?'Edo Tensei versions enter first.':'Your squad always enters.')+
+    seg('versions','Opponent versions',[{v:'random',t:'Random',dis:chaos},{v:'strongest',t:'Strongest',dis:chaos}],chaos?'Every version is rolled, yours too.':'One version per character. Your picks keep theirs.')+
+    seg('seed','Seeding',[{v:'random',t:'Random',dis:chaos},{v:'rating',t:'By rating',dis:chaos}],chaos?'Matchups are shuffled.':s.seed==='rating'?'Top seeds meet late.':'Matchups are shuffled.');
 }
 
 function renderTray(){
   const n=state.settings.squadSize, slots=[];
   for(let i=0;i<n;i++){
     const id=state.squad[i];
-    if(id){ const f=byId(id); slots.push(`<button class="slot filled" data-action="toggle" data-id="${id}" aria-label="Remove ${f.short} from squad">${crest(f,'sm')}<span>${f.short}</span><span class="x">×</span></button>`); }
+    if(id){ const f=byId(id), cap=id===state.captain; slots.push(`<button class="slot filled" data-action="toggle" data-id="${id}" aria-label="Remove ${f.short} from squad${cap?' (captain)':''}">${crest(f,'sm')}<span>${f.short}</span>${cap?'<span class="capt" title="Captain">C</span>':''}<span class="x">×</span></button>`); }
     else slots.push(`<span class="slot empty">Open slot</span>`);
   }
   $('tray').innerHTML=`<div class="slots">${slots.join('')}</div>
     <div class="row"><button class="btn small" data-action="random">Random squad</button><button class="btn small" data-action="clear">Clear</button></div>`;
+}
+function renderIdent(){
+  const el=$('ident'); if(!el) return;
+  const I=squadIdent(state.squad);
+  if(!I){ el.className='ident'; el.innerHTML=''; return; }
+  el.className='panel ident';
+  el.innerHTML=`${emblem(I)}
+    <div class="idt">
+      <input id="sqname" class="sqname" maxlength="32" value="${esc((state.squadName||'').trim()?state.squadName:I.name)}" aria-label="Squad name" spellcheck="false">
+      <div class="idm"><span>Style <b>${I.style}</b></span><span>Squad rating <b>${I.rating.toFixed(1)}</b></span>
+        <label>Captain <select id="cap">${state.squad.map(id=>`<option value="${id}" ${id===state.captain?'selected':''}>${byId(id).short}</option>`).join('')}</select></label></div>
+      <div class="sh">Captain scores 1.5x. Style bonus +4 when a win ${STYLE_WIN[I.prim]}.${(state.squadName||'').trim()?'':' The name follows your picks until you type your own.'}</div>
+    </div>`;
 }
 function renderChips(){
   $('chips').innerHTML=FILTERS.map(t=>`<button class="chip" data-action="filter" data-val="${t}" aria-pressed="${String(state.filter===t)}">${t==='All'?'All':t==='Hokage'?'Hokages':t==='Kage'?'Other Kage':t==='Edo'?'Edo Tensei':t}</button>`).join('');
 }
 function listFiltered(){
   const q=state.q.trim().toLowerCase();
-  let list=ROSTER.filter(f=>(state.filter==='All'||f.tags.includes(state.filter))&&(!q||(f.short+' '+f.name+' '+f.form+' '+f.tags.join(' ')).toLowerCase().includes(q)));
-  const k=state.sort;
-  return list.slice().sort((a,b)=>k==='name'?a.short.localeCompare(b.short):(b[k]-a[k])||a.short.localeCompare(b.short));
+  let list=ROSTER.filter(f=>eligible(f)&&(state.filter==='All'||f.tags.includes(state.filter))&&(!q||(f.short+' '+f.name+' '+f.form+' '+f.tags.join(' ')).toLowerCase().includes(q)));
+  const k=state.sort, wins=f=>(HIST.f[f.id]||{}).w||0;
+  return list.slice().sort((a,b)=>k==='name'?a.short.localeCompare(b.short):k==='wins'?(wins(b)-wins(a))||(b.ovr-a.ovr):(b[k]-a[k])||a.short.localeCompare(b.short));
 }
 function lockedBy(f){ return state.squad.map(byId).find(x=>x.base===f.base&&x.id!==f.id); }
+function repTag(f){
+  const R=HIST.f[f.id]; if(!R||!(R.w+R.l)) return '';
+  return `<span class="rep">Record ${R.w}-${R.l}${R.t?`, ${R.t} title${R.t>1?'s':''}`:R.b?`, best: ${finishName(R.b).toLowerCase()}`:''}</span>`;
+}
 function cardHTML(f){
   const sel=inSquad(f.id), full=state.squad.length>=state.settings.squadSize&&!sel, lock=lockedBy(f);
   const tags=[]; if(f.tags.includes('Edo')) tags.push('Edo Tensei'); if(f.regen) tags.push('Regen'); if(f.guard) tags.push('Guard'); if(f.last) tags.push('Last stand');
   return `<button class="card ${sel?'sel':''} ${full?'dim':''} ${lock?'locked':''}" data-action="toggle" data-id="${f.id}" aria-pressed="${String(sel)}" ${lock?'disabled':''}>
     <div class="ch">${crest(f)}<div class="ct"><div class="cname">${f.short}</div><div class="cform">${f.form}</div></div><div class="tier ${f.tier}" title="Overall ${f.ovr}">${f.tier}</div></div>
     <div class="cs">${STATS.map(([k,l])=>`<div class="st"><span>${l}</span><i><b style="width:${Math.min(100,f[k]/130*100)}%"></b></i><u>${f[k]}</u></div>`).join('')}</div>
-    <div class="cf"><span class="sig">${f.sig}</span><span class="ultn">Ultimate: ${ultOf(f).n}</span><span>Overall ${f.ovr}</span>${tags.map(t=>`<span class="tg">${t}</span>`).join('')}${lock?`<span class="lk">Locked: ${lock.short} is on your squad</span>`:''}</div>
+    <div class="cf"><span class="sig">${f.sig}</span><span class="ultn">Ultimate: ${ultOf(f).n}</span>${repTag(f)}<span>Overall ${f.ovr}</span>${tags.map(t=>`<span class="tg">${t}</span>`).join('')}${lock?`<span class="lk">Locked: ${lock.short} is on your squad</span>`:''}</div>
   </button>`;
 }
 function renderGrid(){
   const list=listFiltered();
   const fams=new Map();
   list.forEach(f=>{ if(!fams.has(f.base)) fams.set(f.base,[]); fams.get(f.base).push(f); });
-  const totals={}; ROSTER.forEach(f=>{ totals[f.base]=(totals[f.base]||0)+1; });
+  const totals={}; ROSTER.forEach(f=>{ if(eligible(f)) totals[f.base]=(totals[f.base]||0)+1; });
   const multi=[], single=[];
   fams.forEach((vs,base)=>{ (totals[base]>1?multi:single).push({base,vs}); });
   let html='';
   multi.forEach(({base,vs})=>{
-    const all=ROSTER.filter(f=>f.base===base);
+    const all=ROSTER.filter(f=>f.base===base&&eligible(f));
     const ordered=state.sort==='name'?vs.slice():vs.slice().sort((a,b)=>a.ovr-b.ovr);
     const picked=state.squad.map(byId).find(x=>x.base===base);
     html+=`<section class="fam"><div class="famh"><h3>${all[0].name}</h3><span class="famn">${vs.length===all.length?`${all.length} versions, pick one`:`${vs.length} of ${all.length} versions shown, pick one`}</span>${picked?`<span class="famp">Picked: ${picked.short}</span>`:''}</div><div class="grid">${ordered.map(cardHTML).join('')}</div></section>`;
   });
   if(single.length){
     const sf=single.flatMap(x=>x.vs);
-    html+=`<section class="fam"><div class="famh"><h3>${multi.length?'Single-form fighters':'Fighters'}</h3><span class="famn">${sf.length} fighters</span></div><div class="grid">${sf.map(cardHTML).join('')}</div></section>`;
+    html+=`<section class="fam"><div class="famh"><h3>${multi.length?'Single-version fighters':'Fighters'}</h3><span class="famn">${sf.length} fighters</span></div><div class="grid">${sf.map(cardHTML).join('')}</div></section>`;
   }
   $('grid').innerHTML=html||'<p class="lede">No fighters match that search.</p>';
-  $('count').textContent=`${list.length} of ${ROSTER.length} versions`;
+  const el=ROSTER.filter(f=>eligible(f)).length;
+  $('count').textContent=`${list.length} of ${el} versions`;
 }
 function renderStart(){
   const need=state.settings.squadSize-state.squad.length;
-  $('startbar').innerHTML=`<button class="btn primary" data-action="start" ${need===0?'':'disabled'}>${need===0?`Start ${state.settings.size}-fighter tournament`:`Draft ${need} more to start`}</button>`;
+  $('startbar').innerHTML=`<div class="sbrow"><button class="btn primary" data-action="start" ${need===0?'':'disabled'}>${need===0?`Start ${state.settings.size}-fighter tournament`:`Draft ${need} more to start`}</button><button class="btn spect" data-action="spectate" title="No squad, no scoring: watch the tournament run by itself">Spectate</button></div>`;
 }
+function draftChanged(){ if(!state.squad.includes(state.captain)) state.captain=state.squad[0]||null; renderTray(); renderIdent(); renderGrid(); renderStart(); }
 
 /* ---------- tournament setup: one version per character ---------- */
+function pickVersion(vs){
+  const s=state.settings, M=tmode(), top=a=>a.slice().sort((x,y)=>y.ovr-x.ovr)[0];
+  if(M.id==='chaos') return pick(vs);
+  if(M.id==='edo'){ const e=vs.filter(isEdo); if(e.length) return s.versions==='strongest'?top(e):pick(e); }
+  return s.versions==='strongest'?top(vs):pick(vs);
+}
 function buildField(){
-  const s=state.settings, squadObjs=state.squad.map(byId), squadBases=new Set(squadObjs.map(f=>f.base));
+  const s=state.settings, M=tmode(), N=state.N, byOvr=(a,b)=>b.ovr-a.ovr;
+  const squadObjs=state.squad.map(byId), squadBases=new Set(squadObjs.map(f=>f.base));
   const chosen=[];
   BASES.forEach(base=>{
     if(squadBases.has(base)) return;
-    const vs=ROSTER.filter(f=>f.base===base);
-    chosen.push(s.versions==='strongest'?vs.slice().sort((a,b)=>b.ovr-a.ovr)[0]:pick(vs));
+    const vs=ROSTER.filter(f=>f.base===base&&eligible(f,state.mode,state.era));
+    if(vs.length) chosen.push(pickVersion(vs));
   });
-  const need=s.size-squadObjs.length;
+  const take=(arr,n)=>{ if(n<=0) return []; if(n>=arr.length) return arr.slice(); return s.field==='strong'&&M.id!=='chaos'?arr.slice().sort(byOvr).slice(0,n):shuffle(arr).slice(0,n); };
+  if(M.id==='akatsuki'){
+    // two halves, and every first-round fight is Akatsuki against the Alliance
+    const half=N/2, aka=f=>AKA_BASES.has(f.base);
+    const A=squadObjs.filter(aka).concat(take(chosen.filter(aka),half-squadObjs.filter(aka).length));
+    const L=squadObjs.filter(f=>!aka(f)).concat(take(chosen.filter(f=>!aka(f)),half-squadObjs.filter(f=>!aka(f)).length));
+    let pairs;
+    if(s.seed==='rating'){ const As=A.slice().sort(byOvr), Ls=L.slice().sort(byOvr), ps=As.map((f,i)=>[f,Ls[half-1-i]]); pairs=seedOrder(half).map(n=>ps[n-1]); }
+    else { const As=shuffle(A), Ls=shuffle(L); pairs=As.map((f,i)=>[f,Ls[i]]); }
+    return pairs.flatMap(p=>Math.random()<.5?p:[p[1],p[0]]);
+  }
+  const need=N-squadObjs.length;
   let others;
-  if(s.size>=BASES.length) others=chosen;
-  else if(s.field==='strong') others=chosen.slice().sort((a,b)=>b.ovr-a.ovr).slice(0,need);
-  else others=shuffle(chosen).slice(0,need);
+  if(M.id==='edo'){ const e=take(chosen.filter(isEdo),need); others=e.concat(take(chosen.filter(f=>!isEdo(f)),need-e.length)); }
+  else others=take(chosen,need);
   let list=squadObjs.concat(others);
-  if(s.seed==='rating'){ const sorted=list.slice().sort((a,b)=>b.ovr-a.ovr); list=seedOrder(list.length).map(n=>sorted[n-1]); }
+  if(s.seed==='rating'&&M.id!=='chaos'){ const sorted=list.slice().sort(byOvr); list=seedOrder(list.length).map(n=>sorted[n-1]); }
   else list=shuffle(list);
   return list;
 }
-function startTournament(){
-  state.N=state.settings.size;
+function startTournament(spec){
+  if(spec!==undefined){
+    if(spec&&!state.spectate) state.keep={squad:state.squad.slice(),captain:state.captain};
+    state.spectate=!!spec;
+  }
+  if(state.spectate){ state.squad=[]; state.captain=null; }
+  const s=state.settings;
+  state.mode=s.mode; state.era=s.era; state.N=s.size;
+  if(state.mode==='chaos'){
+    // your characters stay, their versions are rolled
+    const re={}; state.squad=state.squad.map(id=>{ const n=pick(ROSTER.filter(f=>f.base===byId(id).base)).id; re[id]=n; return n; });
+    if(state.captain) state.captain=re[state.captain]||state.captain;
+  }
+  state.run++; state.r=0; state.m=0; state.tab=0; state.champion=null; state.busy=false; state.copied=false; state.paused=false; state.toFinal=false; state.saved=false;
+  state.pts={}; state.out={}; state.story=[];
   state.rounds=[makeRound(buildField())];
-  state.run++; state.r=0; state.m=0; state.tab=0; state.champion=null; state.busy=false; state.copied=false;
-  state.pts={}; state.out={};
   state.squad.forEach(id=>state.pts[id]=0);
+  const field=fieldOf();
+  state.favorite=field.slice().sort((a,b)=>b.ovr-a.ovr)[0].id;
+  const last=HIST.list.find(t=>t.mode===state.mode&&(t.mode!=='canon'||t.era===state.era));
+  state.defending=last&&field.some(f=>f.id===last.champ)?last.champ:null;
+  if(state.defending) tell('round','The champion returns',`${shortOf(state.defending)} won the last ${modeLabel(state.mode,state.era)} tournament and is back to defend the title.`,0);
+  if(state.mode==='akatsuki') tell('war','The war begins',`${state.N/2} Akatsuki members against ${state.N/2} fighters of the Allied Forces.`,0);
+  if(state.mode==='edo'){ const e=field.filter(isEdo).length; if(e) tell('war','The dead walk',`${e} reanimated fighter${e>1?'s':''} in a ${state.N}-fighter bracket.`,0); }
   renderTournament();
+  if(state.spectate) spectateLoop();
 }
 
 function renderTournament(){
   state.screen='tournament';
   app.innerHTML=`
     <div class="spread">
-      <h2>Fantasy Shinobi Tournament</h2>
-      <div class="row"><button class="btn small" data-action="theme">Light / dark</button><button class="btn small" data-action="newdraft">New draft</button></div>
+      <div><h2>Fantasy Shinobi Tournament</h2><div class="mtag">${modeLabel(state.mode,state.era)}, ${state.N} fighters${state.spectate?', spectator mode':''}</div></div>
+      <div class="row" id="topbtns"></div>
     </div>
+    <div id="squadbar"></div>
     <div class="score" id="score"></div>
     <div id="champ"></div>
+    <div id="headline"></div>
     <div class="phase" id="phase"></div>
     <div class="arena" id="arena"></div>
     <div id="controls"></div>
     <div class="tabs" id="tabs" role="tablist" aria-label="Rounds"></div>
+    <div id="rhead"></div>
     <div class="mgrid" id="mgrid"></div>`;
   refreshAll();
-  if(!state.champion) showUpcoming();
+  if(!state.champion) showUpcoming(); else showFinal(state.rounds[nRounds()-1][0],nRounds()-1);
 }
-function refreshAll(){ renderScore(); renderChamp(); renderPhase(); renderControls(); renderTabs(); renderMatches(); }
-
+function refreshAll(){ renderTop(); renderSquadBar(); renderScore(); renderChamp(); renderHeadline(); renderPhase(); renderControls(); renderTabs(); renderMatches(); }
+function renderTop(){
+  const el=$('topbtns'); if(!el) return;
+  const hist=!state.busy&&(!state.spectate||state.champion);
+  el.innerHTML=`<button class="btn small" data-action="theme">Light / dark</button>${hist?'<button class="btn small" data-action="history">History</button>':''}<button class="btn small" data-action="newdraft">${state.spectate?'Back to draft':'New draft'}</button>`;
+}
+function renderSquadBar(){
+  const el=$('squadbar'); if(!el) return;
+  if(state.spectate){ el.innerHTML=`<div class="squadbar spec"><div><div class="sn">Spectator mode</div><div class="sm">No squad, no scoring. The tournament runs by itself and the camera picks the fights worth watching.</div></div></div>`; return; }
+  const I=squadIdent(state.squad); if(!I){ el.innerHTML=''; return; }
+  el.innerHTML=`<div class="squadbar">${emblem(I)}<div class="sbt"><div class="sn">${esc(squadName())}</div><div class="sm">${state.squad.map(id=>shortOf(id)).join(', ')}</div><div class="sm">Style <b>${I.style}</b>, rating <b>${I.rating.toFixed(1)}</b>${state.captain?`, captain <b>${shortOf(state.captain)}</b>`:''}</div></div></div>`;
+}
+const bestKey=()=>state.mode==='classic'?String(state.N):`${state.mode==='canon'?'canon'+state.era:state.mode}-${state.N}`;
 function renderScore(){
-  $('score').innerHTML=state.squad.map(id=>{
+  const el=$('score'); if(!el) return;
+  if(state.spectate){ el.innerHTML=''; el.style.display='none'; return; }
+  el.style.display='';
+  el.innerHTML=state.squad.map(id=>{
     const f=byId(id);
     let status='Still in';
     if(state.champion&&state.champion.id===id) status='Champion';
     else if(state.out[id]) status=`Out in the ${state.out[id]}`;
-    return `<div class="sc ${state.out[id]?'out':''}"><div class="n">${f.short}</div><div class="s">${status}</div><div class="p">${state.pts[id]||0}</div></div>`;
-  }).join('')+`<div class="sc total"><div class="n">Squad total</div><div class="s">Best at ${state.N}: ${state.best[state.N]||0}</div><div class="p">${total()}</div></div>`;
+    return `<div class="sc ${state.out[id]?'out':''}"><div class="n">${f.short}${id===state.captain?'<span class="capt" title="Captain, 1.5x points">C</span>':''}</div><div class="s">${status}</div><div class="p">${state.pts[id]||0}</div></div>`;
+  }).join('')+`<div class="sc total"><div class="n">Squad total</div><div class="s">Best here: ${state.best[bestKey()]||0}</div><div class="p">${total()}</div></div>`;
 }
 function recapText(){
-  const lines=[`Fantasy Shinobi Tournament recap (${state.N} fighters)`,''];
+  const lines=[`Fantasy Shinobi Tournament recap: ${modeLabel(state.mode,state.era)}, ${state.N} fighters`,''];
   state.rounds.forEach((rd,i)=>{
     lines.push(roundName(i)+':');
     rd.forEach(m=>{ if(m.result) lines.push(`  ${m.winner.short} beat ${m.result.loser.short} (${m.result.ko?'KO':'decision'}, ${m.result.hpLeft} HP left${m.upset?', upset':''})`); });
   });
+  const tales=state.story.filter(e=>e.k!=='round');
+  if(tales.length){ lines.push('','The story:'); tales.forEach(e=>lines.push(`  ${e.t}: ${e.x}`)); }
   lines.push('');
   if(state.champion) lines.push('Champion: '+state.champion.short);
-  lines.push('My squad: '+state.squad.map(id=>`${byId(id).short} ${state.pts[id]||0}`).join(', '));
-  lines.push('Squad total: '+total());
+  if(!state.spectate){
+    lines.push(`My squad, ${squadName()}: `+state.squad.map(id=>`${byId(id).short}${id===state.captain?' (captain)':''} ${state.pts[id]||0}`).join(', '));
+    lines.push('Squad total: '+total());
+  }
   return lines.join('\n');
 }
 function renderChamp(){
   const el=$('champ'); if(!el) return;
   if(!state.champion){ el.innerHTML=''; return; }
-  const c=state.champion, mine=inSquad(c.id), t=total(), best=state.best[state.N]||0;
+  const c=state.champion, mine=inSquad(c.id), t=total(), best=state.best[bestKey()]||0, T=state.saved?HIST.list[0]:null;
+  const facts=[];
+  if(T){
+    if(T.upset) facts.push(`Biggest upset: ${shortOf(T.upset.w)} over ${shortOf(T.upset.l)} (+${T.upset.d})`);
+    if(T.run&&T.run.id!==c.id) facts.push(`Underdog run: ${shortOf(T.run.id)}, ${T.run.n} wins`);
+    if(T.ko) facts.push(`Most KOs: ${shortOf(T.ko.id)}, ${T.ko.n}`);
+    facts.push(`Ultimates landed: ${T.ults}`, `Upsets: ${T.ups}`);
+  }
   el.innerHTML=`<div class="champ">
     ${crest(c,'lg')}
     <div class="txt">
       <h2>${c.short} wins the tournament</h2>
-      <p>${mine?'Your fighter took the title. ':''}Your squad finished with ${t} points${t>0&&t>=best?', a new best for this bracket size.':'.'}</p>
+      <p>${state.spectate?`Tournament #${T?T.n:HIST.n} is in the books.`:`${mine?'Your fighter took the title. ':''}${esc(squadName())} finished with ${t} points${t>0&&t>=best?', a new best for this bracket.':'.'}`}</p>
+      ${facts.length?`<p class="facts">${facts.join(' · ')}</p>`:''}
       <div class="row">
-        <button class="btn primary" data-action="again">Play again with the same squad</button>
+        <button class="btn primary" data-action="again">${state.spectate?'Run another tournament':'Play again with the same squad'}</button>
         <button class="btn" data-action="copy">${state.copied?'Copied':'Copy recap'}</button>
+        <button class="btn" data-action="history">History</button>
       </div>
     </div>
   </div>`;
+}
+const KIND_RANK={champ:0,squad:1,upset:2,war:3,streak:4,ko:5,round:6};
+function renderHeadline(){
+  const el=$('headline'); if(!el) return;
+  const e=state.story[state.story.length-1];
+  el.innerHTML=e?`<button class="headline k-${e.k}" data-action="tab" data-val="story" aria-label="${esc(e.t)}: ${esc(e.x)}. Open the story so far."><span class="ht">${esc(e.t)}</span><span class="hx">${esc(e.x)}</span><span class="hm">Story so far: ${state.story.length}</span></button>`:'';
 }
 function renderPhase(){
   const el=$('phase'); if(!el) return;
@@ -3730,9 +4236,28 @@ function renderPhase(){
   const rd=state.rounds[state.r], done=state.m;
   el.innerHTML=`<span class="pn">${roundName(state.r)}</span><span class="pc">${done} of ${rd.length} fights done</span><div class="prog" aria-hidden="true"><b style="width:${done/rd.length*100}%"></b></div>`;
 }
+const speedSeg=()=>`<div class="seg" role="radiogroup" aria-label="Playback speed">
+      <button role="radio" aria-checked="${String(state.speed==='normal')}" data-action="speed" data-val="normal">Normal</button>
+      <button role="radio" aria-checked="${String(state.speed==='fast')}" data-action="speed" data-val="fast">Fast</button>
+    </div>`;
 function renderControls(){
   const el=$('controls'); if(!el) return;
+  renderTop();
   if(state.champion){ el.innerHTML=`<div class="row"><button class="btn small" data-action="sound">Sound: ${Sfx.on?'on':'off'}</button></div>`; return; }
+  if(state.spectate){
+    el.innerHTML=`<div class="row">
+      <button class="btn primary" data-action="pause">${state.paused?'Resume':'Pause'}</button>
+      ${state.busy?'<button class="btn" data-action="skip">Skip animation</button>':''}
+      <div class="seg" role="radiogroup" aria-label="Which fights to show">
+        <button role="radio" aria-checked="${String(!state.specAll)}" data-action="specall" data-val="0">Highlights</button>
+        <button role="radio" aria-checked="${String(state.specAll)}" data-action="specall" data-val="1">Every fight</button>
+      </div>
+      ${speedSeg()}
+      <button class="btn small" data-action="sound">Sound: ${Sfx.on?'on':'off'}</button>
+      ${state.r<nRounds()-1&&!state.toFinal?'<button class="btn" data-action="tofinal">Skip to the final</button>':''}
+    </div><div class="hint">${state.paused?'Paused.':state.toFinal?'Deciding everything up to the final off camera.':state.specAll?'Every fight plays out on camera.':'The camera shows the close fights, the upsets, the story fights and everything from the quarterfinals on. The rest are decided off camera.'}</div>`;
+    return;
+  }
   const alive=aliveSquad().length, mineNow=hasSquad(curMatch());
   const skipSquad=alive>0&&!mineNow;
   el.innerHTML=`<div class="row">
@@ -3740,12 +4265,9 @@ function renderControls(){
     ${skipSquad?`<button class="btn" data-action="simsquad" ${state.busy?'disabled':''}>Skip to my next fight</button>`:''}
     <button class="btn" data-action="simround" ${state.busy?'disabled':''}>Sim this round</button>
     <button class="btn" data-action="simall" ${state.busy?'disabled':''}>Sim to the end</button>
-    <div class="seg" role="radiogroup" aria-label="Playback speed">
-      <button role="radio" aria-checked="${String(state.speed==='normal')}" data-action="speed" data-val="normal">Normal</button>
-      <button role="radio" aria-checked="${String(state.speed==='fast')}" data-action="speed" data-val="fast">Fast</button>
-    </div>
+    ${speedSeg()}
     <button class="btn small" data-action="sound">Sound: ${Sfx.on?'on':'off'}</button>
-    ${state.busy?'<button class="btn" data-action="skip">Skip animation</button>':''}
+    ${state.busy?`<button class="btn" data-action="pause">${state.paused?'Resume':'Pause'}</button><button class="btn" data-action="skip">Skip animation</button>`:''}
   </div>${alive===0?'<div class="hint">Your whole squad is eliminated. You can still watch the rest of the bracket.</div>':''}`;
 }
 function renderTabs(){
@@ -3753,26 +4275,37 @@ function renderTabs(){
   el.innerHTML=Array.from({length:nRounds()},(_,i)=>{
     const rd=state.rounds[i], exists=!!rd, done=exists?rd.filter(m=>m.result).length:0;
     return `<button class="tab" role="tab" data-action="tab" data-val="${i}" aria-selected="${String(state.tab===i)}" ${exists?'':'disabled'}>${roundName(i)}<small>${exists?`${done}/${rd.length}`:''}</small></button>`;
-  }).join('');
+  }).join('')+`<button class="tab" role="tab" data-action="tab" data-val="story" aria-selected="${String(state.tab==='story')}">Story<small>${state.story.length}</small></button>`;
 }
 function renderMatches(){
-  const el=$('mgrid'); if(!el) return;
-  const rd=state.rounds[state.tab]; if(!rd){ el.innerHTML=''; return; }
+  const el=$('mgrid'), rh=$('rhead'); if(!el) return;
+  if(state.tab==='story'){
+    if(rh) rh.innerHTML='';
+    el.className='storyw';
+    el.innerHTML=state.story.length?`<ol class="story">${state.story.map(e=>`<li class="k-${e.k}"><div class="sr">${e.r<state.rounds.length?roundName(e.r):''}</div><div class="stt">${esc(e.t)}</div><div>${esc(e.x)}</div></li>`).join('')}</ol>`:'<p class="lede">Nothing has happened yet. Upsets, streaks, your squad\'s fate and the final four will show up here.</p>';
+    return;
+  }
+  el.className='mgrid';
+  const rd=state.rounds[state.tab]; if(!rd){ el.innerHTML=''; if(rh) rh.innerHTML=''; return; }
+  if(rh) rh.innerHTML=state.story.filter(e=>e.r===state.tab&&e.mi===null).map(e=>`<div class="rnote k-${e.k}"><span class="ht">${esc(e.t)}</span> ${esc(e.x)}</div>`).join('');
   el.innerHTML=rd.map((m,mi)=>{
     const done=!!m.result, now=!state.champion&&state.tab===state.r&&mi===state.m;
-    const row=f=>{ const w=done&&m.winner.id===f.id, l=done&&!w; return `<span class="mr ${w?'w':''} ${l?'l':''} ${inSquad(f.id)?'mine':''}"><i class="dot" style="background:${gcol(f)}"></i><span class="mn">${f.short}</span><span class="mo">${f.ovr}</span></span>`; };
+    const row=f=>{ const w=done&&m.winner.id===f.id, l=done&&!w; return `<span class="mr ${w?'w':''} ${l?'l':''} ${inSquad(f.id)?'mine':''}"><i class="dot" style="background:${gcol(f)}"></i><span class="mn">${f.short}</span>${l&&inSquad(f.id)?'<span class="gone">Out</span>':''}<span class="mo">${f.ovr}</span></span>`; };
+    const evs=state.story.filter(e=>e.r===state.tab&&e.mi===mi);
+    let ribs=evs.map(e=>`<span class="rib k-${e.k}">${esc(e.t)}</span>`).join('');
+    if(done&&m.upset&&!evs.some(e=>e.k==='upset')) ribs=`<span class="rib k-upset">Upset</span>`+ribs;
     let foot='';
-    if(done) foot=`<span class="ft ${m.result.ko?'ko':''}">${m.result.ko?'KO':'Decision'}</span><span class="ft">${m.result.hpLeft} HP left</span>${m.upset?'<span class="ft up">Upset</span>':''}${m.result.ultW?'<span class="ft ult">Ultimate</span>':''}${m.award?`<span class="ft pts">+${m.award} pts</span>`:''}`;
+    if(done) foot=`<span class="ft ${m.result.ko?'ko':''}">${m.result.ko?'KO':'Decision'}</span><span class="ft">${m.result.hpLeft} HP left</span>${m.result.ultW?'<span class="ft ult">Ultimate</span>':''}${m.award?`<span class="ft pts">+${m.award} pts${m.capB?', captain':''}${m.styleB?', style':''}</span>`:''}`;
     else if(now) foot='<span class="ft pts">Up next</span>';
-    return `<button class="mc ${done?'done':''} ${now?'now':''}" data-action="view" data-r="${state.tab}" data-m="${mi}" ${done?'':'disabled'} ${done?'aria-label="Replay this fight"':''}>${row(m.a)}${row(m.b)}<div class="mf">${foot}</div></button>`;
+    return `<button class="mc ${done?'done':''} ${now?'now':''} ${evs.some(e=>e.k==='squad')?'sq':''}" data-action="view" data-r="${state.tab}" data-m="${mi}" ${done?'':'disabled'} ${done?'aria-label="Replay this fight"':''}>${ribs?`<div class="ribs">${ribs}</div>`:''}${row(m.a)}${row(m.b)}<div class="mf">${foot}</div></button>`;
   }).join('');
 }
 
 /* ---------- arena ---------- */
 function hudSide(f,s){
-  const r=s==='B'?' r':'';
+  const r=s==='B'?' r':'', rec=recLine(f.id);
   return `<div class="hf${r}" id="hf${s}">
-    <div class="who">${crest(f,'')}<div><div class="nm">${f.short}</div><div class="fm">${f.form}</div>${inSquad(f.id)?'<div class="mine">On your squad</div>':''}</div></div>
+    <div class="who">${crest(f,'')}<div><div class="nm">${f.short}</div><div class="fm">${f.form}</div>${rec?`<div class="rec">${rec}</div>`:''}${inSquad(f.id)?`<div class="mine">${f.id===state.captain?'Your captain':'On your squad'}</div>`:''}</div></div>
     <div class="hp${r}" role="progressbar" aria-label="${f.short} HP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="hpbar${s}"><b></b></div>
     <div class="hpn" id="hpn${s}">100 HP</div>
     <div class="cbar${r}" aria-hidden="true"><b id="cb${s}"></b></div>
@@ -3782,11 +4315,13 @@ function hudSide(f,s){
 }
 function buildArena(a,b,label,intro,note,theme){
   destroyStage();
+  const lines=Array.isArray(intro)?intro:intro?[intro]:[];
   $('arena').innerHTML=`<div class="label"><span>${label}</span>${note?`<span class="up">${note}</span>`:''}</div>
     <div class="hud">${hudSide(a,'A')}<div class="hudmid">VS<small>Overall ${a.ovr} vs ${b.ovr}</small></div>${hudSide(b,'B')}</div>
     <div class="stagewrap"><canvas id="stage" role="img" aria-label="Animated fight between ${a.short} and ${b.short}"></canvas><div class="ticker" id="ticker" aria-hidden="true"><span class="live">LIVE</span><span class="tt" id="tickt"></span></div></div>
-    <ul class="log" id="log" aria-live="polite">${intro?`<li class="info">${intro}</li>`:''}</ul>`;
+    <ul class="log" id="log" aria-live="polite">${lines.map(t=>`<li class="info">${esc(t)}</li>`).join('')}</ul>`;
   const st=new Stage($('stage'),a,b,{theme:theme||0,mul:state.speed==='fast'?.55:1,calm:reduced});
+  st.paused=state.paused;
   st.onHp=e=>setHp(e.hp,e.ch,e.um);
   state.stage=st;
   return st;
@@ -3818,38 +4353,50 @@ function markWinner(win){
 }
 function showUpcoming(){
   if(state.champion) return;
-  const m=curMatch();
-  buildArena(m.a,m.b,`Next up: ${roundName(state.r)}, fight ${state.m+1} of ${state.rounds[state.r].length}`,'Press Watch next fight to see it play out.',hasSquad(m)?'Your fighter is up':'',themeFor(state.r));
-  setTicker(new Announcer(m.a,m.b,f=>inSquad(f.id)).preview(roundName(state.r)),false);
+  const m=curMatch(), notes=storyline(m.a,m.b);
+  buildArena(m.a,m.b,`Next up: ${roundName(state.r)}, fight ${state.m+1} of ${state.rounds[state.r].length}`,notes.length?notes.slice(0,3):(state.spectate?'The next fight is about to start.':'Press Watch next fight to see it play out.'),hasSquad(m)?'Your fighter is up':'',themeFor(state.r));
+  setTicker(notes[0]||new Announcer(m.a,m.b,f=>inSquad(f.id)).preview(roundName(state.r)),!!notes[0]);
 }
 function showFinal(m,r){
   const last=m.result.log[m.result.log.length-1];
   const st=buildArena(m.a,m.b,`${roundName(r)}, result`,'',hasSquad(m)?'Your fighter was in this one':'',themeFor(r));
   m.result.log.forEach(addLine);
   st.setFinal(last.win,m.result.ko); setHp(last.hp,last.ch,last.um); markWinner(last.win);
-  setTicker(new Announcer(m.a,m.b,f=>inSquad(f.id)).end(last),true);
+  const ce=state.champion&&r===nRounds()-1?state.story.find(e=>e.k==='champ'):null;
+  setTicker(ce?ce.x:new Announcer(m.a,m.b,f=>inSquad(f.id)).end(last),true);
 }
+// a time limit per log entry that stops counting while the fight is paused
+function stageGuard(st,ms){ return new Promise(res=>{ let left=ms; const tick=()=>{ if(!st.paused) left-=200; if(left<=0||!st.running) res(); else setTimeout(tick,200); }; setTimeout(tick,200); }); }
 
 async function playSim(m,sim,r,real){
   const run=state.run;
   state.busy=true; renderControls();
-  const st=buildArena(m.a,m.b,`${roundName(r)}, ${real?`fight ${state.m+1} of ${state.rounds[r].length}`:'replay'}`,'',hasSquad(m)?'Your fighter is up':'',themeFor(r));
+  const notes=real?storyline(m.a,m.b).slice(0,2):[];
+  const st=buildArena(m.a,m.b,`${roundName(r)}, ${real?`fight ${state.m+1} of ${state.rounds[r].length}`:'replay'}`,notes,hasSquad(m)?'Your fighter is up':'',themeFor(r));
   setHp([100,100],[100,100],[0,0]);
   const ann=new Announcer(m.a,m.b,f=>inSquad(f.id));
+  if(real) ann.st0=[liveRec(m.a.id).st,liveRec(m.b.id).st];
   st.onSay=(k,e)=>{ if(k==='pre') setTicker(ann.pre(e),false); else if(k==='hit') setTicker(ann.hit(e),true); else if(k==='miss') setTicker(ann.miss(e),false); else setTicker(ann.end(e),true); };
   setTicker(ann.intro(roundName(r)),false);
   try{ await st.intro(roundName(r)); }catch(err){ console.error(err); }
+  for(const n of notes){ if(state.run!==run||state.stage!==st) return false; setTicker(n,true); await st.wait(st.d(1500)); }
   setTicker(ann.matchup(),false);
   for(const e of sim.log){
     if(state.run!==run||state.stage!==st) return false;
     addLine(e);
     if(e.type==='info') continue;
-    try{ await Promise.race([e.type==='end'?st.finale(e):st.playEntry(e),sleep(12000)]); }catch(err){ console.error(err); }
+    try{ await Promise.race([e.type==='end'?st.finale(e):st.playEntry(e),stageGuard(st,12000)]); }catch(err){ console.error(err); }
     setHp(e.hp,e.ch,e.um);
     if(e.type==='end') markWinner(e.win);
   }
   st.skipping=false;
+  if(real) m.watched=true;
   return true;
+}
+// after a watched fight: put the biggest new story beat on the ticker
+function announceStory(n0){
+  const ev=state.story.slice(n0).sort((a,b)=>KIND_RANK[a.k]-KIND_RANK[b.k])[0];
+  if(ev) setTicker(`${ev.t.toUpperCase()}: ${ev.x}`,true);
 }
 async function watchNext(){
   if(state.busy||state.champion) return;
@@ -3857,9 +4404,10 @@ async function watchNext(){
   const m=curMatch(), r=state.r, sim=simFight(m.a,m.b);
   const ok=await playSim(m,sim,r,true);
   if(!ok) return;
+  const n0=state.story.length;
   finalize(m,sim);
-  state.busy=false;
-  refreshAll();
+  state.busy=false; state.paused=false;
+  refreshAll(); announceStory(n0);
 }
 async function viewMatch(r,mi){
   if(state.busy) return;
@@ -3867,12 +4415,12 @@ async function viewMatch(r,mi){
   Sfx.init();
   const ok=await playSim(m,m.result,r,false);
   if(!ok) return;
-  state.busy=false; renderControls();
+  state.busy=false; state.paused=false; renderControls();
 }
 
 /* ---------- applying results ---------- */
 function finalize(m,sim){
-  const r=state.r;
+  const r=state.r, mi=state.m, pre=[liveRec(m.a.id).st,liveRec(m.b.id).st];
   m.result=sim; m.winner=sim.winner;
   m.upset=sim.winner.ovr+6<=sim.loser.ovr;
   state.out[sim.loser.id]=roundName(r);
@@ -3884,18 +4432,24 @@ function finalize(m,sim){
     if(m.upset) p+=8;
     if(sim.ultW) p+=10;
     if(r===nRounds()-1) p+=25;
+    const I=squadIdent(state.squad);
+    if(I&&styleHit(I.prim,m,sim)){ p+=4; m.styleB=true; }
+    if(sim.winner.id===state.captain){ p=Math.ceil(p*1.5); m.capB=true; }
     m.award=p;
     state.pts[sim.winner.id]=(state.pts[sim.winner.id]||0)+p;
   }
+  storyFight(m,r,mi,pre);
   state.m++;
   if(state.m>=state.rounds[r].length){
     if(r===nRounds()-1){
       state.champion=sim.winner;
-      const t=total();
-      if(t>(state.best[state.N]||0)){ state.best[state.N]=t; try{ localStorage.setItem('fst_best2',JSON.stringify(state.best)); }catch(e){} }
+      storyRound(r); storyChampion();
+      if(!state.spectate){ const t=total(), k=bestKey(); if(t>(state.best[k]||0)){ state.best[k]=t; try{ localStorage.setItem('fst_best2',JSON.stringify(state.best)); }catch(e){} } }
+      recordTournament();
     } else {
       state.rounds.push(makeRound(state.rounds[r].map(x=>x.winner)));
-      state.r++; state.m=0; state.tab=state.r;
+      storyRound(r);
+      state.r++; state.m=0; if(state.tab!=='story') state.tab=state.r;
     }
   }
 }
@@ -3913,6 +4467,49 @@ function afterSim(last){
   else showUpcoming();
 }
 
+/* ---------- spectator mode: the tournament runs itself ---------- */
+// is this fight worth putting on camera? (the sim is pure, so we know the outcome before showing it)
+function worthWatching(m,sim,r){
+  if(r>=nRounds()-3) return true;
+  let s=0;
+  if(sim.winner.ovr+6<=sim.loser.ovr) s+=3;
+  if(sim.ultW||sim.ultL) s+=2;
+  if(sim.hpLeft<=25) s+=2; else if(sim.hpLeft<=45) s+=1;
+  if(Math.abs(m.a.ovr-m.b.ovr)<=4) s+=1;
+  if([m.a,m.b].some(f=>f.id===state.defending||f.id===state.favorite||liveRec(f.id).st>=4)) s+=2;
+  if(s>=4) return true;
+  const rd=state.rounds[r];
+  return state.m===rd.length-1&&!rd.some(x=>x.watched);
+}
+async function specWait(ms,run){ let left=ms*(state.speed==='fast'?.55:1); while(left>0&&state.run===run&&state.spectate){ await sleep(100); if(!state.paused) left-=100; } }
+function offCamera(batch){
+  const ws=batch.map(m=>m.winner.short), n=batch.length;
+  setTicker(`Off camera: ${n} fight${n>1?'s':''} decided. ${ws.slice(0,3).join(', ')}${n>3?` and ${n-3} more`:''} ${n>1?'advance':'advances'}.`,false);
+  const log=$('log'); if(log){ batch.forEach(m=>{ const li=document.createElement('li'); li.className='info'; li.textContent=`${m.winner.short} beat ${m.result.loser.short}${m.result.ko?' by KO':''}, ${m.result.hpLeft} HP left${m.upset?', an upset':''}.`; log.appendChild(li); }); log.scrollTop=log.scrollHeight; }
+}
+async function spectateLoop(){
+  const run=state.run, live=()=>state.run===run&&state.spectate&&state.screen==='tournament';
+  let batch=[];
+  await specWait(1200,run);
+  while(live()&&!state.champion){
+    if(state.paused){ await sleep(120); continue; }
+    const m=curMatch(), r=state.r, sim=simFight(m.a,m.b), quick=state.toFinal&&r<nRounds()-1;
+    if(quick||!(state.specAll||worthWatching(m,sim,r))){
+      finalize(m,sim); batch.push(m);
+      if(batch.length%8===0) await sleep(0);
+      continue;
+    }
+    if(state.toFinal){ state.toFinal=false; }
+    if(batch.length){ refreshAll(); offCamera(batch); batch=[]; await specWait(2600,run); if(!live()) return; }
+    Sfx.init();
+    const ok=await playSim(m,sim,r,true); if(!ok||!live()) return;
+    const n0=state.story.length;
+    finalize(m,sim); state.busy=false; refreshAll(); announceStory(n0);
+    if(state.champion) break;
+    await specWait(state.story.length>n0?3400:2400,run);
+  }
+}
+
 async function copyRecap(){
   const text=recapText(); let ok=false;
   try{ await navigator.clipboard.writeText(text); ok=true; }catch(e){}
@@ -3921,6 +4518,84 @@ async function copyRecap(){
   }
   state.copied=ok; renderChamp();
   if(ok) setTimeout(()=>{ state.copied=false; if(state.screen==='tournament') renderChamp(); },2000);
+}
+
+/* ---------- history screen ---------- */
+function groupRecs(){
+  if(state.hgroup==='version') return Object.keys(HIST.f).filter(byId).map(id=>({key:id,f:byId(id),name:byId(id).short,R:HIST.f[id]}));
+  const g={};
+  Object.keys(HIST.f).forEach(id=>{
+    const f=byId(id); if(!f) return; const R=HIST.f[id];
+    const G=g[f.base]||(g[f.base]={key:f.base,f,name:cname(f),R:Object.assign(newRec(),{st:null})});
+    ['w','l','ko','u','up','t','fi','sf','e'].forEach(k=>{ G.R[k]+=R[k]||0; });
+    if(R.b&&(!G.R.b||R.b<G.R.b)) G.R.b=R.b; G.R.bs=Math.max(G.R.bs,R.bs||0);
+    if((R.t||0)>((HIST.f[G.f.id]||{}).t||0)||(R.w||0)>((HIST.f[G.f.id]||{}).w||0)) G.f=f; // show the most successful version's face
+  });
+  return Object.values(g);
+}
+const pct=(a,b)=>b?Math.round(a/b*100)+'%':'-';
+function histStats(){
+  const L=HIST.list, recs=groupRecs();
+  const top=recs.slice().sort((a,b)=>b.R.t-a.R.t||b.R.w-a.R.w)[0];
+  let bestK=null; Object.keys(state.best).forEach(k=>{ if(!bestK||state.best[k]>state.best[bestK]) bestK=k; });
+  const bk=k=>{ if(/^\d+$/.test(k)) return `Classic, ${k} fighters`; const [m,n]=k.split('-'); return m.startsWith('canon')?`${modeLabel('canon',m.slice(5))}, ${n} fighters`:`${modeById(m).t}, ${n} fighters`; };
+  return `<div class="sc"><div class="n">Tournaments played</div><div class="s">${L.filter(t=>t.spec).length} spectated</div><div class="p">${HIST.n}</div></div>
+    <div class="sc"><div class="n">Titles for your squads</div><div class="s">${HIST.my.p} played with a squad</div><div class="p">${HIST.my.t}</div></div>
+    <div class="sc"><div class="n">Best squad score</div><div class="s">${bestK?bk(bestK):'No score yet'}</div><div class="p">${bestK?state.best[bestK]:0}</div></div>
+    <div class="sc total"><div class="n">Most titles</div><div class="s">${top&&top.R.t?`${top.name}, ${top.R.t} title${top.R.t>1?'s':''}`:'Nobody yet'}</div><div class="p">${top&&top.R.t?crest(top.f,'sm'):'-'}</div></div>`;
+}
+function histRecent(){
+  if(!HIST.list.length) return '<p class="lede">No finished tournaments yet. Play one through, or press Spectate on the draft screen and let one run.</p>';
+  return `<div class="hcards">${HIST.list.map(T=>{
+    const d=new Date(T.at), when=isNaN(d)?'':d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+    const rows=[];
+    rows.push(['Runner-up',shortOf(T.runner)]);
+    if(T.semis&&T.semis.length) rows.push(['Semifinals',T.semis.map(shortOf).join(', ')]);
+    if(T.upset) rows.push(['Biggest upset',`${shortOf(T.upset.w)} over ${shortOf(T.upset.l)} (+${T.upset.d})`]);
+    if(T.ko) rows.push(['Most KOs',`${shortOf(T.ko.id)}, ${T.ko.n}`]);
+    if(T.run) rows.push(['Underdog run',`${shortOf(T.run.id)} (${(byId(T.run.id)||{}).ovr||'?'}), ${T.run.n} wins`]);
+    rows.push(['Ultimates',`${T.ults} landed, ${T.ups} upset${T.ups===1?'':'s'}`]);
+    rows.push(['Your squad',T.spec?'Spectated':`${esc(T.name||'Squad')}: ${T.score} pts${T.squad.includes(T.champ)?', champions':''}`]);
+    return `<article class="hcard">
+      <div class="hh"><span>#${T.n} · ${modeLabel(T.mode,T.era)} · ${T.N} fighters</span><span>${when}</span></div>
+      <div class="hc">${crestId(T.champ)}<div><div class="hk">Champion</div><div class="hn">${shortOf(T.champ)}</div></div></div>
+      <dl>${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+      ${T.heads&&T.heads.length?`<ul class="hstory">${T.heads.map(([t,x])=>`<li><b>${esc(t)}</b> ${esc(x)}</li>`).join('')}</ul>`:''}
+    </article>`;
+  }).join('')}</div>`;
+}
+function histTable(champs){
+  let recs=groupRecs().filter(g=>champs?g.R.fi>0:(g.R.w+g.R.l)>0);
+  if(!recs.length) return `<p class="lede">${champs?'No finals played yet.':'No fights recorded yet.'}</p>`;
+  const k=state.hsort, wr=g=>(g.R.w+g.R.l)?g.R.w/(g.R.w+g.R.l):0;
+  const key={t:g=>g.R.t*1e6+g.R.fi*1e3+g.R.w,w:g=>g.R.w*1e3+wr(g),wr:g=>(g.R.w+g.R.l>=3?1e3:0)+wr(g),u:g=>(g.R.w+g.R.l)?g.R.u/(g.R.w+g.R.l):0,up:g=>g.R.up,bs:g=>g.R.bs}[champs?'t':k]||(g=>g.R.w);
+  recs.sort((a,b)=>key(b)-key(a)||a.name.localeCompare(b.name));
+  const name=g=>`<td><span class="fn">${crest(g.f,'sm')}<span>${g.name}</span></span></td>`;
+  if(champs) return `<div class="tscroll"><table class="htab"><thead><tr><th>${state.hgroup==='version'?'Fighter':'Character'}</th><th>Titles</th><th>Finals</th><th>Final four</th><th>Wins</th><th>Record</th></tr></thead><tbody>
+    ${recs.map(g=>`<tr>${name(g)}<td><b>${g.R.t}</b></td><td>${g.R.fi}</td><td>${g.R.sf}</td><td>${g.R.w}</td><td>${g.R.w}-${g.R.l}</td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="hrow"><label class="sl" for="hsort">Sort by</label><select id="hsort" aria-label="Sort records">
+      ${[['t','Titles'],['w','Wins'],['wr','Win rate'],['u','Ultimate rate'],['up','Upsets'],['bs','Best streak']].map(([v,t])=>`<option value="${v}" ${k===v?'selected':''}>${t}</option>`).join('')}</select></div>
+    <div class="tscroll"><table class="htab"><thead><tr><th>${state.hgroup==='version'?'Fighter':'Character'}</th><th>Record</th><th>Win rate</th><th>Titles</th><th>Ultimate rate</th><th>Upsets</th><th>Best finish</th><th>Best streak</th>${state.hgroup==='version'?'<th>Now</th>':''}</tr></thead><tbody>
+    ${recs.map(g=>`<tr>${name(g)}<td>${g.R.w}-${g.R.l}</td><td>${pct(g.R.w,g.R.w+g.R.l)}</td><td>${g.R.t}</td><td>${pct(g.R.u,g.R.w+g.R.l)}</td><td>${g.R.up}</td><td>${finishName(g.R.b)}</td><td>${g.R.bs}</td>${state.hgroup==='version'?`<td>${g.R.st>0?`Won ${g.R.st}`:g.R.st<0?`Lost ${-g.R.st}`:'-'}</td>`:''}</tr>`).join('')}</tbody></table></div>
+    <p class="sh">Ultimate rate: share of fights in which the fighter landed an Ultimate. Every fight so far has ended in a knockout, so there is no separate KO rate.</p>`;
+}
+function renderHistory(){
+  destroyStage();
+  if(state.screen!=='history') state.prev=state.screen;
+  state.screen='history';
+  const v=state.hview, opt=(key,val,t)=>`<button role="radio" aria-checked="${String(state[key]===val)}" data-action="${key}" data-val="${val}">${t}</button>`;
+  app.innerHTML=`
+    <div class="hdr">
+      <div><h1>Tournament History</h1><p class="lede">Every finished tournament is saved in this browser: champions, upsets, and the record of every fighter who has stepped into the bracket.</p></div>
+      <div class="row hbtn"><button class="btn small" data-action="back">${state.prev==='tournament'?'Back to the tournament':'Back to the draft'}</button><button class="btn small" data-action="theme">Light / dark</button></div>
+    </div>
+    <div class="score">${histStats()}</div>
+    <div class="row hseg">
+      <div class="seg" role="radiogroup" aria-label="History view">${opt('hview','recent','Tournaments')}${opt('hview','champs','Champions')}${opt('hview','records','Records')}</div>
+      ${v==='recent'?'':`<div class="seg" role="radiogroup" aria-label="Group by">${opt('hgroup','version','Versions')}${opt('hgroup','character','Characters')}</div>`}
+    </div>
+    <div id="hbody">${v==='recent'?histRecent():histTable(v==='champs')}</div>
+    <div class="hclear">${HIST.n?(state.confirmClear?`<span>Delete all ${HIST.n} tournaments and every record?</span><button class="btn small" data-action="clearyes">Delete history</button><button class="btn small" data-action="clearno">Keep it</button>`:'<button class="btn small" data-action="clearhist">Clear history</button>'):''}</div>`;
 }
 
 /* ---------- events ---------- */
@@ -3932,38 +4607,61 @@ app.addEventListener('click',e=>{
     const id=t.dataset.id;
     if(inSquad(id)) state.squad=state.squad.filter(x=>x!==id);
     else if(state.squad.length<state.settings.squadSize&&!lockedBy(byId(id))) state.squad.push(id);
-    renderTray(); renderGrid(); renderStart();
+    draftChanged();
   }
   else if(a==='random'){
     const bases=new Set(), picks=[];
-    for(const f of shuffle(ROSTER)){ if(picks.length>=state.settings.squadSize) break; if(!bases.has(f.base)){ bases.add(f.base); picks.push(f.id); } }
-    state.squad=picks; renderTray(); renderGrid(); renderStart();
+    for(const f of shuffle(ROSTER.filter(x=>eligible(x)))){ if(picks.length>=state.settings.squadSize) break; if(!bases.has(f.base)){ bases.add(f.base); picks.push(f.id); } }
+    state.squad=picks; state.captain=null; draftChanged();
   }
-  else if(a==='clear'){ state.squad=[]; renderTray(); renderGrid(); renderStart(); }
+  else if(a==='clear'){ state.squad=[]; draftChanged(); }
   else if(a==='filter'){ state.filter=v; renderChips(); renderGrid(); }
-  else if(a==='set'){
-    const s=state.settings, k=t.dataset.key;
+  else if(a==='mode'||a==='set'){
+    const s=state.settings, k=a==='mode'?'mode':t.dataset.key;
     s[k]=(k==='size'||k==='squadSize')?+v:v;
     if(k==='size'){ const ok=[3,5,8].filter(x=>x<=s.size/2); if(!ok.includes(s.squadSize)) s.squadSize=ok[ok.length-1]; }
-    state.squad=state.squad.slice(0,s.squadSize);
-    renderSettings(); renderTray(); renderGrid(); renderStart();
+    fitSettings();
+    renderModes(); renderSettings(); draftChanged();
   }
-  else if(a==='start'){ if(state.squad.length===state.settings.squadSize){ Sfx.init(); startTournament(); } }
+  else if(a==='start'){ if(state.squad.length===state.settings.squadSize){ Sfx.init(); startTournament(false); } }
+  else if(a==='spectate'){ Sfx.init(); startTournament(true); }
   else if(a==='watch') watchNext();
   else if(a==='simround') simRound();
   else if(a==='simall') simAll();
   else if(a==='simsquad') simSquad();
   else if(a==='skip'){ if(state.stage) state.stage.skip(); }
+  else if(a==='pause'){ state.paused=!state.paused; if(state.stage) state.stage.paused=state.paused; renderControls(); }
+  else if(a==='specall'){ state.specAll=v==='1'; renderControls(); }
+  else if(a==='tofinal'){ state.toFinal=true; if(state.stage&&state.busy) state.stage.skip(); renderControls(); }
   else if(a==='speed'){ state.speed=v; if(state.stage) state.stage.mul=v==='fast'?.55:1; renderControls(); }
   else if(a==='sound'){ Sfx.on=!Sfx.on; Sfx.init(); try{ localStorage.setItem('fst_sound',Sfx.on?'on':'off'); }catch(err){} renderControls(); }
-  else if(a==='tab'){ state.tab=+v; renderTabs(); renderMatches(); }
+  else if(a==='tab'){ state.tab=v==='story'?'story':+v; renderTabs(); renderMatches(); if(v==='story'&&t.classList.contains('headline')){ const tb=$('tabs'); if(tb) tb.scrollIntoView({block:'start',behavior:reduced?'auto':'smooth'}); } }
   else if(a==='view') viewMatch(+t.dataset.r,+t.dataset.m);
   else if(a==='copy') copyRecap();
   else if(a==='again'){ Sfx.init(); startTournament(); }
-  else if(a==='newdraft'){ state.run++; state.busy=false; state.squad=[]; renderDraft(); }
+  else if(a==='history'){ if(!state.busy){ state.confirmClear=false; renderHistory(); window.scrollTo(0,0); } }
+  else if(a==='back'){ if(state.prev==='tournament'&&state.rounds.length) renderTournament(); else renderDraft(); window.scrollTo(0,0); }
+  else if(a==='hview'||a==='hgroup'){ state[a]=v; renderHistory(); }
+  else if(a==='clearhist'){ state.confirmClear=true; renderHistory(); }
+  else if(a==='clearno'){ state.confirmClear=false; renderHistory(); }
+  else if(a==='clearyes'){ HIST=emptyHist(); saveHist(); state.confirmClear=false; renderHistory(); }
+  else if(a==='newdraft'){
+    state.run++; state.busy=false; state.paused=false; state.toFinal=false;
+    if(state.spectate){ const k=state.keep||{squad:[],captain:null}; state.squad=k.squad; state.captain=k.captain; state.keep=null; state.spectate=false; }
+    else { state.squad=[]; state.captain=null; state.squadName=''; }
+    renderDraft();
+  }
 });
-app.addEventListener('input',e=>{ if(e.target.id==='q'){ state.q=e.target.value; renderGrid(); } });
-app.addEventListener('change',e=>{ if(e.target.id==='sort'){ state.sort=e.target.value; renderGrid(); } });
+app.addEventListener('input',e=>{
+  if(e.target.id==='q'){ state.q=e.target.value; renderGrid(); }
+  else if(e.target.id==='sqname'){ const I=squadIdent(state.squad); state.squadName=I&&e.target.value.trim()===I.name?'':e.target.value; }
+});
+app.addEventListener('change',e=>{
+  if(e.target.id==='sort'){ state.sort=e.target.value; renderGrid(); }
+  else if(e.target.id==='cap'){ state.captain=e.target.value; renderTray(); renderIdent(); }
+  else if(e.target.id==='hsort'){ state.hsort=e.target.value; renderHistory(); }
+  else if(e.target.id==='sqname'){ if(!e.target.value.trim()){ state.squadName=''; renderIdent(); } }
+});
 
 renderDraft();
 </script>
