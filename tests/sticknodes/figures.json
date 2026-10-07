@@ -1,0 +1,83 @@
+{
+ "hashirama": {
+  "file": "Senju-Brothers-Pack/Senju-Hashirama.nodes"
+ },
+ "tobirama": {
+  "file": "Senju-Brothers-Pack/Senju-Tobirama.nodes"
+ },
+ "kakashi1": {
+  "file": "Kakashi-Hatake-Pack/kakashi hatake.nodes"
+ },
+ "kimimaro": {
+  "file": "Kimimaro-Kaguya-Pack/kimimaro.nodes"
+ },
+ "obito2": {
+  "file": "Obito-360-Pack-2/_Obito (War) 1.nodes"
+ },
+ "itachi1": {
+  "file": "The-Akatsuki-Pack/Itachi Uchiha.nodes"
+ },
+ "itachi2": {
+  "file": "The-Akatsuki-Pack/Itachi Uchiha (edo tensei).nodes"
+ },
+ "kisame": {
+  "file": "The-Akatsuki-Pack/Kisame Hoshigaki.nodes",
+  "graft": "The-Akatsuki-Pack/Kisame Arm.nodes",
+  "att": [
+   {
+    "file": "The-Akatsuki-Pack/Samehada (Kisame Sword).nodes",
+    "at": "sho",
+    "a": 168,
+    "x": -6,
+    "y": -4,
+    "s": 0.42
+   }
+  ]
+ },
+ "deidara": {
+  "file": "The-Akatsuki-Pack/Deidara R.nodes"
+ },
+ "deidaraE": {
+  "file": "The-Akatsuki-Pack/Deidara R (edo tensei).nodes"
+ },
+ "sasori": {
+  "file": "The-Akatsuki-Pack/Sasori.nodes"
+ },
+ "sasoriE": {
+  "file": "The-Akatsuki-Pack/Sasori (edo tensei).nodes"
+ },
+ "kakuzu": {
+  "file": "The-Akatsuki-Pack/Kakuzu.nodes"
+ },
+ "kakuzuE": {
+  "file": "The-Akatsuki-Pack/Kakuzu (Edo Tensei).nodes"
+ },
+ "konan": {
+  "file": "The-Akatsuki-Pack/Konan.nodes"
+ },
+ "pain": {
+  "file": "The-Akatsuki-Pack/Pain.nodes"
+ },
+ "zetsu": {
+  "file": "The-Akatsuki-Pack/Zetsu R.nodes"
+ },
+ "orochimaru": {
+  "file": "The-Akatsuki-Pack/Orochimaru (Classic).nodes"
+ },
+ "madara1": {
+  "file": "The-Akatsuki-Pack/Madara Uchiha L.nodes",
+  "att": [
+   {
+    "file": "The-Akatsuki-Pack/Madara Gunbai.nodes",
+    "at": "sho",
+    "a": -15,
+    "x": -14,
+    "y": 30,
+    "s": 0.45
+   }
+  ]
+ },
+ "obito1": {
+  "file": "The-Akatsuki-Pack/Tobi R.nodes"
+ }
+}

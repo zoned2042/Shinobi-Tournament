@@ -9,7 +9,7 @@ Shinobi Life" and the footer links that repo. The UI follows Shinobi Life's look
 amber `#e08a3c` accent) and "Old Scroll" light theme, Georgia serif titles, spaced-caps kicker lines, film grain and
 rising embers. CSS tokens live on `:root` (`--serif`, `--soft`, `--glow`, `--edge`); the canvas keeps its own fonts.
 
-- Entry point: `index.html` (about 6,000 lines, HTML + CSS + one `<script>`, no build step, no dependencies).
+- Entry point: `index.html` (about 6,000 lines, HTML + CSS + one `<script>`, plus a generated data `<script id="snfig">`; no build step, no dependencies).
 - Originally built and published as a Claude artifact: https://claude.ai/artifact/Ng4jRYAvPF7r3B9QLgtmZ3
 - Keep it a SINGLE self-contained HTML file. It must keep working when published as an artifact
   (CSP allows scripts only from cdnjs/jsdelivr/jquery, nothing else; fonts come from Google Fonts with fallbacks).
@@ -38,6 +38,8 @@ npm run portraits                 # contact sheet of every look to tests/out/por
 node tests/look.js itachi1,pain    # close-up of a look: big portrait, face icon, fighter in 6 poses at 2x
 node tests/look.js crow,kazekage   #   also takes puppet looks (PUP_LOOK keys): figure only
 node tests/nodes.js <dir> out.png  # contact sheet of Stick Nodes .nodes figures (reference packs the user sends)
+node tests/sticknodes/build.js <packs dir>  # rebuild the in-game figures (SNFIG) from unzipped packs, per tests/sticknodes/figures.json
+node tests/sticknodes/poses.js     # every figure fighter drawn in 7 poses -> tests/out/sn_poses.png (check the bones)
 npm run sounds                    # renders every effect + the busiest moments offline to tests/out/sfx.wav, reports peaks/clipping
 npm run layout                    # phone-width screenshots (draft, bracket, arena, story, history, modes, spectator) + overflow check
 ```
@@ -64,6 +66,7 @@ Google Fonts through curl so the canvas text uses the real fonts.
 | `class Stage` | Canvas renderer + animation engine. Fighters are skeletons driven by pose angles (`POSES`). Plays log entries as animations. `titleLayout` breaks Ultimate titles into 1-4 lines. |
 | `SIGMAP` / `STYLES` | 33 staged signature moves, keyed by id or base. Unmapped characters fall back to a generic move by `sigType` (currently none). |
 | `ULTMAP` / `ULTS` | 28 Ultimate/Kinjutsu choreographies, keyed by id or base. Fallback by sigType via `ULTFB`. Mostly Kinjutsu-tier ones with modes: `gatesKin` (`drunk` Drunken Fist, `peacock` Morning Peacock, `tiger` Daytime Tiger, `elephant` Evening Elephant, `night` Night Guy), `summon` (`kind` toad/slug/salamander/weasel/wolf/snake, drawn by `Stage.drawSummon`), `bind` (`mode` shadow/tree/mind/ritual/chains/hive/water/threads, drawn by `Stage.drawBind`), `barrage` (bomb/shuriken/coral/tsb/lava/swallows), `skyfall` (heel/guillotine/gold/boulder), `beam` (cannon/circus/spear/bone), `giant` (butterfly/hydro, grows the fighter with `scale`), `trigram` (vacuum/palms64/lions). |
+| `SNFIG` / `snFig` / `snPose` / `snDraw` / `SNALIAS` | Stick Nodes figures (community packs from sticknodes.com, credited in the footer) for 24 versions: Hashirama, Tobirama, Copy Ninja Kakashi, Kimimaro, Itachi (and Edo), Kisame (with Samehada and the pack's separate arm), Deidara (and Edo), Sasori (and Edo), Kakuzu (and Edo), Konan, Pain, Black Zetsu, Orochimaru, Prime Madara (with the gunbai), Tobi, Jinchuriki Obito (the pack's War Obito), plus `SNALIAS` (Edo Hashirama/Tobirama/Kimimaro, Rinnegan Madara reuse a figure; Edo skin turns ashen via `edoPal`). Data lives in `<script id="snfig">`, written by `tests/sticknodes/build.js`: per node parent, type, length, width, angle relative to parent, palette colour, draw order, polyfills, and the skeleton `b` (torso, shoulders, neck, head, both arms, both legs, found by `tests/sticknodes/detect.js`). `Stage.mk` sets `f.sn`; `drawFighter` then calls `snPose(f.sn,pose)` (drives those bones with the game's `POSES`, rotates the torso by `lean`, the head by `hd`, all by `rot`) and `snDraw` instead of drawing the body, so every move, tint, hit flash, trail and KO still works. Portraits/cut-ins/face icons stay drawn. ~1.3 ms per frame for two figures. |
 | `PUPPETS` / `PUP_LOOK` / `mkPup` / `pupFree` / `pupHome` | Puppet masters (Kankuro: Crow; Chiyo: Mother and Father; both Sasoris: the Third Kazekage). `Stage.mk` gives each fighter `f.pups`: pseudo-fighters drawn with `drawFighter` (look from `PUP_LOOK`, `pup:true` = wooden limbs with ball joints and a hinged jaw; `arms4`, `tail`, `bk:'shell'`) that hover behind their master (`p.off`) on chakra threads (`drawThreads`) while `p.follow` is set, and drop when the master is KO'd (`p.down`). The puppet does the master's tai and nin (`pupFree` takes it off follow), steps in front on Guard, raises its arms during other big moves. Signature style `puppetry` (`m:'crow'|'pair'|'sand'`), Ultimate styles `army` with `pk` (real puppet looks: `CHIKA` ten, `HUNDRED` for Sasori) and `threepup` (Kankuro: Salamander shields, Black Ant swallows, Crow's blades; `sasori:true` adds the Sasori puppet for the Kinjutsu). `recover()` hands every puppet back (`pupHome`); `T.check` fails a run that leaves a puppet off its threads. |
 | `LINES` / `Announcer` | Live commentary ticker text. |
 | `APP STATE AND UI` | Draft screen, settings, bracket tabs, arena HUD, `playSim`, scoring (`finalize`), events. |
@@ -124,6 +127,11 @@ Verified (Oct 2026):
   Edo defender. Every Ultimate and signature cut-in title was looked at (`tests/titles.js`), none overflow.
 - Shino/Zetsu/Hanzo/Sai plague swarm redone and checked (it used to read as falling snow).
 - Akatsuki Itachi has a custom signature (`crows`: crow flock + Mangekyo Tsukuyomi), checked in hit/dodge/KO.
+- Stick Nodes figures (Oct 2026): five packs the user sent (The Akatsuki, Senju Brothers, Kakashi Hatake, Kimimaro Kaguya,
+  Obito 360) drive 24 versions. `tests/sticknodes/poses.js` sheet and fights looked at; `node tests/moves.js all` 2,568 runs,
+  smoke, meta and layout pass. The pack files themselves are not in the repo (rebuild needs them unzipped somewhere).
+  Not used yet: the Naruto Pack 8 figures, teen Kakashi, Kimimaro's curse-mark/bone forms, Kisame and Kakuzu without
+  cloaks, the masked War Obito, Orochimaru's newer outfit, Sasori's true form.
 - Kakuzu and Sai redrawn from reference art (Oct 2026): Kakuzu has a fitted grey cowl (`hs:'cowl'`) with a slashed
   forehead protector, black mask, red-sclera green eyes (`es:'kakuzu'`), high collar, grey pants with white shin wraps;
   Sai has very pale skin, a black Leaf headband, a cropped jacket with red trim and bare midriff (`os:'crop'`) and a
