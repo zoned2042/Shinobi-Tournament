@@ -26,11 +26,11 @@ const { open, writeDataURL, shard } = require('./lib');
   else ids = who.split(',');
   ids = shard(ids, +k, +n);
   const atList = flags.at ? flags.at.split(',').map(Number) : null;
-  const every = atList && !flags.every ? 0 : +(flags.every || (mv === 'ult' ? 250 : 120));
+  const every = atList && !flags.every ? 0 : +(flags.every || (mv === 'ult' || mv === 'super' ? 250 : 120));
   const from = mv === 'ult' ? 2500 : mv === 'sig' ? 950 : 0;
   for (const id of ids) {
     const r = await page.evaluate(([id, mv, variant, every, from, f]) => T.play(id, f.vs || T.foe(id), mv, variant, {
-      every, from, at: f.atList || (mv === 'ult' ? [1900] : mv === 'sig' ? [600] : []), cols: +(f.cols || (f.atList ? Math.min(2, f.atList.length) : 5)),
+      every, from, at: f.atList || (mv === 'ult' ? [1900] : mv === 'super' ? [2400] : mv === 'sig' ? [600] : []), cols: +(f.cols || (f.atList ? Math.min(2, f.atList.length) : 5)),
       tw: +(f.tw || (f.atList ? 800 : 320)), theme: +(f.theme || 0), att: +(f.att || 0), settle: f.atList ? 0 : 600,
       title: `${id} ${mv} ${variant}: ${mv === 'ult' ? ultOf(ROSTER.find(x => x.id === id)).n : ''}`
     }).then(r => { r.bad = T.check(r); return r; }), [id, mv, variant, every, from, Object.assign({ atList }, flags)]);

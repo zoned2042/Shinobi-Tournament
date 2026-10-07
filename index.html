@@ -168,6 +168,7 @@ details.rules p{margin:8px 0}
 .ulbl.ready{color:var(--ready)}
 .cf .ultn{flex-basis:100%;color:var(--flame);font-size:11px}
 .ft.ult{border-color:var(--ready);color:var(--ready)}
+.ft.ult.sup{border-color:#ff4fd8;color:#d03aa8}
 .hudmid{text-align:center;font-family:var(--serif);font-weight:700;color:var(--muted);font-size:18px;line-height:1.2}
 .hudmid small{display:block;font-family:ui-sans-serif,system-ui,sans-serif;font-weight:400;font-size:11px}
 .stagewrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#000;aspect-ratio:16/9}
@@ -327,7 +328,7 @@ details.rules p{margin:8px 0}
 .sslot.fresh.r-A{animation:landed .55s ease-out,mythic 1.6s ease-in-out 1}
 @keyframes landed{0%{transform:scale(.9)}60%{transform:scale(1.04)}100%{transform:none}}
 @keyframes mythic{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 22px 2px var(--rc)}}
-@media (prefers-reduced-motion: reduce){ .sslot.fresh,.sslot.fresh.r-S,.sslot.fresh.r-A,.toast{animation:none} }
+@media (prefers-reduced-motion: reduce){ .cbtn.grd.hot{animation:none} .sslot.fresh,.sslot.fresh.r-S,.sslot.fresh.r-A,.toast{animation:none} }
 
 /* fight it yourself: the command bar */
 .cmd{background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:12px;transition:box-shadow .2s ease,border-color .2s ease}
@@ -336,7 +337,7 @@ details.rules p{margin:8px 0}
 .cmdh b{color:var(--ink)}
 .cmdh .you b{color:var(--flame)}
 .cmdh .cmds{flex-basis:100%;color:var(--ink);font-weight:700;font-size:14px}
-.cmdg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.cmdg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .cbtn{--mc:var(--line);position:relative;text-align:left;display:flex;flex-direction:column;gap:2px;padding:10px 12px 10px 40px;min-height:62px;border-radius:12px;border:1px solid var(--edge);border-left:4px solid var(--mc);background:var(--panel2);color:var(--ink);min-width:0}
 .cbtn b{font-size:14px;line-height:1.2;overflow-wrap:anywhere}
 .cbtn small{font-size:12px;color:var(--muted);line-height:1.25}
@@ -345,6 +346,16 @@ details.rules p{margin:8px 0}
 .cbtn:disabled{opacity:.42;cursor:not-allowed}
 .cbtn.tai{--mc:var(--flame)} .cbtn.nin{--mc:var(--chakra)} .cbtn.gen{--mc:var(--gen)} .cbtn.sig{--mc:var(--ko)} .cbtn.foc{--mc:var(--good)}
 .cbtn.ult{--mc:var(--ready)}
+.cbtn.grd{--mc:#7fb8ff}
+.cbtn.grd.hot:not(:disabled){box-shadow:0 0 0 2px #7fb8ff,0 0 18px rgba(127,184,255,.45);animation:pulse 1.2s ease-in-out infinite}
+.cbtn.sup:not(:disabled){background:linear-gradient(135deg,rgba(226,178,74,.28),rgba(255,79,216,.16) 60%,var(--panel2));box-shadow:0 0 22px rgba(255,79,216,.3)}
+.cbtn.sup:not(:disabled) b{color:#ff8ae6}
+.threat{margin-top:8px;padding:8px 12px;border-radius:10px;border:1px solid var(--ko);background:rgba(224,106,85,.12);color:var(--ink);font-weight:700;font-size:13px}
+@keyframes pulse{50%{box-shadow:0 0 0 2px #7fb8ff,0 0 28px rgba(127,184,255,.7)}}
+.ubar.sup b{background:linear-gradient(90deg,#ff4fd8 0 var(--sp),#e2b24a var(--sp) 100%)}
+.ubar.sup.ready{box-shadow:0 0 12px #ff4fd8}
+.ulbl.sup{color:#c870b0}
+.ulbl.sup.ready{color:#ff4fd8}
 .cbtn.ult:not(:disabled){background:linear-gradient(135deg,rgba(226,178,74,.22),var(--panel2) 70%);box-shadow:0 0 18px rgba(226,178,74,.25)}
 .cbtn.ult:not(:disabled) b{color:var(--ready)}
 .cmdr{margin-top:10px}
@@ -1184,40 +1195,48 @@ function jointAt(k,x,face,p,scale,lift){ const j=skeleton(p)[k]; return {x:x+j[0
    ===================================================================== */
 // A duel steps one action at a time, so the same rules drive both the instant simulation (simFight)
 // and fights the player controls. act(i) without a choice is the AI; with a choice it is the player's move.
+// Ultimate / Super Ultimate / Guard tuning. Check with npm run test:balance after changing anything here.
+// One big move per fight. The gauge fills to 100 for the Ultimate and keeps going to 150 for the Super Ultimate,
+// so holding the Ultimate is a gamble. A big move can only be used the turn after its gauge filled (a warning turn).
+const RULES={
+  gainDealt:.7,gainTaken:.5,gainTurn:2.5,                 // gauge per point of damage dealt / taken, and per turn
+  ultAt:100,supAt:125,aiUlt:.45,aiSup:.9,                  // the AI fires a ready Ultimate 45% of turns, else holds for the Super
+  ultBase:36,ultCap:35,ultDodge:.2,                       // damage is capped: an Ultimate cannot KO a fighter above 35 HP
+  supBase:58,supCap:50,supDodge:.15,bigCrit:1.25,
+  guardMul:.4,guardChakra:10                              // Guard (player move): all damage that turn x0.4
+};
 function makeDuel(A,B){
-  const maxCh=d=>40+Math.min(d.sta,130)*0.6;
-  const f=[A,B].map((d,i)=>({d,i,hp:100,ch:maxCh(d),stun:0,cd:0,used:false,um:0,usedUlt:false,ultLanded:false,form:0.82+Math.random()*0.36}));
+  const R=RULES, D={turn:0}, maxCh=d=>40+Math.min(d.sta,130)*0.6;
+  const f=[A,B].map((d,i)=>({d,i,hp:100,ch:maxCh(d),stun:0,cd:0,used:false,um:0,usedUlt:false,ultLanded:false,supLanded:false,readyT:0,superT:0,guarding:false,form:0.82+Math.random()*0.36}));
   const log=[];
   const snap=()=>[Math.max(0,Math.round(f[0].hp)),Math.max(0,Math.round(f[1].hp))];
   const chs=()=>f.map(x=>Math.round(clamp(x.ch,0,maxCh(x.d))/maxCh(x.d)*100));
-  const ums=()=>f.map(x=>Math.round(clamp(x.um,0,100)));
-  const gain=(att,def,dmg)=>{ att.um=Math.min(100,att.um+dmg*.46); def.um=Math.min(100,def.um+dmg*.67); };
-  const say=(text,type,x)=>log.push(Object.assign({text,type,hp:snap(),ch:chs(),um:ums(),tgt:null,dmg:0,win:null,att:null,mv:null,name:'',dodge:false,crit:false,guard:false,stun:false,surv:false,ko:false,skip:false,resist:false,who:null,st:null,heal:0},x||{}));
+  const ums=()=>f.map(x=>x.usedUlt?0:Math.round(clamp(x.um,0,100)));
+  const sms=()=>f.map(x=>x.usedUlt?0:Math.round(clamp((x.um-R.ultAt)/(R.supAt-R.ultAt)*100,0,100))); // Super charge past the Ultimate
+  const uus=()=>f.map(x=>x.usedUlt?2:0);
+  // the gauge fills more from hitting than from being hit, so a beaten-down opponent is not handed one;
+  // readyT / superT remember the turn each threshold was crossed (the move unlocks the turn after)
+  const fill=(x,v)=>{ if(x.usedUlt) return; x.um=Math.min(R.supAt,x.um+v); if(x.um>=R.ultAt&&!x.readyT) x.readyT=D.turn||1; if(x.um>=R.supAt&&!x.superT) x.superT=D.turn||1; };
+  const gain=(att,def,dmg)=>{ fill(att,dmg*R.gainDealt); fill(def,dmg*R.gainTaken); };
+  const say=(text,type,x)=>log.push(Object.assign({text,type,hp:snap(),ch:chs(),um:ums(),sm:sms(),uu:uus(),sup:false,tgt:null,dmg:0,win:null,att:null,mv:null,name:'',dodge:false,crit:false,guard:false,stun:false,surv:false,ko:false,skip:false,resist:false,who:null,st:null,heal:0},x||{}));
 
   const dodgeOf=(att,def)=>clamp(0.1+(def.d.spd-att.d.spd)/300+(def.d.int-att.d.int)/700,0.04,0.38);
   function act(att,def,choice){
     const a=att.d.short, d=def.d.short, st=att.d.sigType;
     if(att.stun>0){ att.stun--; say(`${a} is caught in an illusion and loses the turn.`,'gen',{att:att.i,skip:true}); return; }
     if(choice&&!canUse(att,def,choice)) choice='tai';
+    if(choice==='guard'){
+      const g=Math.round(Math.min(R.guardChakra,maxCh(att.d)-att.ch)); att.ch+=g; att.guarding=true;
+      say(`${a} braces and guards for the turn.`,'guard',{att:att.i,who:att.i,heal:g});
+      return;
+    }
     if(choice==='focus'){
       const g=Math.round(Math.min(30,maxCh(att.d)-att.ch)); att.ch+=g;
       say(`${a} steps back and focuses, gathering ${g} chakra.`,'focus',{att:att.i,who:att.i,heal:g});
       return;
     }
-    if(choice?choice==='ult':(att.um>=100&&!att.usedUlt&&Math.random()<.85)){
-      const u=ultOf(att.d); att.usedUlt=true; att.um=0; att.ch=Math.max(0,att.ch-20);
-      const dg=clamp(0.1+(def.d.spd-att.d.spd)/300+(def.d.int-att.d.int)/700,0.04,0.38)*0.2;
-      if(Math.random()<dg){ say(`${d} somehow evades ${a}'s ultimate, ${u.n}!`,'ult',{att:att.i,mv:'ult',name:u.n,dodge:true,st}); return; }
-      let ud=46*(0.82+0.42*att.d[st]/100)*Math.max(0.62,1.12-(def.d.tai+def.d.sta)/650)*(0.8+Math.random()*0.4)*att.form;
-      const uc=Math.random()<att.d.int/600+0.06; if(uc) ud*=1.35;
-      ud=Math.max(8,Math.round(ud)); let un='', ug=false, us=false;
-      if(def.d.guard&&Math.random()<def.d.guard*.4){ ud=Math.round(ud*.6); un+=` ${d} braces and cuts the damage.`; ug=true; }
-      def.hp-=ud;
-      if(def.hp<=0&&def.d.last&&!def.used){ def.used=true; def.hp=12; un+=` ${d} refuses to fall and survives with 12 HP.`; us=true; }
-      att.ultLanded=true; gain(att,def,ud);
-      say(`${a} unleashes the ULTIMATE: ${u.n}! ${ud} damage.${uc?' Critical hit!':''}${un}`,'ult',{att:att.i,mv:'ult',name:u.n,tgt:def.i,dmg:ud,crit:uc,guard:ug,surv:us,ko:def.hp<=0,st});
-      return;
-    }
+    if(choice?choice==='super':(canUse(att,def,'super')&&Math.random()<R.aiSup)){ bigMove(att,def,true); return; }
+    if(choice?choice==='ult':(canUse(att,def,'ult')&&Math.random()<R.aiUlt)){ bigMove(att,def,false); return; }
     const opts=[
       {k:'tai',w:att.d.tai*0.9+10},
       {k:'nin',w:att.ch>=10?att.d.nin*0.9:0},
@@ -1248,7 +1267,8 @@ function makeDuel(A,B){
     if(crit) dmg*=1.4;
     dmg=Math.max(1,Math.round(dmg));
     let notes='', guard=false, surv=false, stunned=false;
-    if(def.d.guard&&Math.random()<def.d.guard){ dmg=Math.max(1,Math.round(dmg*0.5)); notes+=` ${d} blocks half of it.`; guard=true; }
+    if(def.guarding){ dmg=Math.max(1,Math.round(dmg*R.guardMul)); notes+=` ${d} was guarding.`; guard=true; }
+    else if(def.d.guard&&Math.random()<def.d.guard){ dmg=Math.max(1,Math.round(dmg*0.5)); notes+=` ${d} blocks half of it.`; guard=true; }
     def.hp-=dmg; gain(att,def,dmg);
     if(def.hp<=0&&def.d.last&&!def.used){ def.used=true; def.hp=12; notes+=` ${d} refuses to fall and survives with 12 HP.`; surv=true; }
     const tag=crit?' Critical hit!':'';
@@ -1260,16 +1280,34 @@ function makeDuel(A,B){
     }
   }
 
+  // the Ultimate, and after it the Super Ultimate: capped so neither can wipe out a healthy fighter in one hit
+  function bigMove(att,def,sup){
+    const a=att.d.short, d=def.d.short, st=att.d.sigType, u=sup?supOf(att.d):ultOf(att.d), word=sup?'SUPER ULTIMATE':'ULTIMATE';
+    att.usedUlt=true; att.um=0;
+    att.ch=Math.max(0,att.ch-20);
+    if(Math.random()<dodgeOf(att,def)*(sup?R.supDodge:R.ultDodge)){ say(`${d} somehow evades ${a}'s ${word.toLowerCase()}, ${u.n}!`,'ult',{att:att.i,mv:'ult',sup,name:u.n,dodge:true,st}); return; }
+    let ud=(sup?R.supBase:R.ultBase)*(0.82+0.42*att.d[st]/100)*Math.max(0.62,1.12-(def.d.tai+def.d.sta)/650)*(0.8+Math.random()*0.4)*att.form;
+    const uc=Math.random()<att.d.int/600+0.06; if(uc) ud*=R.bigCrit;
+    ud=Math.max(8,Math.min(sup?R.supCap:R.ultCap,Math.round(ud))); let un='', ug=false, us=false;
+    if(def.guarding){ ud=Math.max(1,Math.round(ud*R.guardMul)); un+=` ${d} was guarding and takes only ${ud}.`; ug=true; }
+    else if(def.d.guard&&Math.random()<def.d.guard*.4){ ud=Math.round(ud*.6); un+=` ${d} braces and cuts the damage.`; ug=true; }
+    def.hp-=ud;
+    if(def.hp<=0&&def.d.last&&!def.used){ def.used=true; def.hp=12; un+=` ${d} refuses to fall and survives with 12 HP.`; us=true; }
+    att.ultLanded=true; if(sup) att.supLanded=true; gain(att,def,ud);
+    say(`${a} unleashes the ${word}: ${u.n}! ${ud} damage.${uc?' Critical hit!':''}${un}`,'ult',{att:att.i,mv:'ult',sup,name:u.n,tgt:def.i,dmg:ud,crit:uc,guard:ug,surv:us,ko:def.hp<=0,st});
+  }
   function canUse(att,def,k){
     if(k==='tai') return true;
     if(k==='nin') return att.ch>=10;
     if(k==='gen') return att.ch>=8&&def.stun===0;
     if(k==='sig') return att.ch>=28&&att.cd<=0;
-    if(k==='ult') return att.um>=100&&!att.usedUlt;
+    if(k==='ult') return !att.usedUlt&&att.um>=R.ultAt&&att.readyT<D.turn&&!(att.um>=R.supAt&&att.superT<D.turn);
+    if(k==='super') return !att.usedUlt&&att.um>=R.supAt&&att.superT<D.turn;
+    if(k==='guard') return true;
     if(k==='focus') return att.ch<maxCh(att.d)-1;
     return false;
   }
-  const D={f,log,turn:0,say,maxCh};
+  D.f=f; D.log=log; D.say=say; D.maxCh=maxCh;
   D.act=(i,choice)=>act(f[i],f[1-i],choice);
   D.over=()=>D.turn>=28||f[0].hp<=0||f[1].hp<=0;
   D.order=()=>{ const s0=A.spd*(0.75+Math.random()*0.5), s1=B.spd*(0.75+Math.random()*0.5); return s0>=s1?[0,1]:[1,0]; };
@@ -1281,14 +1319,17 @@ function makeDuel(A,B){
       nin:{ok:canUse(att,def,'nin'),hit:pct(1-dg),cost:10},
       gen:{ok:canUse(att,def,'gen'),trap:pct((1-dg)*clamp(0.3+(att.d.gen-def.d.int)/150,0.08,0.8)),cost:8,stunned:def.stun>0},
       sig:{ok:canUse(att,def,'sig'),hit:pct(1-dg*0.6),cost:28,cd:att.cd},
-      ult:{ok:canUse(att,def,'ult'),hit:pct(1-dg*0.2),gauge:Math.round(att.um),used:att.usedUlt},
+      ult:{ok:canUse(att,def,'ult'),hit:pct(1-dg*R.ultDodge),gauge:Math.round(Math.min(100,att.um)),used:att.usedUlt,soon:!att.usedUlt&&att.um>=R.ultAt&&att.readyT>=D.turn},
+      super:{ok:canUse(att,def,'super'),hit:pct(1-dg*R.supDodge),gauge:att.usedUlt?0:Math.round(clamp((att.um-R.ultAt)/(R.supAt-R.ultAt)*100,0,100))},
+      guard:{ok:true,gain:Math.round(Math.min(R.guardChakra,maxCh(att.d)-att.ch))},
+      threat:canUse(def,att,'super')?'super':canUse(def,att,'ult')?'ult':'',
       focus:{ok:canUse(att,def,'focus'),gain:Math.round(Math.min(30,maxCh(att.d)-att.ch))},
       ch:Math.round(att.ch),max:Math.round(maxCh(att.d)),stun:att.stun>0
     };
   };
   D.endTurn=()=>{
     f.forEach(x=>{
-      x.ch=Math.min(maxCh(x.d),x.ch+5); x.um=Math.min(100,x.um+1.2); if(x.cd>0) x.cd--;
+      x.ch=Math.min(maxCh(x.d),x.ch+5); fill(x,R.gainTurn); if(x.cd>0) x.cd--; x.guarding=false;
       if(x.hp>0&&x.d.regen&&x.hp<100&&f[0].hp>0&&f[1].hp>0){
         const h=Math.min(x.d.regen,100-x.hp); x.hp+=h;
         say(`${x.d.short} regenerates ${h} HP.`,'heal',{who:x.i,heal:h});
@@ -1304,7 +1345,7 @@ function makeDuel(A,B){
   const hpLeft=Math.max(0,Math.round(f[w].hp));
   if(ko) say(`${f[w].d.short} wins by knockout.`,'end',{win:w,ko:true});
   else say(`Time. ${f[w].d.short} takes the decision, ${hpLeft} HP to ${Math.max(0,Math.round(f[1-w].hp))}.`,'end',{win:w});
-  return {winner:f[w].d,loser:f[1-w].d,ko,hpLeft,log,turns:D.turn,ultW:f[w].ultLanded,ultL:f[1-w].ultLanded};
+  return {winner:f[w].d,loser:f[1-w].d,ko,hpLeft,log,turns:D.turn,ultW:f[w].ultLanded,ultL:f[1-w].ultLanded,supW:f[w].supLanded,supL:f[1-w].supLanded};
   };
   return D;
 }
@@ -1391,7 +1432,8 @@ const POSES={
   dodge:PP({lean:-.7,hd:-.2,fa1:.2,fa2:1.0,ba1:-.2,ba2:1.0,fl1:.9,fl2:1.1,bl1:-.9,bl2:.7}),
   ko:PP({lean:-.2,hd:-.3,fa1:.3,fa2:.2,ba1:-.5,ba2:.3,fl1:.3,fl2:.2,bl1:-.4,bl2:.2,rot:-1.55}),
   win:PP({lean:-.05,fa1:2.9,fa2:.1,ba1:.4,ba2:.5,fl1:.35,fl2:.3,bl1:-.3,bl2:.3}),
-  slam:PP({lean:.7,fa1:1.9,fa2:.2,ba1:1.8,ba2:.2,fl1:1.0,fl2:.5,bl1:-.8,bl2:.4})
+  slam:PP({lean:.7,fa1:1.9,fa2:.2,ba1:1.8,ba2:.2,fl1:1.0,fl2:.5,bl1:-.8,bl2:.4}),
+  block:PP({lean:-.12,hd:.12,fa1:1.35,fa2:2.0,ba1:1.15,ba2:2.3,fl1:.45,fl2:.5,bl1:-.55,bl2:.3})
 };
 const THEMES=[
   {t:'#58b8f0',b:'#fff0c8',orb:'#fffbe0',ox:600,oy:96,or:44,m1:'#6f8fb0',m2:'#4b6d8c',wall:'#7b6a58',floor:'#cdb07a',floor2:'#a98c56',stars:false},
@@ -1405,7 +1447,7 @@ class Stage{
     o=o||{};
     this.cv=cv; this.ctx=cv.getContext('2d');
     this.theme=o.theme||0; this.mul=o.mul||1; this.calm=!!o.calm;
-    this.t=0; this.rt=0; this.skipping=false; this.paused=false; this.running=true; this.hpDone=false; this.onHp=null;
+    this.t=0; this.rt=0; this.skipping=false; this.paused=false; this.superOn=false; this.running=true; this.hpDone=false; this.onHp=null;
     this.scars=[]; this.vigA=0; this.ultCut=null; this.efx=[]; this.timers=[]; this.tweens=[]; this.parts=[]; this.projs=[]; this.bolts=[]; this.spirals=[]; this.props=[]; this.ghosts=[]; this.pops=[]; this.banners=[];
     this.cap=null; this.cut=null; this.mood=null; this.flashA=0; this.flashC='#ffffff'; this.shakeA=0; this.shakeT=0; this.shakeD=1; this.lines=0;
     this.cam={zoom:1,x:SW/2,y:SH/2}; this.ts=1; this.stopT=0; this.excite=0; this.front=0; this.auraT=0;
@@ -1804,7 +1846,7 @@ class Stage{
   popupDmg(e,D){
     const big=e.mv==='sig'||e.mv==='ult'||e.crit;
     this.popup(`-${e.dmg}`,D.x,GY-196,'#ffffff',e.mv==='ult'?58:(e.crit?48:big?40:30),'#8a1a10');
-    if(e.mv==='ult') this.popup(e.crit?'CRITICAL ULTIMATE!':'ULTIMATE!',D.x,GY-256,'#ffd84d',e.crit?28:32,'#5a3a00');
+    if(e.mv==='ult') this.popup(e.sup?(e.crit?'CRITICAL SUPER ULTIMATE!':'SUPER ULTIMATE!'):e.crit?'CRITICAL ULTIMATE!':'ULTIMATE!',D.x,GY-256,e.sup?'#ffe9a0':'#ffd84d',e.crit?26:32,e.sup?'#7a1a5a':'#5a3a00');
     else if(e.crit) this.popup('CRITICAL!',D.x,GY-236,'#ffd84d',26,'#5a3a00');
   }
   guardFx(D){ this.ring(D.x,GY-95,'#7fe3ff',20,70,320,4); this.popup('GUARD',D.x+(D.face*-30),GY-150,'#7fe3ff',20,'#0a3a4a'); }
@@ -1952,9 +1994,11 @@ class Stage{
   fade(prop,v,ms){ return this.tween(this,{[prop]:v},ms,ease.out); }
   camTo(x,y,z,ms){ if(this.calm) return Promise.resolve(); return this.tween(this.cam,{x,y,zoom:z},this.d(ms),ease.inout); }
   inward(x,y,col,n,rmin,rmax,ms,size){ return (async()=>{ for(let i=0;i<n;i++){ if(this.skipping) break; const a=rand(0,TAU), r=rand(rmin,rmax); this.spawn({x:x+Math.cos(a)*r,y:y+Math.sin(a)*r,vx:-Math.cos(a)*r/260,vy:-Math.sin(a)*r/260,life:260,size:size||rand(12,22),col,shape:'glow'}); await this.wait(ms/n); } })(); }
-  async ultCutIn(A,name,col,col2){
-    this.sfx('cut'); this.sfx('boom'); this.ultCut={f:A,name,col,col2,t:0,dur:this.d(2500)};
-    await this.wait(this.d(2500));
+  async ultCutIn(A,name,col,col2,sup){
+    const ms=sup?3000:2500;
+    this.sfx('cut'); this.sfx('boom'); if(sup) this.sfx('charge');
+    this.ultCut={f:A,name,col,col2,sup,t:0,dur:this.d(ms)};
+    await this.wait(this.d(ms));
   }
   async ultHit(e,A,D,fx,x,y,o){
     o=o||{};
@@ -1967,6 +2011,10 @@ class Stage{
       return false;
     }
     const ko=e.ko; // the KO finisher runs in slow motion: keep the glare short so the knockout stays visible
+    if(this.superOn){ // a Super Ultimate lands harder: gold shockwaves and a wider blast
+      this.ring(x,y,'#ffd84d',14,560,this.d(900),14); this.ring(x,y,'#ff4fd8',8,460,this.d(1000),7); this.rays(x,y,'#ffd84d',ko?360:1100,900,26);
+      this.burst(x,y,'#ffd84d',60,1.6,7); this.flash('#ffe9a0',1);
+    }
     this.flash('#ffffff',1); this.bloom(x,y,fx.c,ko?.7:1,ko?380:1000,700); this.rays(x,y,fx.c2,ko?340:900,760,18);
     this.ring(x,y,'#ffffff',10,420,760,11); this.ring(x,y,fx.c,6,320,880,8); this.ring(x,y,fx.c2,4,230,960,5);
     this.burst(x,y,fx.c,80,1.4,8); this.burst(x,y,fx.c2,44,1.0,5); this.sparks(x,y,'#ffffff',34); dust(this,x,40); this.scar(x,150+rand(0,60));
@@ -1977,15 +2025,16 @@ class Stage{
   async ultEnd(A,D,e){
     this.clearSub(D);
     A.run=false; A.trail=false; A.aura=0; A.eye=0; A.alpha=1; A.face=A.homeFace; A.scale=1;
-    this.mood=null; this.lines=0; this.ts=1; this.fade('vigA',0,this.d(400));
+    this.mood=null; this.lines=0; this.ts=1; this.superOn=false; this.fade('vigA',0,this.d(400));
     A.pose.rot=0; if(!D.dead){ D.pose.rot=0; D.dizzy=false; D.scale=1; D.alpha=1; }
     await this.tween(this.cam,{zoom:1,x:SW/2,y:SH/2},this.d(420),ease.inout);
     if(!e.ko&&!D.dead) await Promise.all([this.recover(A),this.recover(D)]); else await this.recover(A);
   }
   async ultimate(e,A,D){
-    const u=ultOf(A.d), col=u.c||A.fx.c, col2=u.c2||A.fx.c2||'#ffffff';
+    const sup=!!e.sup, u0=sup?supOf(A.d):ultOf(A.d), u=sup?Object.assign({big:true},u0):u0, col=u.c||A.fx.c, col2=u.c2||A.fx.c2||'#ffffff';
     const fx=Object.assign({},A.fx,{c:col,c2:col2});
-    await this.ultCutIn(A,e.name,col,col2);
+    this.superOn=sup;
+    await this.ultCutIn(A,e.name,col,col2,sup);
     await ULTS[u.s].call(this,e,A,D,fx,u);
     await this.ultEnd(A,D,e);
   }
@@ -2062,8 +2111,10 @@ class Stage{
     // title block
     const tx=SW*.48, tk=clamp((k-.2)/.25,0,1);
     ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.lineJoin='round';
-    ctx.font='20px "Zen Kaku Gothic New",system-ui,sans-serif'; ctx.fillStyle=col2; ctx.globalAlpha=tk; ctx.fillText('ULTIMATE JUTSU',tx+(1-tk)*80,SH*.34);
-    ctx.fillStyle=col; ctx.fillRect(tx+(1-tk)*80,SH*.34+16,160*tk,3);
+    ctx.font=c.sup?'26px "Dela Gothic One",Impact,sans-serif':'20px "Zen Kaku Gothic New",system-ui,sans-serif'; ctx.fillStyle=c.sup?'#ffd84d':col2; ctx.globalAlpha=tk;
+    if(c.sup){ ctx.shadowColor='#ff4fd8'; ctx.shadowBlur=16; }
+    ctx.fillText(c.sup?'SUPER ULTIMATE':'ULTIMATE JUTSU',tx+(1-tk)*80,SH*.34); ctx.shadowBlur=0;
+    ctx.fillStyle=c.sup?'#ffd84d':col; ctx.fillRect(tx+(1-tk)*80,SH*.34+18,(c.sup?250:160)*tk,3);
     if(!c.lay) c.lay=this.titleLayout(ctx,c.name,SW*.49);
     const lines=c.lay.lines, fs=c.lay.fs; ctx.font=`${fs}px "Dela Gothic One",Impact,sans-serif`;
     lines.forEach((ln,li)=>{
@@ -2076,7 +2127,15 @@ class Stage{
       }
     });
     ctx.globalAlpha=1;
-    if(k>.92){ ctx.globalAlpha=(k-.92)/.08; ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,SW,SH); }
+    if(c.sup){ // gold frame and a slow prismatic sweep around the Super Ultimate card
+      ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=.55*inP;
+      const fr=ctx.createLinearGradient(0,0,SW,0); fr.addColorStop(0,'#ffd84d'); fr.addColorStop(.5,'#ff4fd8'); fr.addColorStop(1,'#ffd84d');
+      ctx.strokeStyle=fr; ctx.lineWidth=10+4*Math.sin(t*6); ctx.strokeRect(6,6,SW-12,SH-12);
+      ctx.globalAlpha=.16*inP; ctx.fillStyle='#ffd84d';
+      for(let i=0;i<10;i++){ const a=-t*.5+i*TAU/10; ctx.beginPath(); ctx.moveTo(SW*.75,SH*.5); ctx.lineTo(SW*.75+Math.cos(a-.05)*900,SH*.5+Math.sin(a-.05)*900); ctx.lineTo(SW*.75+Math.cos(a+.05)*900,SH*.5+Math.sin(a+.05)*900); ctx.closePath(); ctx.fill(); }
+      ctx.globalCompositeOperation='source-over'; ctx.globalAlpha=1;
+    }
+    if(k>.92){ ctx.globalAlpha=(k-.92)/.08; ctx.fillStyle=c.sup?'#fff4c8':'#ffffff'; ctx.fillRect(0,0,SW,SH); }
     ctx.restore();
   }
   drawVignette(ctx){
@@ -2119,6 +2178,7 @@ class Stage{
     try{
       if(e.type==='heal') await this.heal(e);
       else if(e.type==='focus') await this.focus(e);
+      else if(e.type==='guard') await this.guardUp(e);
       else if(e.skip) await this.stunSkip(e);
       else if(e.att!==null&&e.mv){
         const A=this.f[e.att], D=this.f[1-e.att];
@@ -2144,6 +2204,14 @@ class Stage{
     else for(let i=0;i<8;i++) this.spawn({x:f.x+rand(-26,26),y:GY-rand(20,120),vy:-rand(.05,.1),life:rand(500,800),size:rand(4,7),col:'#7fe3a0',shape:'plus'});
     this.popup('+'+e.heal,f.x,GY-190,'#7fe3a0',24,'#0a4a22'); this.sfx('heal');
     await this.wait(this.d(260));
+  }
+  async guardUp(e){
+    const A=this.f[e.att]; this.front=A.i;
+    await this.pose(A,'block',this.d(140)); this.sfx('thud');
+    this.ring(A.x+A.face*34,GY-110,'#7fe3ff',24,96,this.d(460),4); this.ring(A.x+A.face*34,GY-110,'#ffffff',16,70,this.d(360),2);
+    this.popup('GUARD UP',A.x,GY-196,'#7fe3ff',24,'#0a3a4a');
+    await this.wait(this.d(480));
+    await this.pose(A,'idle',this.d(140));
   }
   async focus(e){
     const A=this.f[e.att], c=A.look.glow||A.fx.c; this.front=A.i;
@@ -3056,12 +3124,12 @@ const STYLES={
    ULTIMATES: the strongest technique of each character, fully staged
    ===================================================================== */
 const ULTMAP={
-  hashirama:{s:'titan',mode:'buddha',c:'#6abf6a',c2:'#d6ffd9',n:'Sage Art: Thousand Hands Wood Buddha'},
+  hashirama:{s:'titan',mode:'buddha',c:'#6abf6a',c2:'#d6ffd9',n:'Wood Release: Wood Golem Technique'},
   yamato:{s:'titan',mode:'buddha',c:'#5fbf6a',c2:'#d6ffd9',n:'Wood Style: Deep Forest Golem'},
   tobirama:{s:'blitz',c:'#7fc8ff',n:'Flying Thunder God: Ten Thousand Slashes'},
   shisui:{s:'blitz',c:'#ff5a5a',n:'Susanoo Shunshin: Crimson Slashes'},
   hiruzen:{s:'inferno',c:'#ff9a2a',c2:'#ffe08a',n:'Five Elements: Grand Fire Dragon Storm'},
-  minato:{s:'reaper',c:'#d8d0ff',c2:'#ffffff',n:'Reaper Death Seal'},
+  minato:{s:'blitz',c:'#ffe08a',c2:'#ffffff',n:'Flying Thunder God: Rasengan Relay'},
   tsunade:{s:'quake',c:'#ffd84d',c2:'#fff2b0',n:'Strength of a Hundred: Seal Release Smash'},
   sakura:{s:'quake',c:'#ff8ac0',c2:'#ffe0f0',pink:true,n:'Hundred Healings Seal: Cherry Blossom Final Smash'},
   jugo:{s:'quake',c:'#e08a2a',n:'Cursed Seal: Rampage Eruption'},
@@ -3101,7 +3169,7 @@ const ULTMAP={
   rasa:{s:'storm',kind:'sand',c:'#e8c060',c2:'#fff0b0',n:'Gold Dust: Iron Sand Tsunami'},
   temari:{s:'storm',kind:'wind',c:'#bfe9d0',c2:'#ffffff',n:'Weasel Dance: Great Wind Scythe Typhoon'},
   danzo:{s:'storm',kind:'wind',c:'#cfe8ff',c2:'#ffffff',n:'Izanagi: Great Vacuum Typhoon'},
-  deidara:{s:'supernova',c:'#ffe28a',c2:'#ffffff',n:'C0: Ultimate Art Self-Detonation'},
+  deidara:{s:'plague',c:'#e8d8a8',c2:'#ffffff',n:'C4 Karura: Microscopic Bomb Cloud'},
   naruto1:{s:'army',clones:true,c:'#ffb347',c2:'#ffffff',n:'Thousand Shadow Clones: Uzumaki Barrage'},
   konohamaru:{s:'army',clones:true,c:'#8fd8ff',c2:'#ffffff',n:'Sarutobi Clone Barrage: Rasengan Rush'},
   sasori:{s:'army',puppets:true,c:'#8a7ab5',c2:'#d8d0ff',n:'Performance of a Hundred Puppets'},
@@ -3113,7 +3181,7 @@ const ULTMAP={
   lee1:{s:'rushUlt',gates:true,c:'#7fe28a',c2:'#ffffff',n:'Eight Gates: Gate of Joy Morning Peacock'},
   lee2:{s:'rushUlt',gates:true,c:'#ff5a5a',c2:'#ffd0a0',n:'Gate of Death: Hidden Lotus Final'},
   guy1:{s:'rushUlt',gates:true,c:'#ff8a3a',c2:'#ffe08a',n:'Eight Gates: Daylight Tiger'},
-  guy2:{s:'rushUlt',gates:true,c:'#ff3a2a',c2:'#ffd0a0',n:'Gate of Death: Night Guy Final Blow'},
+  guy2:{s:'rushUlt',gates:true,c:'#ff3a2a',c2:'#ffd0a0',n:'Eighth Gate: Evening Elephant'},
   neji:{s:'rushUlt',palms:true,c:'#8fc8ff',c2:'#ffffff',n:'Revolving Heaven: 128 Palms'},
   hinata1:{s:'rushUlt',palms:true,c:'#8fc8ff',c2:'#ffffff',n:'Gentle Fist: Eight Trigrams Barrage'},
   hinata2:{s:'rushUlt',palms:true,c:'#8fc8ff',c2:'#ffffff',n:'Twin Lion Fist: Lion Barrage'},
@@ -3124,7 +3192,7 @@ const ULTMAP={
   mifune:{s:'rushUlt',slashes:true,c:'#ffffff',c2:'#cfe8ff',n:'Iai: Ten Thousand Cuts'},
   iruka:{s:'rushUlt',c:'#ffffff',c2:'#cfe8ff',n:'Academy Fury: Chakra Blade Rush'},
   haku:{s:'mirrorsUlt',c:'#bfeaff',c2:'#ffffff',n:'Demonic Ice Mirrors: Thousand Needles'},
-  orochimaru:{s:'hydra',c:'#a06bd0',c2:'#e8d0ff',n:'Yamata no Orochi: Eight-Headed Serpent'},
+  orochimaru:{s:'hydra',c:'#a06bd0',c2:'#e8d0ff',n:'Summoning: Manda, Serpent King Strike'},
   kabuto:{s:'hydra',c:'#9fe7a8',c2:'#ffffff',n:'Sage Art: Dragon Heads Rampage'},
   anko:{s:'hydra',c:'#a06bd0',c2:'#e8d0ff',n:'Hidden Shadow Snake Hands: Hydra'},
   tenten:{s:'rainUlt',c:'#dddddd',c2:'#ffffff',n:'Weapon Storm: Thousand Blades Detonation'},
@@ -3137,6 +3205,91 @@ const ULTMAP={
 };
 const ULTFB={nin:'bijuu',tai:'rushUlt',gen:'dimension'};
 function ultOf(d){ return ULTMAP[d.id]||ULTMAP[d.base]||{s:ULTFB[d.sigType]||'bijuu',look:'void',n:d.sig+': Final Form'}; }
+/* Super Ultimates: the very top technique of each character, unlocked once the Ultimate is spent.
+   Same styles as ULTMAP (keyed by id or base); the stage plays them bigger, with a gold cut-in. */
+const SUPERMAP={
+  hashirama:{s:'titan',mode:'kannon',c:'#e8c25a',c2:'#fff4c8',n:'Sage Art Shinsu Senju: Thousand-Armed Kannon'},
+  tobirama:{s:'flood',kind:'water',c:'#3a8ad5',c2:'#cfe8ff',n:'Water Release: Great Exploding Water Shockwave'},
+  hiruzen:{s:'reaper',c:'#d8d0ff',c2:'#ffffff',n:'Dead Demon Consuming Seal'},
+  minato:{s:'reaper',c:'#ffe08a',c2:'#ffffff',n:'Reaper Death Seal: Eight Trigrams Sealing'},
+  tsunade:{s:'quake',c:'#ffd84d',c2:'#fff2b0',n:'Creation Rebirth: Heavenly Heel Drop Cataclysm'},
+  kakashi:{s:'titan',mode:'sword',c:'#8fd0ff',c2:'#ffffff',n:'Perfect Susanoo: Kamui Raikiri'},
+  kakashi6:{s:'kirin',c:'#b38aff',n:'Purple Lightning: Thunder God Spear'},
+  danzo:{s:'dimension',look:'void',c:'#cfe8ff',c2:'#ffffff',n:'Reverse Tetragram Sealing'},
+  naruto1:{s:'bijuu',head:'fox',c:'#ff5a2a',c2:'#ffb08a',n:'Four-Tails Cloak: Mini Tailed Beast Bomb'},
+  narutosage:{s:'bijuu',shuriken:true,c:'#ffb347',c2:'#ffffff',n:'Sage Art: Many Ultra-Big Ball Rasenshuriken'},
+  narutokcm:{s:'bijuu',head:'fox',shuriken:true,c:'#ffc533',c2:'#fff1a0',n:'Kurama Mode: Tailed Beast Rasenshuriken'},
+  narutobary:{s:'rushUlt',gates:true,c:'#ff8f3a',c2:'#ffd0a0',n:'Baryon Mode: Life-Burning Final Strike'},
+  narutosix:{s:'planet',c:'#ffe680',c2:'#ffffff',n:'Six Paths Chibaku Tensei: Sealing of the Moon'},
+  naruto7:{s:'bijuu',head:'fox',c:'#ff9a2a',c2:'#ffe08a',n:'Kurama Link Mode: Tailed Beast Bomb Barrage'},
+  sasuke1:{s:'kirin',c:'#9a8aff',n:'Curse Mark Level Two: Black Chidori Spear'},
+  sasuke2:{s:'titan',mode:'arrow',c:'#a05aff',c2:'#ffffff',n:'Susanoo: Blaze Release Kagutsuchi Arrow'},
+  sasuke3:{s:'kirin',c:'#c9a8ff',n:"Six Paths Indra's Arrow: Valley of the End"},
+  itachi1:{s:'titan',mode:'sword',c:'#ff5a3a',c2:'#ffd0a0',n:'Susanoo: Totsuka Blade and Yata Mirror'},
+  itachi2:{s:'dimension',look:'tsukuyomi',c:'#ff2a3a',c2:'#ffb0b0',n:'Izanami: The Loop of Fate'},
+  shisui:{s:'dimension',look:'tsukuyomi',c:'#ff5a5a',c2:'#ffffff',n:'Kotoamatsukami: Supreme Illusion'},
+  gaara:{s:'bijuu',c:'#d6b46a',c2:'#f3e2b0',n:'Shukaku Full Release: Sand Tailed Beast Bomb'},
+  temari:{s:'storm',kind:'wind',c:'#bfe9d0',c2:'#ffffff',n:'Summoning: Kamatari Blade Dance Typhoon'},
+  kankuro:{s:'army',puppets:true,c:'#b0402a',c2:'#ffd0b0',n:'Black Secret: Sasori Puppet, Iron Sand Rain'},
+  chiyo:{s:'army',puppets:true,c:'#c8a0ff',c2:'#ffffff',n:'White Secret: Chikamatsu Collection, Final Act'},
+  rasa:{s:'storm',kind:'sand',c:'#ffd84d',c2:'#fff4c0',n:'Gold Dust: Golden Waterfall Burial'},
+  lee1:{s:'rushUlt',gates:true,c:'#ff8a3a',c2:'#ffe08a',n:'Gate of Wonder: Daytime Tiger'},
+  lee2:{s:'rushUlt',gates:true,c:'#ff3a2a',c2:'#ffd0a0',n:'Gate of Wonder: Evening Elephant'},
+  guy1:{s:'rushUlt',gates:true,c:'#ff3a2a',c2:'#ffd0a0',n:'Seventh Gate: Evening Elephant'},
+  guy2:{s:'rushUlt',gates:true,c:'#ff2a1a',c2:'#ff9a6a',n:'Eighth Gate Release: Night Guy'},
+  neji:{s:'rushUlt',palms:true,c:'#bfe0ff',c2:'#ffffff',n:'Eight Trigrams: Vacuum Wall Palm'},
+  hinata1:{s:'rushUlt',palms:true,c:'#a8c8ff',c2:'#ffffff',n:'Eight Trigrams: Protection of Sixty-Four Palms'},
+  hinata2:{s:'rushUlt',palms:true,c:'#e0d0ff',c2:'#ffffff',n:"Twin Lion Fists: Hamura's Chakra"},
+  sakura:{s:'quake',c:'#ff8ac0',c2:'#ffe0f0',pink:true,n:'Strength of a Hundred: Katsuyu Final Impact'},
+  choji1:{s:'quake',c:'#ffb347',n:'Spiked Human Boulder: Full Expansion'},
+  choji2:{s:'quake',c:'#ff9ad0',c2:'#ffe0f0',n:'Butterfly Mode: Ultra Big Ball Bomb'},
+  kiba:{s:'rushUlt',c:'#e8e8f0',c2:'#ffffff',n:'Twin-Headed Wolf: Tunneling Fang Storm'},
+  iruka:{s:'rushUlt',c:'#ffd08a',c2:'#ffffff',n:'Chakra Blade: The Last Lesson'},
+  shikamaru:{s:'dimension',look:'void',c:'#7a5ad0',c2:'#e8d8ff',n:'Shadow Imitation: Thousand-Strand Stitching'},
+  shino:{s:'plague',c:'#2a2a2a',c2:'#b0b0b0',n:'Kikaichu Sphere: Hive Collapse'},
+  tenten:{s:'storm',kind:'wind',c:'#ffd0a0',c2:'#ffffff',n:'Treasure Tool: Banana Palm Fan Tempest'},
+  ino:{s:'dimension',look:'void',c:'#ffd0ff',c2:'#ffffff',n:'Mind Destruction: Total Mental Collapse'},
+  asuma:{s:'rushUlt',slashes:true,c:'#bfe9ff',c2:'#ffffff',n:'Wind Release: Flying Swallow Thousand Blades'},
+  kushina:{s:'bijuu',head:'fox',c:'#ff5a3a',c2:'#ffd0a0',n:'Adamantine Chains: Nine-Tails Barrier Crush'},
+  yamato:{s:'hydra',c:'#6abf6a',c2:'#d6ffd9',n:'Wood Release: Ten Thousand Branch Dragon Prison'},
+  sai:{s:'hydra',c:'#3a3a48',c2:'#b0b0c0',n:'Super Beast Scroll: Ink Dragon Swarm'},
+  anko:{s:'hydra',c:'#7a3ad0',c2:'#e8d0ff',n:'Twin Snakes Mutual Death'},
+  kurenai:{s:'dimension',look:'void',c:'#ff4a6a',c2:'#ffffff',n:'Demonic Illusion: Forest of Binding Death'},
+  konohamaru:{s:'bijuu',shuriken:true,c:'#8fd8ff',c2:'#ffffff',n:'Rasenshuriken: Will of Fire'},
+  boruto:{s:'planet',c:'#b0e0ff',c2:'#ffffff',n:'Karma Mode: Giant Vanishing Rasengan'},
+  jiraiya:{s:'inferno',c:'#ff6a2a',c2:'#ffe08a',n:'Sage Art: Goemon Inferno'},
+  orochimaru:{s:'hydra',c:'#8a3ad0',c2:'#e8d0ff',n:'Eight Branches Technique: Yamata no Orochi'},
+  kabuto:{s:'dimension',look:'void',c:'#9fe7a8',c2:'#ffffff',n:'Sage Art: Inorganic Reincarnation'},
+  pain:{s:'supernova',c:'#c9a8ff',c2:'#ffffff',n:'Shinra Tensei: Destruction of the Leaf'},
+  konan:{s:'rainUlt',paper:true,c:'#ffd84d',c2:'#ffffff',n:'Six Hundred Billion Explosive Tags'},
+  kisame:{s:'flood',kind:'water',sharks:true,c:'#2a6ad5',c2:'#bfe0ff',n:'Great Shark Prison: Ocean of a Thousand Sharks'},
+  deidara:{s:'supernova',c:'#ffe28a',c2:'#ffffff',n:'C0: Ultimate Art Self-Detonation'},
+  sasori:{s:'storm',kind:'sand',c:'#6a6a7a',c2:'#c8c8d8',n:'Iron Sand: World Order'},
+  hidan:{s:'dimension',look:'void',c:'#ff1a1a',c2:'#ffd0d0',n:'Jashin Curse: Immortal Death Ritual'},
+  kakuzu:{s:'inferno',c:'#ff3a1a',c2:'#ffd0a0',n:'Earth Grudge Fear: Five Masks Rampage'},
+  obito1:{s:'bijuu',head:'eye',c:'#b36bff',c2:'#ffffff',n:'Ten-Tails Revival: Tailed Beast Bomb'},
+  obito2:{s:'planet',c:'#e8e8f0',c2:'#ffffff',n:'Six Paths: Truth-Seeking Shakujo Strike'},
+  zetsu:{s:'plague',c:'#1a1a1a',c2:'#ffffff',n:'Will of Kaguya: Infinite Spores'},
+  madara1:{s:'planet',rock:true,c:'#ff7a2e',c2:'#ffd9a0',n:'Tengai Shinsei: Twin Falling Heavens'},
+  madara2:{s:'dimension',look:'tsukuyomi',c:'#ff3a3a',c2:'#ffffff',n:'Infinite Tsukuyomi'},
+  kaguya:{s:'planet',c:'#ffffff',c2:'#c9a8ff',n:'Expansive Truth-Seeking Ball'},
+  hagoromo:{s:'planet',c:'#fff2c0',c2:'#ffffff',n:'Six Paths: Birth of the Moon'},
+  raikage:{s:'kirin',c:'#ffe08a',n:'Lightning Oppression: Guillotine Drop'},
+  bee:{s:'bijuu',head:'octo',c:'#c27bff',c2:'#ffffff',n:'Eight-Tails: Tailed Beast Bomb Barrage'},
+  onoki:{s:'disintegrate',c:'#e8b06f',c2:'#fff0c0',n:'Dust Release: Primitive World Twin Cube'},
+  mei:{s:'flood',kind:'lava',c:'#ff3a0a',c2:'#ffd060',n:'Lava Release: Molten Planet Flood'},
+  yagura:{s:'bijuu',head:'turtle',c:'#3a90ff',c2:'#ffffff',n:'Three-Tails: Coral Tidal Bomb'},
+  darui:{s:'kirin',c:'#cfe8ff',n:'Storm Release: Laser Circus'},
+  zabuza:{s:'flood',kind:'water',c:'#5aa0ff',c2:'#ffffff',n:'Water Dragon Bullet: Demon of the Hidden Mist'},
+  haku:{s:'mirrorsUlt',c:'#dff4ff',c2:'#ffffff',n:'Ice Release: Black Swallow Blizzard'},
+  kimimaro:{s:'rushUlt',c:'#ffffff',c2:'#c8d0d8',n:'Dance of the Clematis: Flower Drill Spear'},
+  suigetsu:{s:'flood',kind:'water',c:'#4ab0ff',c2:'#ffffff',n:'Water Release: Giant Arm Executioner Slash'},
+  jugo:{s:'quake',c:'#ff7a2a',n:'Sage Transformation: Natural Energy Cannon'},
+  mifune:{s:'rushUlt',slashes:true,c:'#ffffff',c2:'#ffe8a0',n:'Iai: Final Draw of the Samurai'},
+  hanzo:{s:'plague',c:'#7ad050',c2:'#e0ffd0',n:'Summoning: Ibuse, Salamander Venom Breath'}
+};
+const SUPFB={nin:'planet',tai:'rushUlt',gen:'dimension'};
+function supOf(d){ return SUPERMAP[d.id]||SUPERMAP[d.base]||{s:SUPFB[d.sigType]||'planet',look:'void',n:d.sig+': Final Awakening'}; }
 
 const ULTS={
   async bijuu(e,A,D,fx,u){
@@ -3201,7 +3354,10 @@ const ULTS={
   async titan(e,A,D,fx,u){
     // a translucent giant of the attacker (Susanoo / Wood Buddha), sized so its head stays on screen
     const f=A.face, dx=D.x, SC=2.05, g={pose:Object.assign({},POSES.idle),a:0,x:A.x-f*30,sc:.6}, bl={ang:-1.7,vis:0};
-    const hands=Array.from({length:u.mode==='buddha'?14:0},(_,i)=>({a:lerp(-2.7,.25,i/13),l:rand(120,170),ph:rand(0,TAU)}));
+    // buddha: 14 wooden arms; kannon (Thousand-Armed Kannon): a golden halo of 40 arms in two rings
+    const kannon=u.mode==='kannon';
+    const hands=kannon?Array.from({length:40},(_,i)=>{ const ring=i<20?0:1, j=i%20; return {a:lerp(-3.1,.1,j/19)+(ring?.08:0),l:ring?rand(206,236):rand(150,180),ph:rand(0,TAU)}; })
+      :Array.from({length:u.mode==='buddha'?14:0},(_,i)=>({a:lerp(-2.7,.25,i/13),l:rand(120,170),ph:rand(0,TAU)}));
     const grab={k:0,list:[]};
     this.fade('vigA',.5,this.d(400)); this.pose(A,'up',this.d(240)); A.aura=1; this.sfx('charge'); this.shake(14,1500);
     const arm=(ctx,x0,y0,x1,y1,w,al)=>{ ctx.globalAlpha=al; ctx.lineCap='round'; ctx.strokeStyle='rgba(0,0,0,.45)'; ctx.lineWidth=w+5; ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke(); ctx.strokeStyle=fx.c; ctx.lineWidth=w; ctx.stroke(); ctx.fillStyle=fx.c2; ctx.strokeStyle='rgba(0,0,0,.45)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(x1,y1,w*.85,0,TAU); ctx.fill(); ctx.stroke(); };
@@ -3209,6 +3365,12 @@ const ULTS={
       if(g.a<=0) return;
       const sh=jointAt('sh',g.x,f,g.pose,g.sc), ch=jointAt('hip',g.x,f,g.pose,g.sc), t=this.t/1000;
       ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=g.a*.7; const gl=ctx.createRadialGradient(sh.x,(sh.y+ch.y)/2,10,sh.x,(sh.y+ch.y)/2,190*g.sc/SC); gl.addColorStop(0,fx.c+'99'); gl.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=gl; ctx.fillRect(sh.x-260,sh.y-260,520,620); ctx.restore();
+      if(kannon){ // the halo behind the Kannon: a golden wheel with spokes
+        const R=250*g.sc/SC; ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=g.a*.55; ctx.strokeStyle=fx.c; ctx.lineWidth=7;
+        ctx.beginPath(); ctx.arc(sh.x,sh.y,R,0,TAU); ctx.stroke(); ctx.lineWidth=3; ctx.beginPath(); ctx.arc(sh.x,sh.y,R*.8,0,TAU); ctx.stroke();
+        ctx.globalAlpha=g.a*.3; for(let i=0;i<24;i++){ const a=i*TAU/24+t*.15; ctx.beginPath(); ctx.moveTo(sh.x+Math.cos(a)*R*.8,sh.y+Math.sin(a)*R*.8); ctx.lineTo(sh.x+Math.cos(a)*R*1.12,sh.y+Math.sin(a)*R*1.12); ctx.stroke(); }
+        ctx.restore();
+      }
       if(hands.length){ ctx.save(); hands.forEach((h,i)=>{ if(grab.list.includes(i)) return; const a=h.a+Math.sin(t*2+h.ph)*.12, l=h.l*g.sc/SC; arm(ctx,sh.x,sh.y,sh.x+Math.cos(a)*l*f,sh.y+Math.sin(a)*l,10*g.sc/SC,g.a*.85); }); ctx.restore(); }
       this.drawFighter(ctx,A,{x:g.x,pose:g.pose,alpha:g.a,tint:fx.c,scale:g.sc,lift:0});
       if(bl.vis>0){
@@ -3226,9 +3388,20 @@ const ULTS={
     });
     this.ring(A.x,GY,fx.c,10,260,800,8); this.ring(A.x,GY,'#ffffff',6,180,600,5);
     const ground=(async()=>{ for(let i=0;i<14;i++){ if(this.skipping) break; dust(this,A.x+rand(-60,60),6); this.shake(10,120); this.sfx('thud'); await this.wait(this.d(80)); } })();
-    await Promise.all([this.tween(g,{sc:SC,a:.6},this.d(1100),ease.out),ground]);
+    await Promise.all([this.tween(g,{sc:SC,a:kannon?.78:.6},this.d(1100),ease.out),ground]);
     const pd=this.pdodge(e,A,D);
-    if(u.mode==='buddha'){
+    if(kannon){
+      // Top Transformation: three waves of golden palms crash down, then one last strike
+      await Promise.all([this.tween(g.pose,POSES.up,this.d(320)),this.pose(A,'cast',this.d(160))]); await this.wait(this.d(200));
+      const waves=[[2,5,8,11,14,17],[22,25,28,31,34,37],[0,4,9,13,19,21,27,33,39]];
+      for(const [w,list] of waves.entries()){
+        if(this.skipping) break;
+        grab.list=list; grab.k=0; this.sfx('whoosh'); this.lines=this.d(300);
+        await Promise.all([this.tween(g.pose,w%2?POSES.cast:POSES.slam,this.d(220)),this.tween(grab,{k:1},this.d(280),ease.in)]);
+        if(!e.dodge){ for(let i=0;i<4;i++){ D.flash=1; this.burst(dx,GY-170+i*24,fx.c,10,.7,4); this.sfx('hit',.7); this.shake(12,90); await this.wait(this.d(50)); } }
+        else { dust(this,dx,30); this.shake(12,140); await this.wait(this.d(120)); }
+      }
+    } else if(u.mode==='buddha'){
       await Promise.all([this.tween(g.pose,POSES.up,this.d(320)),this.pose(A,'cast',this.d(160))]); await this.wait(this.d(160));
       grab.list=[1,4,7,10,12]; this.sfx('whoosh'); this.lines=this.d(400);
       await Promise.all([this.tween(g.pose,POSES.slam,this.d(260)),this.tween(grab,{k:1},this.d(320),ease.in)]);
@@ -3692,10 +3865,14 @@ const LINES={
   ultPre:['THE ULTIMATE GAUGE IS FULL! {a} goes all in: {move}!','This is it! {a} unleashes {move}!','Everything on the line! {move}!'],
   hitUlt:['ULTIMATE CONNECTS! {dmg} damage! {d} is at {hp} HP.','DEVASTATING! {dmg} off {d}, down to {hp} HP.','{d} takes the full force: {dmg} damage!'],
   ultReady:['{x} has a full ultimate gauge!','Careful. {x} can go for the ultimate!'],
+  supPre:['SUPER ULTIMATE! {a} reaches the very top: {move}!','This is everything {a} has: {move}!','The arena shakes. SUPER ULTIMATE: {move}!'],
+  hitSup:['THE SUPER ULTIMATE LANDS! {dmg} damage! {d} is at {hp} HP.','{d} takes the full {move}: {dmg} damage!'],
+  supReady:['{x} has a full SUPER gauge!','{x} can go for the Super Ultimate!'],
+  guardUp:['{x} braces for impact.','{x} raises a guard.','{x} plays it safe and guards.'],
   focus:['{x} steps back to gather chakra.','{x} focuses: +{h} chakra.','{x} takes a breath and refills, +{h} chakra.']
 };
 class Announcer{
-  constructor(a,b,isMine){ this.d=[a,b]; this.isMine=isMine||(()=>false); this.hp=[100,100]; this.streak=[0,0]; this.lead=-1; this.lastIdx={}; this.ready=[false,false]; }
+  constructor(a,b,isMine){ this.d=[a,b]; this.isMine=isMine||(()=>false); this.hp=[100,100]; this.streak=[0,0]; this.lead=-1; this.lastIdx={}; this.ready=[false,false]; this.sready=[false,false]; }
   line(key){ const arr=LINES[key]; if(!Array.isArray(arr)) return arr; let i=Math.floor(Math.random()*arr.length); if(arr.length>1&&this.lastIdx[key]===i) i=(i+1)%arr.length; this.lastIdx[key]=i; return arr[i]; }
   fill(t,v){ return t.replace(/\{(\w+)\}/g,(m,k)=>v[k]!==undefined?v[k]:m); }
   vars(e){
@@ -3714,8 +3891,9 @@ class Announcer{
     const v=this.vars(e);
     if(e.type==='heal') return this.fill(this.line('heal'),v);
     if(e.type==='focus') return this.fill(this.line('focus'),v);
+    if(e.type==='guard') return this.fill(this.line('guardUp'),v);
     if(e.skip) return this.fill(this.line('skip'),v);
-    if(e.mv==='ult'){ this.ready[e.att]=false; return this.fill(this.line('ultPre'),v); }
+    if(e.mv==='ult'){ this.ready[e.att]=false; this.sready[e.att]=false; return this.fill(this.line(e.sup?'supPre':'ultPre'),v); }
     const key=e.mv==='tai'?'taiPre':e.mv==='nin'?'ninPre':e.mv==='gen'?'genPre':'sigPre';
     return this.fill(this.line(key),v);
   }
@@ -3727,14 +3905,18 @@ class Announcer{
     else if(e.surv) t=this.fill(LINES.surv,v);
     else if(e.mv==='gen') t=this.fill(this.line(e.stun?'trapped':'resisted'),v);
     else if(e.crit) t=this.fill(this.line('crit'),v);
-    else if(e.mv==='ult') t=this.fill(this.line('hitUlt'),v);
+    else if(e.mv==='ult') t=this.fill(this.line(e.sup?'hitSup':'hitUlt'),v);
     else t=this.fill(this.line(e.mv==='sig'?'hitSig':e.mv==='nin'?'hitNin':'hitTai'),v);
     if(e.guard) t+=' '+this.fill(LINES.guard,v);
     if(e.dmg>0){ this.streak[e.att]++; this.streak[1-e.att]=0; if(this.streak[e.att]===3||this.streak[e.att]===5) t+=' '+this.fill(LINES.streak,Object.assign({n:this.streak[e.att]},v)); }
     const lead=e.hp[0]>e.hp[1]?0:e.hp[1]>e.hp[0]?1:-1;
     if(!e.ko&&lead!==-1&&this.lead!==-1&&lead!==this.lead) t+=' '+this.fill(this.line('lead'),{x:this.d[lead].short});
     if(lead!==-1) this.lead=lead;
-    if(e.um) for(let i=0;i<2;i++){ if(e.um[i]>=100&&!this.ready[i]&&e.mv!=='ult'){ this.ready[i]=true; t+=' '+this.fill(this.line('ultReady'),{x:this.d[i].short}); } }
+    if(e.um) for(let i=0;i<2;i++){
+      if(e.uu&&e.uu[i]===2) continue;
+      if(e.um[i]>=100&&!this.ready[i]&&e.mv!=='ult'){ this.ready[i]=true; t+=' '+this.fill(this.line('ultReady'),{x:this.d[i].short}); }
+      if(e.sm&&e.sm[i]>=100&&!this.sready[i]&&e.mv!=='ult'){ this.sready[i]=true; t+=' '+this.fill(this.line('supReady'),{x:this.d[i].short}); }
+    }
     if(!e.ko&&!e.surv&&e.hp[1-e.att]<=25) t+=' '+this.fill(this.line('low'),v);
     return t;
   }
@@ -4082,6 +4264,7 @@ function storyFight(m,r,mi,pre){
   if(nw>=5&&nw%5===0) tell('streak','On fire',`${w.short} has won ${nw} tournament fights in a row.`,r,mi);
   if(sl>=5) tell('streak','Streak snapped',`${w.short} ends ${l.short}'s ${sl}-fight winning streak.`,r,mi);
   if(m.result.hpLeft>=100) tell('ko','Flawless',`${w.short} wins without losing a single HP.`,r,mi);
+  const fin=m.result.log.find(e=>e.ko&&e.sup); if(fin) tell('ko','Super Ultimate',`${w.short} ends it with ${fin.name}.`,r,mi);
   if(inSquad(l.id)){
     const left=aliveSquad().length;
     if(!left) tell('squad','Your squad has fallen',`${l.short} was your last fighter standing.`,r,mi);
@@ -4171,9 +4354,10 @@ function renderDraft(){
     <details class="rules">
       <summary>How scoring works</summary>
       <p>A win scores more the later the round: 4 in the Round of 64, 6 in the Round of 32, 10 in the Round of 16, 20 in the quarterfinals, 35 in the semifinals and 60 in the final.</p>
-      <p>Bonuses: +5 for a knockout, +5 for winning with 80 or more HP left, +8 for an upset (winning against a fighter rated at least 6 points higher overall), +10 if your fighter lands an Ultimate in the win, and +25 if your fighter wins the whole tournament.</p>
+      <p>Bonuses: +5 for a knockout, +5 for winning with 80 or more HP left, +8 for an upset (winning against a fighter rated at least 6 points higher overall), +10 if your fighter lands an Ultimate in the win (+15 for a Super Ultimate), and +25 if your fighter wins the whole tournament.</p>
       <p>Your squad has a style, worked out from its stats. A win in that style earns +4: Ninjutsu squads when the final blow is ninjutsu, Taijutsu squads when it is taijutsu, Genjutsu squads when the winner traps the opponent in a genjutsu. Your captain's points are then multiplied by 1.5.</p>
-      <p>Every fighter has an Ultimate gauge that fills as they hit and get hit. When it is full, they can unleash their strongest technique once per fight: it hits far harder than anything else and is very hard to dodge. Edo Tensei versions are reanimated: they regenerate, never tire, and crumble to ash when beaten.</p>
+      <p>Every fighter has one big move per fight. The gauge fills as they hit (more) and get hit (less). At 100% the Ultimate is ready; keep holding and the gauge charges on to the Super Ultimate, the character's very top technique. A big move can only be used the turn after its gauge fills, so you always get a warning. An Ultimate does at most 35 damage and a Super at most 50, so neither can wipe out a healthy fighter in one hit. When you fight it yourself, Guard cuts all damage that turn to 40%.</p>
+      <p>Edo Tensei versions are reanimated: they regenerate, never tire, and crumble to ash when beaten.</p>
       <p>Your squad can hold only one version of each character, so picking Prime Madara locks the other Madara. Every character enters the bracket as a single version: yours keep the version you drafted (except in Random Chaos), and everyone else is set by the Opponent versions option.</p>
       <p>Stats are 0 to 130. Some fighters also regenerate, guard (a chance to halve incoming damage) or have a last stand (survive one lethal hit). Finished tournaments are saved in this browser: see History for champions and every fighter's record.</p>
       <p>Spin draft: each spin rolls a random fighter for one slot (Common 50%, Rare 30%, Legendary 15%, Mythic 5%). A spun squad earns double XP. XP is your squad's points plus 25 per finished tournament; every level gives 5 spins, a title for your squad gives 3, and you get 10 free spins each day you come back.</p>
@@ -4559,7 +4743,7 @@ function renderMatches(){
     if(done&&m.upset&&!evs.some(e=>e.k==='upset')) ribs=`<span class="rib k-upset">Upset</span>`+ribs;
     if(m.played) ribs=`<span class="rib k-squad">You fought</span>`+ribs;
     let foot='';
-    if(done) foot=`<span class="ft ${m.result.ko?'ko':''}">${m.result.ko?'KO':'Decision'}</span><span class="ft">${m.result.hpLeft} HP left</span>${m.result.ultW?'<span class="ft ult">Ultimate</span>':''}${m.award?`<span class="ft pts">+${m.award} pts${m.capB?', captain':''}${m.styleB?', style':''}</span>`:''}`;
+    if(done) foot=`<span class="ft ${m.result.ko?'ko':''}">${m.result.ko?'KO':'Decision'}</span><span class="ft">${m.result.hpLeft} HP left</span>${m.result.supW?'<span class="ft ult sup">Super Ultimate</span>':m.result.ultW?'<span class="ft ult">Ultimate</span>':''}${m.award?`<span class="ft pts">+${m.award} pts${m.capB?', captain':''}${m.styleB?', style':''}</span>`:''}`;
     else if(now) foot='<span class="ft pts">Up next</span>';
     return `<button class="mc ${done?'done':''} ${now?'now':''} ${evs.some(e=>e.k==='squad')?'sq':''}" data-action="view" data-r="${state.tab}" data-m="${mi}" ${done?'':'disabled'} ${done?'aria-label="Replay this fight"':''}>${ribs?`<div class="ribs">${ribs}</div>`:''}${row(m.a)}${row(m.b)}<div class="mf">${foot}</div></button>`;
   }).join('');
@@ -4587,11 +4771,11 @@ function buildArena(a,b,label,intro,note,theme){
     <ul class="log" id="log" aria-live="polite">${lines.map(t=>`<li class="info">${esc(t)}</li>`).join('')}</ul>`;
   const st=new Stage($('stage'),a,b,{theme:theme||0,mul:state.speed==='fast'?.55:1,calm:reduced});
   st.paused=state.paused;
-  st.onHp=e=>setHp(e.hp,e.ch,e.um);
+  st.onHp=e=>setHp(e.hp,e.ch,e.um,e.sm,e.uu);
   state.stage=st;
   return st;
 }
-function setHp(hp,ch,um){
+function setHp(hp,ch,um,sm,uu){
   ['A','B'].forEach((s,i)=>{
     const bar=$('hpbar'+s), n=$('hpn'+s); if(!bar) return;
     const v=hp[i]; bar.setAttribute('aria-valuenow',v);
@@ -4599,7 +4783,13 @@ function setHp(hp,ch,um){
     b.style.background=v>50?'var(--good)':v>25?'var(--flame)':'var(--ko)';
     n.textContent=v+' HP';
     const cb=$('cb'+s); if(cb&&ch) cb.style.width=ch[i]+'%';
-    if(um){ const ub=$('ub'+s), ul=$('ul'+s), ubar=$('ubar'+s); if(ub) ub.style.width=um[i]+'%'; if(ul) ul.textContent=um[i]>=100?'Ultimate READY':`Ultimate ${um[i]}%`; if(ubar) ubar.classList.toggle('ready',um[i]>=100); if(ul) ul.classList.toggle('ready',um[i]>=100); }
+    if(um){
+      const ub=$('ub'+s), ul=$('ul'+s), ubar=$('ubar'+s), spent=uu&&uu[i]===2, u=spent?0:um[i], sp=spent||!sm?0:sm[i];
+      if(ub){ ub.style.width=u+'%'; ub.style.setProperty('--sp',sp+'%'); }
+      if(ul) ul.textContent=spent?'Big move spent':sp>=100?'SUPER ULTIMATE READY':u>=100?(sp>0?`Ultimate READY, Super ${sp}%`:'Ultimate READY'):`Ultimate ${u}%`;
+      if(ubar){ ubar.classList.toggle('ready',u>=100); ubar.classList.toggle('sup',sp>0); }
+      if(ul){ ul.classList.toggle('ready',u>=100); ul.classList.toggle('sup',sp>=100); }
+    }
   });
 }
 function setTicker(text,hot){
@@ -4626,7 +4816,7 @@ function showFinal(m,r){
   const last=m.result.log[m.result.log.length-1];
   const st=buildArena(m.a,m.b,`${roundName(r)}, result`,'',hasSquad(m)?'Your fighter was in this one':'',themeFor(r));
   m.result.log.forEach(addLine);
-  st.setFinal(last.win,m.result.ko); setHp(last.hp,last.ch,last.um); markWinner(last.win);
+  st.setFinal(last.win,m.result.ko); setHp(last.hp,last.ch,last.um,last.sm,last.uu); markWinner(last.win);
   const ce=state.champion&&r===nRounds()-1?state.story.find(e=>e.k==='champ'):null;
   setTicker(ce?ce.x:new Announcer(m.a,m.b,f=>inSquad(f.id)).end(last),true);
 }
@@ -4651,7 +4841,7 @@ async function playSim(m,sim,r,real){
     addLine(e);
     if(e.type==='info') continue;
     try{ await Promise.race([e.type==='end'?st.finale(e):st.playEntry(e),stageGuard(st,12000)]); }catch(err){ console.error(err); }
-    setHp(e.hp,e.ch,e.um);
+    setHp(e.hp,e.ch,e.um,e.sm,e.uu);
     if(e.type==='end') markWinner(e.win);
   }
   st.skipping=false;
@@ -4695,7 +4885,7 @@ function finalize(m,sim){
     if(sim.ko) p+=5;
     if(sim.hpLeft>=80) p+=5;
     if(m.upset) p+=8;
-    if(sim.ultW) p+=10;
+    if(sim.supW) p+=15; else if(sim.ultW) p+=10;
     if(r===nRounds()-1) p+=25;
     const I=squadIdent(state.squad);
     if(I&&styleHit(I.prim,m,sim)){ p+=4; m.styleB=true; }
@@ -4733,21 +4923,25 @@ function afterSim(last){
 }
 
 /* ---------- fight it yourself: you pick each move, the opponent uses the same AI as the simulation ---------- */
-const MOVE_KEYS=['tai','nin','gen','sig','ult','focus'];
+const MOVE_KEYS=['tai','nin','gen','sig','big','guard','focus'];
 function duelPanel(){
   const S=state.duel, D=S.D, o=D.options(S.me), me=D.f[S.me].d, foe=D.f[1-S.me].d, w=S.waiting;
   const b=(k,i,cls,title,sub,ok)=>`<button class="cbtn ${cls}" data-action="move" data-val="${k}" ${w&&ok?'':'disabled'} aria-keyshortcuts="${i+1}"><kbd>${i+1}</kbd><b>${title}</b><small>${sub}</small></button>`;
-  const head=S.done?'Fight over.':w?(S.auto?'The AI is fighting for you.':`Your move, turn ${D.turn}.<span class="kh"> Pick a technique or press 1 to 6.</span>`):o.stun?`${me.short} is trapped in a genjutsu and loses this turn...`:`Turn ${D.turn} is playing out...`;
+  const head=S.done?'Fight over.':w?(S.auto?'The AI is fighting for you.':`Your move, turn ${D.turn}.<span class="kh"> Pick a technique or press 1 to 7.</span>`):o.stun?`${me.short} is trapped in a genjutsu and loses this turn...`:`Turn ${D.turn} is playing out...`;
   return `<div class="cmd ${w?'live':''}">
-    <div class="cmdh"><span class="you">You: <b>${me.short}</b></span><span>Chakra <b>${o.ch}</b>/${o.max}</span><span>Ultimate <b>${o.ult.used?'used':o.ult.gauge+'%'}</b></span><span class="cmds">${head}</span></div>
+    <div class="cmdh"><span class="you">You: <b>${me.short}</b></span><span>Chakra <b>${o.ch}</b>/${o.max}</span><span>${o.ult.used?'Big move <b>spent</b>':o.super.gauge>0?`Super <b>${o.super.gauge}%</b>`:`Ultimate <b>${o.ult.gauge}%</b>`}</span><span class="cmds">${head}</span></div>
     <div class="cmdg">
       ${b('tai',0,'tai','Taijutsu',`Hit ${o.tai.hit}%, +3 chakra`,o.tai.ok)}
       ${b('nin',1,'nin','Ninjutsu',o.nin.ok?`10 chakra, hit ${o.nin.hit}%`:'Needs 10 chakra',o.nin.ok)}
       ${b('gen',2,'gen','Genjutsu',o.gen.stunned?`${foe.short} is already trapped`:o.gen.ok?`8 chakra, trap ${o.gen.trap}%`:'Needs 8 chakra',o.gen.ok)}
       ${b('sig',3,'sig',me.sig,o.sig.cd>0?`Ready in ${o.sig.cd} turn${o.sig.cd>1?'s':''}`:o.sig.ok?`28 chakra, hit ${o.sig.hit}%`:'Needs 28 chakra',o.sig.ok)}
-      ${b('ult',4,'ult','ULTIMATE',`${o.ult.used?'Used':o.ult.ok?`READY, hit ${o.ult.hit}%`:`Gauge ${o.ult.gauge}%`}: ${ultOf(me).n}`,o.ult.ok)}
-      ${b('focus',5,'foc','Focus',o.focus.ok?`Skip the attack, +${o.focus.gain} chakra`:'Chakra is full',o.focus.ok)}
+      ${o.ult.used?b('ult',4,'ult','Big move','Spent this fight',false)
+        :o.super.ok?b('super',4,'ult sup','SUPER ULTIMATE',`${supOf(me).n}. READY, hit ${o.super.hit}%`,true)
+        :b('ult',4,'ult','ULTIMATE',`${ultOf(me).n}. ${o.ult.ok?`READY, hit ${o.ult.hit}%. ${o.super.gauge>0?`Super charging ${o.super.gauge}%`:'Hold it to charge the Super'}`:o.ult.soon?'Ready next turn':`Gauge ${o.ult.gauge}%`}`,o.ult.ok)}
+      ${b('guard',5,'grd'+(o.threat&&w?' hot':''),'Guard',`All damage this turn x0.4${o.guard.gain?`, +${o.guard.gain} chakra`:''}`,o.guard.ok)}
+      ${b('focus',6,'foc','Focus',o.focus.ok?`Skip the attack, +${o.focus.gain} chakra`:'Chakra is full',o.focus.ok)}
     </div>
+    ${o.threat&&w?`<div class="threat" role="alert">${foe.short}'s ${o.threat==='super'?'SUPER ULTIMATE':'Ultimate'} is READY. Guard (key 6) cuts it to 40%.</div>`:''}
     <div class="row cmdr">
       ${speedSeg()}
       <button class="btn small" data-action="sound">Sound: ${Sfx.on?'on':'off'}</button>
@@ -4791,7 +4985,7 @@ async function playControlled(a,b,me,o){
       const e=D.log[ptr++]; if(gone()) return false;
       addLine(e); if(e.type==='info') continue;
       try{ await Promise.race([e.type==='end'?st.finale(e):st.playEntry(e),stageGuard(st,12000)]); }catch(err){ console.error(err); }
-      setHp(e.hp,e.ch,e.um); if(e.type==='end') markWinner(e.win);
+      setHp(e.hp,e.ch,e.um,e.sm,e.uu); if(e.type==='end') markWinner(e.win);
     }
     return !gone();
   };
@@ -4806,7 +5000,8 @@ async function playControlled(a,b,me,o){
     if(D.f[me].stun>0){ renderDuel(); }
     else { choice=await askMove(); if(choice===null||gone()) return null; }
     renderDuel();
-    for(const i of D.order()){ if(D.f[0].hp<=0||D.f[1].hp<=0) break; D.act(i,i===me?choice:undefined); if(!await playNew()) return null; }
+    const ord=choice==='guard'?[me,1-me]:D.order(); // a guard goes up before anyone moves
+    for(const i of ord){ if(D.f[0].hp<=0||D.f[1].hp<=0) break; D.act(i,i===me?choice:undefined); if(!await playNew()) return null; }
     D.endTurn(); if(!await playNew()) return null;
   }
   const res=D.result(); st.skipping=false;
@@ -4889,7 +5084,9 @@ function startVersus(){
 document.addEventListener('keydown',e=>{
   if(!state.duel||!state.duel.waiting||e.ctrlKey||e.metaKey||e.altKey) return;
   const t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='SELECT'||t.tagName==='TEXTAREA')) return;
-  const k=MOVE_KEYS[+e.key-1]; if(k){ e.preventDefault(); chooseMove(k); }
+  let k=MOVE_KEYS[+e.key-1]; if(!k) return;
+  if(k==='big') k=state.duel.D.options(state.duel.me).super.ok?'super':'ult';
+  e.preventDefault(); chooseMove(k);
 });
 
 /* ---------- spectator mode: the tournament runs itself ---------- */
@@ -4898,7 +5095,7 @@ function worthWatching(m,sim,r){
   if(r>=nRounds()-3) return true;
   let s=0;
   if(sim.winner.ovr+6<=sim.loser.ovr) s+=3;
-  if(sim.ultW||sim.ultL) s+=2;
+  if(sim.supW||sim.supL) s+=4; else if(sim.ultW||sim.ultL) s+=2;
   if(sim.hpLeft<=25) s+=2; else if(sim.hpLeft<=45) s+=1;
   if(Math.abs(m.a.ovr-m.b.ovr)<=4) s+=1;
   if([m.a,m.b].some(f=>f.id===state.defending||f.id===state.favorite||liveRec(f.id).st>=4)) s+=2;

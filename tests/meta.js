@@ -196,7 +196,7 @@ const path = require('path');
       if ((!s.duel && !s.busy) || s.done) break;
       if (s.waiting) {
         const o = await page.evaluate(() => state.duel.D.options(state.duel.me));
-        await page.keyboard.press(o.ult.ok ? '5' : o.sig.ok ? '4' : o.focus.ok && o.ch < 10 ? '6' : o.nin.ok ? '2' : '1'); moves++;
+        await page.keyboard.press(o.super.ok || o.ult.ok ? '5' : o.threat ? '6' : o.sig.ok ? '4' : o.focus.ok && o.ch < 10 ? '7' : o.nin.ok ? '2' : '1'); moves++;
       } else await page.click('#cmdslot [data-action="skip"]').catch(() => {});
       await page.waitForTimeout(120);
     }
@@ -227,7 +227,10 @@ const path = require('path');
   await page.click('[data-action="speed"][data-val="fast"]');
   await page.click('[data-action="vsfight"]');
   await page.waitForFunction(() => state.duel && state.duel.waiting, null, { timeout: 15000 }).catch(() => fail.push('quick fight never asked for a move'));
-  await page.evaluate(() => document.getElementById('arena').scrollIntoView()); await shot('12_quickfight');
+  // force the opponent's Super to be ready: the bar must warn and offer Guard
+  await page.evaluate(() => { const D = state.duel.D; D.f[1].um = RULES.supAt; D.f[1].readyT = D.f[1].superT = -1; D.f[0].um = RULES.ultAt; D.f[0].readyT = -1; renderDuel(); });
+  ok(await page.evaluate(() => /SUPER ULTIMATE is READY/.test(document.getElementById('cmdslot').textContent) && !!document.querySelector('.cbtn.grd.hot')), 'no warning when the opponent Super is ready');
+  await page.evaluate(() => document.getElementById('cmdslot').scrollIntoView({ block: 'end' })); await shot('12_quickfight');
   await playOut();
   await page.waitForFunction(() => !state.busy && state.vs.last, null, { timeout: 20000 }).catch(() => fail.push('quick fight did not finish'));
   const qf = await page.evaluate(() => ({ last: state.vs.last, xp: PROF.xp, btn: !!document.querySelector('[data-action="vsfight"]') }));

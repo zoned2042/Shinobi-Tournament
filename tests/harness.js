@@ -7,6 +7,9 @@ window.T = {
   /* a log entry shaped exactly like the ones simFight() produces */
   entry(A, D, att, mv, variant) {
     const v = variant || 'hit';
+    if (mv === 'guard') return { text: '', type: 'guard', hp: [70, 70], ch: [50, 50], um: [0, 0], att, tgt: null, mv: null, name: '', dmg: 0,
+      dodge: false, crit: false, guard: false, stun: false, surv: false, ko: false, skip: false, resist: false, who: att, st: A.sigType, heal: 10, win: null };
+    if (mv === 'super') { const e = T.entry(A, D, att, 'ult', variant); e.sup = true; e.name = supOf(A).n; return e; }
     if (mv === 'focus') return { text: '', type: 'focus', hp: [70, 70], ch: [50, 50], um: [0, 0], att, tgt: null, mv: null, name: '', dmg: 0,
       dodge: false, crit: false, guard: false, stun: false, surv: false, ko: false, skip: false, resist: false, who: att, st: A.sigType, heal: 25, win: null };
     const name = mv === 'ult' ? ultOf(A).n : mv === 'sig' ? A.sig : mv === 'nin' ? (A.mv && A.mv[0]) || 'a Fireball Jutsu'
