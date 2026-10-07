@@ -34,6 +34,7 @@ node tests/frames.js all ult ko   #   one sheet per version; "styles" instead of
 node tests/titles.js              # every Ultimate, Kinjutsu and signature cut-in title, frozen when fully revealed
 npm run portraits                 # contact sheet of every look to tests/out/portraits.png
 node tests/look.js itachi1,pain    # close-up of a look: big portrait, face icon, fighter in 6 poses at 2x
+node tests/look.js crow,kazekage   #   also takes puppet looks (PUP_LOOK keys): figure only
 npm run sounds                    # renders every effect + the busiest moments offline to tests/out/sfx.wav, reports peaks/clipping
 npm run layout                    # phone-width screenshots (draft, bracket, arena, story, history, modes, spectator) + overflow check
 ```
@@ -57,8 +58,9 @@ Google Fonts through curl so the canvas text uses the real fonts.
 | `SUPERMAP` / `supOf` / `KIN` | Kinjutsu ("forbidden technique"; called "super" in code, e.g. `e.sup`, `supOf`): the tier above the Ultimate, each character's top technique. The player-facing name is the one constant `KIN`. Hashirama's is Sage Art Shinsu Senju, Thousand-Armed Kannon. Same format and styles as `ULTMAP`; played with `big:true`, a gold "KINJUTSU" cut-in (`ultCut.sup`) and a gold impact (`stage.superOn` in `ultHit`). `titan` has a `kannon` mode (golden halo of 40 arms striking in three waves). |
 | `Sfx` | Tiny WebAudio synth (no assets). `tone(...,at)` schedules on the audio clock. Measured worst case (stacked KO impacts) peaks at ~0.55 of full scale, so there is no limiter. |
 | `class Stage` | Canvas renderer + animation engine. Fighters are skeletons driven by pose angles (`POSES`). Plays log entries as animations. `titleLayout` breaks Ultimate titles into 1-4 lines. |
-| `SIGMAP` / `STYLES` | 32 staged signature moves, keyed by id or base. Unmapped characters fall back to a generic move by `sigType` (currently none). |
-| `ULTMAP` / `ULTS` | 19 Ultimate choreographies, keyed by id or base. Fallback by sigType via `ULTFB`. |
+| `SIGMAP` / `STYLES` | 33 staged signature moves, keyed by id or base. Unmapped characters fall back to a generic move by `sigType` (currently none). |
+| `ULTMAP` / `ULTS` | 20 Ultimate choreographies, keyed by id or base. Fallback by sigType via `ULTFB`. |
+| `PUPPETS` / `PUP_LOOK` / `mkPup` / `pupFree` / `pupHome` | Puppet masters (Kankuro: Crow; Chiyo: Mother and Father; both Sasoris: the Third Kazekage). `Stage.mk` gives each fighter `f.pups`: pseudo-fighters drawn with `drawFighter` (look from `PUP_LOOK`, `pup:true` = wooden limbs with ball joints and a hinged jaw; `arms4`, `tail`, `bk:'shell'`) that hover behind their master (`p.off`) on chakra threads (`drawThreads`) while `p.follow` is set, and drop when the master is KO'd (`p.down`). The puppet does the master's tai and nin (`pupFree` takes it off follow), steps in front on Guard, raises its arms during other big moves. Signature style `puppetry` (`m:'crow'|'pair'|'sand'`), Ultimate styles `army` with `pk` (real puppet looks: `CHIKA` ten, `HUNDRED` for Sasori) and `threepup` (Kankuro: Salamander shields, Black Ant swallows, Crow's blades; `sasori:true` adds the Sasori puppet for the Kinjutsu). `recover()` hands every puppet back (`pupHome`); `T.check` fails a run that leaves a puppet off its threads. |
 | `LINES` / `Announcer` | Live commentary ticker text. |
 | `APP STATE AND UI` | Draft screen, settings, bracket tabs, arena HUD, `playSim`, scoring (`finalize`), events. |
 | `MODES` / `ERA` / `VILLAINS` / `TAI_MASTERS` / `akaSide` | Tournament types. A mode is `{id,t,d,ok(f,era),pick(f),max}`; `ok` filters versions for the field AND the draft, `pick` further limits what the player may draft or spin (`draftable`), `max` caps the bracket. Themed types stay in their story period: Akatsuki War = Shippuden/War versions only (`inEra(f,'SW')`), sides by version (`akaSide`: Akatsuki-tagged + `AKA_ALLIES`), up to 32; Edo Rising = Edo-only squad (`pick:isEdo`), living defenders from the War era; Taijutsu Masters = the explicit `TAI_MASTERS` list. Classic, Legends, Kage Clash, Underdogs, Villains and Random Chaos are deliberate all-eras dream matches. `buildField` has the special cases (Akatsuki War pairs the two sides in round 1, Edo Rising puts Edo versions first, Random Chaos rolls versions, squad included). `ERA[id]` = eras a version fits (`1` Part I, `S` Shippuden, `W` War, `N` Next Gen). `state.settings.mode` is the draft choice, `state.mode` the running tournament's. |
@@ -118,6 +120,9 @@ Verified (Oct 2026):
   Edo defender. Every Ultimate and signature cut-in title was looked at (`tests/titles.js`), none overflow.
 - Shino/Zetsu/Hanzo/Sai plague swarm redone and checked (it used to read as falling snow).
 - Akatsuki Itachi has a custom signature (`crows`: crow flock + Mangekyo Tsukuyomi), checked in hit/dodge/KO.
+- Puppet masters fight with visible puppets (see `PUPPETS`): moves suite 2,548 runs clean, plus every version's sig/ult/tai/nin/gen
+  (hit/KO/skip) against Chiyo and Kankuro as defenders (2,700 runs, 0 failures). Frames looked at: idle, tai, nin, Guard, every
+  puppet signature, all three puppet Ultimates (hit/dodge/KO) and Kankuro's Kinjutsu, a puppet master KO'd.
 - Sound: `npm run sounds` renders every effect and the busiest stacked moments; worst peak 0.54 of full scale, no
   clipping. The effects have still never been HEARD by a person: listen to `tests/out/sfx.wav`.
 - Phone layout at 390 and 360 px: no horizontal overflow; squad tray is one scrolling row, the live ticker sits under

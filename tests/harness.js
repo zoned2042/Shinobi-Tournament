@@ -52,7 +52,8 @@ window.T = {
     for (let s = 0; s < (o.settle || 0); s += dt) { st.update(dt); if (s % 32 === 0) await T.yieldMacro(); }
     if (o.every && o.settle) grab(t + (o.settle || 0));
     const fA = st.f[att], fD = st.f[1 - att];
-    const pick = f => ({ x: Math.round(f.x), home: f.home, alpha: +f.alpha.toFixed(2), lift: Math.round(f.lift), scale: +f.scale.toFixed(2), rot: +f.pose.rot.toFixed(2), dead: f.dead, face: f.face, dizzy: f.dizzy });
+    const pick = f => ({ x: Math.round(f.x), home: f.home, alpha: +f.alpha.toFixed(2), lift: Math.round(f.lift), scale: +f.scale.toFixed(2), rot: +f.pose.rot.toFixed(2), dead: f.dead, face: f.face, dizzy: f.dizzy,
+      pups: f.pups.map(p => ({ k: p.k, follow: p.follow, down: p.down, alpha: +p.alpha.toFixed(2), dx: Math.round(p.x - Math.max(24, Math.min(776, f.x + f.face * p.off))), face: p.face })) });
     const res = {
       id: aId, vs: bId, mv, variant, done, err, t: endT,
       efx: st.efx.length, projs: st.projs.length, props: st.props.length, mood: !!st.mood, cut: !!st.cut || !!st.ultCut,
@@ -78,6 +79,11 @@ window.T = {
     const homeOk = f => Math.abs(f.x - f.home) <= 1 && f.alpha === 1 && f.lift === 0 && f.scale === 1 && f.rot === 0;
     if (!homeOk(r.A)) bad.push('attacker not reset ' + JSON.stringify(r.A));
     if (r.A.face !== (r.A.home < 400 ? 1 : -1)) bad.push('attacker faces the wrong way');
+    // puppets: back on their threads behind a living master, dropped when the master is KO'd
+    for (const [who, f] of [['attacker', r.A], ['defender', r.D]]) for (const p of f.pups) {
+      if (f.dead) { if (!p.down) bad.push(who + ' puppet ' + p.k + ' still up after KO'); }
+      else if (!p.follow || p.down || p.alpha !== 1 || Math.abs(p.dx) > 2 || p.face !== f.face) bad.push(who + ' puppet not back ' + JSON.stringify(p));
+    }
     if (r.variant === 'ko') { if (!r.D.dead) bad.push('defender not KO'); }
     else { if (r.D.dead) bad.push('defender dead without KO'); if (!homeOk(r.D)) bad.push('defender not reset ' + JSON.stringify(r.D)); }
     return bad;
