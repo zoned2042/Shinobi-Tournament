@@ -166,6 +166,9 @@ details.rules p{margin:8px 0}
 .ubar.ready{box-shadow:0 0 10px #ffd84d}
 .ulbl{font-size:11px;color:var(--muted);font-weight:700}
 .ulbl.ready{color:var(--ready)}
+.glbl{font-size:11px;color:var(--muted);font-weight:700}
+.glbl.open{color:#5fc46e}
+.glbl.death{color:#ff5a3a}
 .cf .ultn{flex-basis:100%;color:var(--flame);font-size:11px}
 .ft.ult{border-color:var(--ready);color:var(--ready)}
 .ft.ult.sup{border-color:#ff4fd8;color:#d03aa8}
@@ -344,7 +347,7 @@ details.rules p{margin:8px 0}
 .cbtn kbd{position:absolute;left:10px;top:10px;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font:700 12px ui-monospace,monospace;background:var(--bg);border:1px solid var(--edge);color:var(--muted)}
 .cbtn:hover:not(:disabled){border-color:var(--mc);transform:translateY(-2px)}
 .cbtn:disabled{opacity:.42;cursor:not-allowed}
-.cbtn.tai{--mc:var(--flame)} .cbtn.nin{--mc:var(--chakra)} .cbtn.gen{--mc:var(--gen)} .cbtn.sig{--mc:var(--ko)} .cbtn.foc{--mc:var(--good)}
+.cbtn.tai{--mc:var(--flame)} .cbtn.gate{--mc:#5fc46e} .cbtn.nin{--mc:var(--chakra)} .cbtn.gen{--mc:var(--gen)} .cbtn.sig{--mc:var(--ko)} .cbtn.foc{--mc:var(--good)}
 .cbtn.ult{--mc:var(--ready)}
 .cbtn.grd{--mc:#7fb8ff}
 .cbtn.grd.hot:not(:disabled){box-shadow:0 0 0 2px #7fb8ff,0 0 18px rgba(127,184,255,.45);animation:pulse 1.2s ease-in-out infinite}
@@ -485,10 +488,10 @@ const ROSTER=[
   C('chiyo','Chiyo','Chiyo','chiyo',['Sand'],'Puppet Master',[88,55,25,60,60,100],'Mother and Father Puppets','nin'),
   C('rasa','Rasa','Rasa','rasa',['Sand','Kage'],'Fourth Kazekage',[92,60,25,70,80,92],'Gold Dust Wave','nin',{guard:.1}),
   // Taijutsu users
-  C('lee1','Rock Lee','Rock Lee','lee',['Leaf'],'Part I',[5,90,5,90,80,50],'Primary Lotus','tai'),
-  C('lee2','Rock Lee','Gates Lee','lee',['Leaf'],'Eight Gates Release',[5,118,5,118,70,70],'Hidden Lotus','tai'),
-  C('guy1','Might Guy','Might Guy','guy',['Leaf'],'Jonin',[10,105,10,100,100,80],'Evening Elephant','tai'),
-  C('guy2','Might Guy','Eighth Gate Guy','guy',['Leaf','Legends'],'Eighth Gate',[10,126,10,120,60,88],'Night Guy','tai',{last:true}),
+  C('lee1','Rock Lee','Rock Lee','lee',['Leaf'],'Part I',[5,90,5,90,80,50],'Primary Lotus','tai',{gates:5,sg:1}),
+  C('lee2','Rock Lee','Gates Lee','lee',['Leaf'],'Eight Gates Release',[5,100,5,100,78,70],'Hidden Lotus','tai',{gates:6,sg:5}),
+  C('guy1','Might Guy','Might Guy','guy',['Leaf'],'Jonin',[10,105,10,100,100,80],'Morning Peacock','tai',{gates:7,sg:6}),
+  C('guy2','Might Guy','Eighth Gate Guy','guy',['Leaf','Legends'],'Eighth Gate',[10,108,10,100,80,88],'Morning Peacock','tai',{gates:8,sg:6,last:true}),
   C('neji','Neji Hyuga','Neji','neji',['Leaf'],'Byakugan',[70,100,40,90,70,94],'Sixty-Four Palms','tai',{guard:.1}),
   C('hinata1','Hinata Hyuga','Young Hinata','hinata',['Leaf'],'Part I',[45,70,40,65,55,70],'Gentle Fist Strike','tai'),
   C('hinata2','Hinata Hyuga','Hinata','hinata',['Leaf'],'Byakugan Princess',[62,92,50,80,70,86],'Twin Lion Fists','tai',{guard:.1}),
@@ -576,8 +579,8 @@ const MOVES={
   kankuro:{tm:['Puppet Slash','Blade Arm'],mv:['Puppet Barrage','Poison Needle Spray','Black Secret Technique','Iron Maiden'],gj:[]},
   rasa:{tm:['Gold Dust Fist'],mv:['Gold Dust Wave','Gold Dust Shuriken','Magnet Release'],gj:[]},
   chiyo:{tm:['Puppet Strike'],mv:['Mother and Father Puppets','Poison Blade Dance','Spirit Rescue Art'],gj:[]},
-  lee:{tm:['Leaf Hurricane','Konoha Senpu','Dynamic Entry','Leaf Rising Wind','Hidden Lotus Combo'],mv:['Weights Off Strike'],gj:[]},
-  guy:{tm:['Leaf Great Whirlwind','Dynamic Entry','Strong Fist','Leaf Rising Wind'],mv:['Morning Peacock Fire'],gj:[]},
+  lee:{tm:['Leaf Hurricane','Konoha Senpu','Dynamic Entry','Leaf Rising Wind','Weights Off Strike','Leaf Gale'],mv:[],gj:[]}, // taijutsu only
+  guy:{tm:['Leaf Great Whirlwind','Dynamic Entry','Strong Fist','Leaf Rising Wind','Leaf Hurricane'],mv:[],gj:[]},
   neji:{tm:['Gentle Fist Strike','Eight Trigrams Palm','Rotation Counter'],mv:['Air Palm','Gentle Step Twin Lions'],gj:[]},
   hinata:{tm:['Gentle Fist','Eight Trigrams Palm','Twin Lion Fists'],mv:['Air Palm','Protective Eight Trigrams'],gj:[]},
   sakura:{tm:['Cherry Blossom Impact','Chakra Punch','Medical Palm Strike'],mv:['Chakra Scalpel','Medical Burst'],gj:['Genjutsu Release Counter']},
@@ -747,10 +750,10 @@ const LK={
   rasa:{sk:'#e8c8a8',hr:'#3a2a1a',hs:'bald',tp:'#8a3a2c',bt:'#6a2a22',ac:'#e8dcc0',os:'robe',hat:'#d8c8a0',mr:['mustache'],keep:true},
   chiyo:{sk:'#e8cdb0',hr:'#d8d4d0',hs:'bun',ey:'#2a2a33',tp:'#7a4a6a',bt:'#5a3a50',os:'robe',mr:['wrinkle'],keep:true},
   lee:{sk:'#f3d2b0',hr:'#14141a',hs:'bowl',tp:'#2fa043',bt:'#2fa043',ac:'#f08a2a',bd:'waist',os:'suit',lg:'warm',mr:['brows'],sh:'#14141a'},
-  lee2:{sk:'#f0a898',glow:'#7fe28a',mr:['brows','vein']},
+  lee2:{mr:['brows']},
   guy:{sk:'#f0c8a0',hr:'#14141a',hs:'bowl',tp:'#2fa043',bt:'#2fa043',ac:'#f08a2a',bd:'waist',os:'suit',lg:'warm',mr:['brows','thick'],sh:'#14141a'},
   guy1:{vs:'#4a6d4a'},
-  guy2:{sk:'#ea8c80',glow:'#ff5a3a',mr:['brows','thick','vein']},
+  guy2:{mr:['brows','thick']},
   neji:{sk:'#f2d4bf',hr:'#3a2a2a',hs:'longLow',ey:'#d8d8f0',es:'byakugan',tp:'#e8e4d4',bt:'#e8e4d4',ac:'#6a5a4a',bd:'blue-seal',os:'robe',keep:true,mr:['neji']},
   hinata:{sk:'#f6dfcc',hr:'#2a2650',hs:'bob',ey:'#d8d8f0',es:'byakugan',tp:'#a9a4d4',bt:'#2a3560',ac:'#e8e4d4',bd:'blue-neck',os:'jacket',col:true,sh:'#2a3560'},
   hinata2:{hs:'longStraight',tp:'#a9a4d4',bd:'blue'},
@@ -1239,22 +1242,44 @@ const RULES={
   supBase:58,supCap:50,supDodge:.15,bigCrit:1.25,
   guardMul:.4,guardChakra:10                              // Guard (player move): all damage that turn x0.4
 };
+/* Eight Gates (Lee, Guy: d.gates = how many they can open). They are taijutsu only: no ninjutsu, no genjutsu.
+   The 'gate' move opens the next gate and strikes in the same turn, and open gates stack: GATES[g] is the state with
+   g gates open. pw = damage multiplier (taijutsu, signature, big moves), sp = speed bonus (dodging and turn order),
+   dr = HP burned at the end of every turn (never below 1). The Gate of Healing gives back heal HP once.
+   A signature or big move that needs more gates (d.sg, u.gate) forces them open. */
+const GATES=[
+  {n:'',pw:1,sp:0,dr:0},
+  {n:'Gate of Opening',pw:1.04,sp:2,dr:0,c:'#9fe0a0'},
+  {n:'Gate of Healing',pw:1.08,sp:4,dr:0,heal:8,c:'#9fe0a0'},
+  {n:'Gate of Life',pw:1.12,sp:6,dr:0,c:'#7fe28a'},
+  {n:'Gate of Pain',pw:1.16,sp:8,dr:1,c:'#7fe28a'},
+  {n:'Gate of Limit',pw:1.21,sp:10,dr:2,c:'#6ae07a'},
+  {n:'Gate of View',pw:1.27,sp:12,dr:3,c:'#5ad86a'},
+  {n:'Gate of Wonder',pw:1.34,sp:15,dr:4,c:'#5ab8ff'},
+  {n:'Gate of Death',pw:1.5,sp:20,dr:8,c:'#ff3a2a'}
+];
+const taiOnly=d=>!!d.gates;
 function makeDuel(A,B){
   const R=RULES, D={turn:0}, maxCh=d=>40+Math.min(d.sta,130)*0.6;
-  const f=[A,B].map((d,i)=>({d,i,hp:100,ch:maxCh(d),stun:0,cd:0,used:false,um:0,usedUlt:false,ultLanded:false,supLanded:false,readyT:0,superT:0,guarding:false,form:0.82+Math.random()*0.36}));
+  const f=[A,B].map((d,i)=>({d,i,hp:100,ch:maxCh(d),stun:0,cd:0,used:false,um:0,usedUlt:false,ultLanded:false,supLanded:false,readyT:0,superT:0,guarding:false,gates:0,healed:false,form:0.82+Math.random()*0.36}));
   const log=[];
   const snap=()=>[Math.max(0,Math.round(f[0].hp)),Math.max(0,Math.round(f[1].hp))];
   const chs=()=>f.map(x=>Math.round(clamp(x.ch,0,maxCh(x.d))/maxCh(x.d)*100));
   const ums=()=>f.map(x=>x.usedUlt?0:Math.round(clamp(x.um,0,100)));
   const sms=()=>f.map(x=>x.usedUlt?0:Math.round(clamp((x.um-R.ultAt)/(R.supAt-R.ultAt)*100,0,100))); // Super charge past the Ultimate
   const uus=()=>f.map(x=>x.usedUlt?2:0);
+  const gts=()=>f.map(x=>x.gates);
+  const spdOf=x=>x.d.spd+GATES[x.gates].sp, pwOf=x=>GATES[x.gates].pw;
+  // open gates up to n (at most the fighter's limit); returns the highest gate opened, or 0
+  const openTo=(x,n)=>{ x.gh=0; n=Math.min(n,x.d.gates||0); if(n<=x.gates) return 0; x.gates=n; if(n>=2&&!x.healed){ x.healed=true; x.gh=Math.min(GATES[2].heal,100-Math.round(x.hp)); x.hp+=x.gh; } return n; };
+  const gateNote=(x,g)=>g?` ${x.d.short} opens the ${GATES[g].n}${x.gh?` (+${x.gh} HP)`:''}!`:'';
   // the gauge fills more from hitting than from being hit, so a beaten-down opponent is not handed one;
   // readyT / superT remember the turn each threshold was crossed (the move unlocks the turn after)
   const fill=(x,v)=>{ if(x.usedUlt) return; x.um=Math.min(R.supAt,x.um+v); if(x.um>=R.ultAt&&!x.readyT) x.readyT=D.turn||1; if(x.um>=R.supAt&&!x.superT) x.superT=D.turn||1; };
   const gain=(att,def,dmg)=>{ fill(att,dmg*R.gainDealt); fill(def,dmg*R.gainTaken); };
-  const say=(text,type,x)=>log.push(Object.assign({text,type,hp:snap(),ch:chs(),um:ums(),sm:sms(),uu:uus(),sup:false,tgt:null,dmg:0,win:null,att:null,mv:null,name:'',dodge:false,crit:false,guard:false,stun:false,surv:false,ko:false,skip:false,resist:false,who:null,st:null,heal:0},x||{}));
+  const say=(text,type,x)=>log.push(Object.assign({text,type,hp:snap(),ch:chs(),um:ums(),sm:sms(),uu:uus(),gt:gts(),gate:0,sup:false,tgt:null,dmg:0,win:null,att:null,mv:null,name:'',dodge:false,crit:false,guard:false,stun:false,surv:false,ko:false,skip:false,resist:false,who:null,st:null,heal:0},x||{}));
 
-  const dodgeOf=(att,def)=>clamp(0.1+(def.d.spd-att.d.spd)/300+(def.d.int-att.d.int)/700,0.04,0.38);
+  const dodgeOf=(att,def)=>clamp(0.1+(spdOf(def)-spdOf(att))/300+(def.d.int-att.d.int)/700,0.04,0.38);
   function act(att,def,choice){
     const a=att.d.short, d=def.d.short, st=att.d.sigType;
     if(att.stun>0){ att.stun--; say(`${a} is caught in an illusion and loses the turn.`,'gen',{att:att.i,skip:true}); return; }
@@ -1271,23 +1296,29 @@ function makeDuel(A,B){
     }
     if(choice?choice==='super':(canUse(att,def,'super')&&Math.random()<R.aiSup)){ bigMove(att,def,true); return; }
     if(choice?choice==='ult':(canUse(att,def,'ult')&&Math.random()<R.aiUlt)){ bigMove(att,def,false); return; }
+    // the AI opens gates early and keeps climbing while it can afford the drain; the Gate of Death is a last resort
+    const gateW=!canUse(att,def,'gate')?0:att.gates<3?70:att.gates<6?(att.hp>35?45:15):att.gates<7?(att.hp>45?30:8):(att.hp<=50||def.hp<=45?60:0);
     const opts=[
       {k:'tai',w:att.d.tai*0.9+10},
-      {k:'nin',w:att.ch>=10?att.d.nin*0.9:0},
-      {k:'gen',w:(att.ch>=8&&def.stun===0)?att.d.gen*0.7:0},
-      {k:'sig',w:(att.ch>=28&&att.cd<=0)?55:0}
+      {k:'nin',w:canUse(att,def,'nin')?att.d.nin*0.9:0},
+      {k:'gen',w:canUse(att,def,'gen')?att.d.gen*0.7:0},
+      {k:'sig',w:canUse(att,def,'sig')?55:0},
+      {k:'gate',w:gateW}
     ];
-    const m=choice||weighted(opts).k;
+    let m=choice||weighted(opts).k, gate=0;
+    if(m==='gate'){ gate=openTo(att,att.gates+1); m='tai'; }
+    if(m==='sig'&&att.d.sg) gate=openTo(att,att.d.sg);
+    const gn=gateNote(att,gate);
     let base,pow,name;
     if(m==='tai'){ base=9; pow=att.d.tai; name=pick(att.d.tm||TAI_MOVES); att.ch=Math.min(maxCh(att.d),att.ch+3); }
     else if(m==='nin'){ base=12; pow=att.d.nin; name=pick(att.d.mv||NIN_MOVES); att.ch-=10; }
     else if(m==='gen'){ base=3; pow=att.d.gen; name=(att.d.gj&&att.d.gj.length)?pick(att.d.gj):'an illusion'; att.ch-=8; }
     else { base=26; pow=att.d[st]; name=att.d.sig; att.ch-=28; att.cd=3; }
 
-    let dodge=clamp(0.1+(def.d.spd-att.d.spd)/300+(def.d.int-att.d.int)/700,0.04,0.38);
+    let dodge=dodgeOf(att,def);
     if(m==='sig') dodge*=0.6;
     if(Math.random()<dodge){
-      say(pick(DODGES).replace('{d}',d).replace('{m}',name),m==='sig'?'sig':m,{att:att.i,mv:m,name,dodge:true,st});
+      say((gn?gn.trim()+' ':'')+pick(DODGES).replace('{d}',d).replace('{m}',name),m==='sig'?'sig':m,{att:att.i,mv:m,name,dodge:true,st,gate,heal:gate?att.gh||0:0});
       return;
     }
     if(m==='gen'){
@@ -1296,7 +1327,7 @@ function makeDuel(A,B){
       else say(`${d} sees through ${a}'s ${name.replace(/^an? /,'')}.`,'gen',{att:att.i,mv:'gen',name,resist:true,st});
       return;
     }
-    let dmg=base*(0.82+0.42*pow/100)*Math.max(0.62,1.12-(def.d.tai+def.d.sta)/650)*(0.65+Math.random()*0.7)*att.form;
+    let dmg=base*(0.82+0.42*pow/100)*Math.max(0.62,1.12-(def.d.tai+def.d.sta)/650)*(0.65+Math.random()*0.7)*att.form*pwOf(att);
     const crit=Math.random()<att.d.int/600+0.04;
     if(crit) dmg*=1.4;
     dmg=Math.max(1,Math.round(dmg));
@@ -1308,9 +1339,9 @@ function makeDuel(A,B){
     const tag=crit?' Critical hit!':'';
     if(m==='sig'){
       if(st==='gen'&&Math.random()<0.5&&def.hp>0){ def.stun=1; notes+=` ${d} is stunned.`; stunned=true; }
-      say(`${a} unleashes ${name}. ${dmg} damage.${tag}${notes}`,'sig',{att:att.i,mv:m,name,tgt:def.i,dmg,crit,guard,surv,stun:stunned,ko:def.hp<=0,st});
+      say(`${gn.trim()}${gn?' ':''}${a} unleashes ${name}. ${dmg} damage.${tag}${notes}`,'sig',{att:att.i,mv:m,name,tgt:def.i,dmg,crit,guard,surv,stun:stunned,ko:def.hp<=0,st,gate,heal:gate?att.gh||0:0});
     } else {
-      say(`${a} lands ${name} on ${d}. ${dmg} damage.${tag}${notes}`,m,{att:att.i,mv:m,name,tgt:def.i,dmg,crit,guard,surv,ko:def.hp<=0,st});
+      say(`${gn.trim()}${gn?' ':''}${a} lands ${name} on ${d}. ${dmg} damage.${tag}${notes}`,m,{att:att.i,mv:m,name,tgt:def.i,dmg,crit,guard,surv,ko:def.hp<=0,st,gate,heal:gate?att.gh||0:0});
     }
   }
 
@@ -1319,8 +1350,9 @@ function makeDuel(A,B){
     const a=att.d.short, d=def.d.short, st=att.d.sigType, u=sup?supOf(att.d):ultOf(att.d), word=sup?KINU:'ULTIMATE';
     att.usedUlt=true; att.um=0;
     att.ch=Math.max(0,att.ch-20);
-    if(Math.random()<dodgeOf(att,def)*(sup?R.supDodge:R.ultDodge)){ say(`${d} somehow evades ${a}'s ${word.toLowerCase()}, ${u.n}!`,'ult',{att:att.i,mv:'ult',sup,name:u.n,dodge:true,st}); return; }
-    let ud=(sup?R.supBase:R.ultBase)*(0.82+0.42*att.d[st]/100)*Math.max(0.62,1.12-(def.d.tai+def.d.sta)/650)*(0.8+Math.random()*0.4)*att.form;
+    const gate=u.gate?openTo(att,u.gate):0, gn=gateNote(att,gate);
+    if(Math.random()<dodgeOf(att,def)*(sup?R.supDodge:R.ultDodge)){ say(`${gn.trim()}${gn?' ':''}${d} somehow evades ${a}'s ${word.toLowerCase()}, ${u.n}!`,'ult',{att:att.i,mv:'ult',sup,name:u.n,dodge:true,st,gate,heal:gate?att.gh||0:0}); return; }
+    let ud=(sup?R.supBase:R.ultBase)*(0.82+0.42*att.d[st]/100)*Math.max(0.62,1.12-(def.d.tai+def.d.sta)/650)*(0.8+Math.random()*0.4)*att.form*pwOf(att);
     const uc=Math.random()<att.d.int/600+0.06; if(uc) ud*=R.bigCrit;
     ud=Math.max(8,Math.min(sup?R.supCap:R.ultCap,Math.round(ud))); let un='', ug=false, us=false;
     if(def.guarding){ ud=Math.max(1,Math.round(ud*R.guardMul)); un+=` ${d} was guarding and takes only ${ud}.`; ug=true; }
@@ -1328,12 +1360,13 @@ function makeDuel(A,B){
     def.hp-=ud;
     if(def.hp<=0&&def.d.last&&!def.used){ def.used=true; def.hp=12; un+=` ${d} refuses to fall and survives with 12 HP.`; us=true; }
     att.ultLanded=true; if(sup) att.supLanded=true; gain(att,def,ud);
-    say(`${a} unleashes the ${word}: ${u.n}! ${ud} damage.${uc?' Critical hit!':''}${un}`,'ult',{att:att.i,mv:'ult',sup,name:u.n,tgt:def.i,dmg:ud,crit:uc,guard:ug,surv:us,ko:def.hp<=0,st});
+    say(`${gn.trim()}${gn?' ':''}${a} unleashes the ${word}: ${u.n}! ${ud} damage.${uc?' Critical hit!':''}${un}`,'ult',{att:att.i,mv:'ult',sup,name:u.n,tgt:def.i,dmg:ud,crit:uc,guard:ug,surv:us,ko:def.hp<=0,st,gate,heal:gate?att.gh||0:0});
   }
   function canUse(att,def,k){
     if(k==='tai') return true;
-    if(k==='nin') return att.ch>=10;
-    if(k==='gen') return att.ch>=8&&def.stun===0;
+    if(k==='nin') return att.ch>=10&&!taiOnly(att.d);
+    if(k==='gen') return att.ch>=8&&def.stun===0&&!taiOnly(att.d);
+    if(k==='gate') return att.gates<(att.d.gates||0);
     if(k==='sig') return att.ch>=28&&att.cd<=0;
     if(k==='ult') return !att.usedUlt&&att.um>=R.ultAt&&att.readyT<D.turn&&!(att.um>=R.supAt&&att.superT<D.turn);
     if(k==='super') return !att.usedUlt&&att.um>=R.supAt&&att.superT<D.turn;
@@ -1344,7 +1377,7 @@ function makeDuel(A,B){
   D.f=f; D.log=log; D.say=say; D.maxCh=maxCh;
   D.act=(i,choice)=>act(f[i],f[1-i],choice);
   D.over=()=>D.turn>=28||f[0].hp<=0||f[1].hp<=0;
-  D.order=()=>{ const s0=A.spd*(0.75+Math.random()*0.5), s1=B.spd*(0.75+Math.random()*0.5); return s0>=s1?[0,1]:[1,0]; };
+  D.order=()=>{ const s0=spdOf(f[0])*(0.75+Math.random()*0.5), s1=spdOf(f[1])*(0.75+Math.random()*0.5); return s0>=s1?[0,1]:[1,0]; };
   // what fighter i can do right now, with the odds the rules use (for the command bar)
   D.options=i=>{
     const att=f[i], def=f[1-i], dg=dodgeOf(att,def), pct=x=>Math.round(x*100);
@@ -1358,12 +1391,16 @@ function makeDuel(A,B){
       guard:{ok:true,gain:Math.round(Math.min(R.guardChakra,maxCh(att.d)-att.ch))},
       threat:canUse(def,att,'super')?'super':canUse(def,att,'ult')?'ult':'',
       focus:{ok:canUse(att,def,'focus'),gain:Math.round(Math.min(30,maxCh(att.d)-att.ch))},
+      gate:{ok:canUse(att,def,'gate'),open:att.gates,max:att.d.gates||0,next:GATES[att.gates+1]||null,pw:Math.round((pwOf(att)-1)*100),dr:GATES[att.gates].dr,hit:pct(1-dg)},
+      taiOnly:taiOnly(att.d),
       ch:Math.round(att.ch),max:Math.round(maxCh(att.d)),stun:att.stun>0
     };
   };
   D.endTurn=()=>{
     f.forEach(x=>{
       x.ch=Math.min(maxCh(x.d),x.ch+5); fill(x,R.gainTurn); if(x.cd>0) x.cd--; x.guarding=false;
+      const dr=Math.min(GATES[x.gates].dr,Math.ceil(x.hp)-1);
+      if(dr>0&&f[0].hp>0&&f[1].hp>0){ x.hp-=dr; say(`${x.d.short} burns ${dr} HP holding the ${GATES[x.gates].n} open.`,'drain',{who:x.i,dmg:dr}); }
       if(x.hp>0&&x.d.regen&&x.hp<100&&f[0].hp>0&&f[1].hp>0){
         const h=Math.min(x.d.regen,100-x.hp); x.hp+=h;
         say(`${x.d.short} regenerates ${h} HP.`,'heal',{who:x.i,heal:h});
@@ -1499,7 +1536,7 @@ class Stage{
   }
   mk(d,i){
     const home=i?560:240;
-    const f={d,i,x:home,home,face:i?-1:1,homeFace:i?-1:1,scale:1,pose:Object.assign({},POSES.idle),alpha:1,lift:0,flash:0,aura:0,eye:0,run:false,trail:false,dizzy:false,dead:false,fx:FX[d.base]||FX.def,look:lookOf(d),ghostT:0,flameT:0};
+    const f={d,i,x:home,home,face:i?-1:1,homeFace:i?-1:1,scale:1,pose:Object.assign({},POSES.idle),alpha:1,lift:0,flash:0,aura:0,eye:0,run:false,trail:false,dizzy:false,dead:false,fx:FX[d.base]||FX.def,look:lookOf(d),ghostT:0,flameT:0,gates:0,steamT:0};
     f.pups=pupsOf(d).map((k,n)=>this.mkPup(f,k,n));
     return f;
   }
@@ -1585,6 +1622,8 @@ class Stage{
       }
       if(f.look.edo&&!f.dead&&this.parts.length<500&&Math.random()<dt*.003) this.spawn({x:f.x+rand(-18,18),y:GY-rand(40,160),vx:rand(-.02,.02),vy:rand(.01,.05),life:rand(700,1100),size:rand(1.5,3),col:'#b8b4ae',shape:'dot'});
       if(f.trail){ f.ghostT-=dt; if(f.ghostT<=0){ f.ghostT=40; this.ghosts.push({f,x:f.x,pose:Object.assign({},f.pose),a:.38,run:f.run}); } }
+      if(f.gates>0&&!f.dead&&this.parts.length<500){ f.steamT-=dt; if(f.steamT<=0){ const g=f.gates; f.steamT=g>=8?28:g>=5?55:110; // Eight Gates: steam (red at the Gate of Death)
+        this.spawn({x:f.x+rand(-22,22),y:GY-f.lift-rand(30,150),vx:rand(-.02,.02),vy:-rand(.05,.12),life:rand(500,900),size:rand(6,g>=5?14:10),grow:.012,col:g>=8?'#ff6a4a':g>=7?'#bfe4ff':'#f0f0f0',shape:'smoke'}); } }
       if((f.aura>0||f.d.tier==='S'||f.look.glow)&&!f.dead&&this.parts.length<500){
         f.flameT-=dt; if(f.flameT<=0){ f.flameT=f.aura>0?30:95; this.spawn({x:f.x+rand(-26,26),y:GY-rand(0,20),vx:rand(-.02,.02),vy:-rand(.06,f.aura>0?.2:.12),life:rand(380,700),size:rand(3,f.aura>0?8:5),col:f.look.glow||f.fx.c,shape:'dot',grow:-.004}); }
       }
@@ -1784,6 +1823,99 @@ class Stage{
   }
 
   /* ----- drawing: fighter ----- */
+  /* the summoned creatures, standing on the ground at cr.x, facing f. cr.s = scale, cr.open = jaw, cr.neck = Manda's lunge */
+  drawSummon(ctx,k,cr,f){
+    const t=this.t/1000, ln='rgba(0,0,0,.6)';
+    ctx.save(); ctx.translate(cr.x,GY); ctx.scale(f*cr.s,cr.s); ctx.globalAlpha=cr.a; ctx.lineJoin='round'; ctx.lineCap='round'; ctx.lineWidth=3; ctx.strokeStyle=ln;
+    const E=(x,y,rx,ry,c,r)=>{ ctx.fillStyle=c; ctx.beginPath(); ctx.ellipse(x,y,rx,ry,r||0,0,TAU); ctx.fill(); ctx.stroke(); };
+    const eye=(x,y,r,c,slit)=>{ E(x,y,r,r,c||'#f0d040'); ctx.fillStyle='#14141a'; ctx.beginPath(); if(slit) ctx.ellipse(x+r*.2,y,r*.2,r*.75,0,0,TAU); else ctx.arc(x+r*.25,y,r*.45,0,TAU); ctx.fill(); };
+    if(k==='toad'){ // Gamabunta: red-brown, cream belly, blue vest, pipe
+      E(-70,-30,60,34,'#a8401f'); E(0,-96,128,92,'#b84a2a'); E(46,-64,72,52,'#ecc9a0');
+      ctx.fillStyle='#2a3a6a'; ctx.beginPath(); ctx.moveTo(-120,-60); ctx.quadraticCurveTo(-60,-200,40,-176); ctx.lineTo(10,-120); ctx.quadraticCurveTo(-60,-120,-100,-30); ctx.closePath(); ctx.fill(); ctx.stroke();
+      E(78,-140,84,52,'#b84a2a'); eye(42,-188,22,'#f0d040',true); eye(104,-182,20,'#f0d040',true);
+      ctx.fillStyle='#3a0a0a'; ctx.beginPath(); ctx.moveTo(20,-124); ctx.lineTo(160,-132); ctx.lineTo(150,-124+cr.open*34); ctx.lineTo(30,-118+cr.open*18); ctx.closePath(); ctx.fill(); ctx.stroke();
+      E(96,-16,44,17,'#a8401f'); E(-96,-14,40,15,'#a8401f'); // feet
+      ctx.lineWidth=6; ctx.strokeStyle='#5a3a20'; ctx.beginPath(); ctx.moveTo(150,-130); ctx.lineTo(196,-160); ctx.stroke(); ctx.fillStyle='#6a4428'; ctx.fillRect(190,-178,16,20);
+    } else if(k==='slug'){ // Katsuyu: white with blue stripes and eye stalks
+      ctx.fillStyle='#eef2f6'; ctx.beginPath(); ctx.moveTo(-180,0); ctx.quadraticCurveTo(-100,-80,10,-112); ctx.quadraticCurveTo(60,-190,120,-182); ctx.quadraticCurveTo(186,-170,176,-96); ctx.quadraticCurveTo(170,-40,182,0); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle='#4a7ad0'; ctx.lineWidth=8; for(const o of [0,26]){ ctx.beginPath(); ctx.moveTo(-160,-8+o*.2); ctx.quadraticCurveTo(-80,-70+o,14,-100+o); ctx.quadraticCurveTo(70,-170+o,124,-166+o); ctx.stroke(); }
+      ctx.strokeStyle=ln; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(110,-178); ctx.lineTo(98,-232+Math.sin(t*3)*4); ctx.moveTo(146,-170); ctx.lineTo(158,-224+Math.cos(t*3)*4); ctx.stroke(); ctx.lineWidth=3;
+      E(98,-236,8,8,'#4a7ad0'); E(158,-228,8,8,'#4a7ad0');
+      ctx.fillStyle='#3a5a8a'; ctx.beginPath(); ctx.ellipse(172,-110,8,5+cr.open*12,0,0,TAU); ctx.fill();
+    } else if(k==='salamander'){ // Ibuse: long, low, dark purple with pale spots
+      ctx.fillStyle='#4a3a5a'; ctx.beginPath(); ctx.moveTo(-150,-40); ctx.quadraticCurveTo(-240,-30,-290,-6); ctx.quadraticCurveTo(-230,-50,-150,-70); ctx.closePath(); ctx.fill(); ctx.stroke();
+      for(const lx of [-100,-30,60,120]){ ctx.lineWidth=14; ctx.strokeStyle='#3a2c48'; ctx.beginPath(); ctx.moveTo(lx,-40); ctx.lineTo(lx+(lx>0?20:-20),0); ctx.stroke(); } ctx.lineWidth=3; ctx.strokeStyle=ln;
+      E(0,-56,170,46,'#4a3a5a'); E(176,-64,58,34,'#4a3a5a');
+      ctx.fillStyle='#9a7ab8'; for(const [sx,sy,r] of [[-110,-70,8],[-60,-48,6],[-10,-78,9],[40,-56,7],[90,-80,6],[130,-50,5]]){ ctx.beginPath(); ctx.arc(sx,sy,r,0,TAU); ctx.fill(); }
+      eye(184,-82,9,'#f0d040',true); ctx.fillStyle='#1a0a2a'; ctx.beginPath(); ctx.moveTo(150,-56); ctx.lineTo(232,-58); ctx.lineTo(226,-52+cr.open*16); ctx.lineTo(156,-50); ctx.closePath(); ctx.fill();
+    } else if(k==='weasel'){ // Kamatari: a small one-eyed weasel with a huge scythe
+      const sw=cr.spin*2.4;
+      ctx.save(); ctx.translate(14,-110); ctx.rotate(-.5+sw); ctx.lineWidth=7; ctx.strokeStyle='#6a4a2a'; ctx.beginPath(); ctx.moveTo(0,40); ctx.lineTo(0,-150); ctx.stroke();
+      ctx.fillStyle='#d8dde4'; ctx.strokeStyle=ln; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(0,-150); ctx.quadraticCurveTo(90,-170,120,-90); ctx.quadraticCurveTo(70,-130,0,-126); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+      ctx.strokeStyle='#b8a888'; ctx.lineWidth=16; ctx.beginPath(); ctx.moveTo(-26,-40); ctx.quadraticCurveTo(-90,-60,-70,-130); ctx.stroke(); ctx.lineWidth=3; ctx.strokeStyle=ln;
+      E(0,-62,34,56,'#e0d8c4'); E(16,-128,30,24,'#e0d8c4'); E(-2,-152,8,12,'#e0d8c4',-.3); E(26,-150,8,12,'#e0d8c4',.3);
+      ctx.fillStyle='#14141a'; ctx.beginPath(); ctx.arc(30,-130,4,0,TAU); ctx.fill(); ctx.strokeStyle='#2a2a30'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(6,-140); ctx.lineTo(18,-122); ctx.stroke(); // scarred eye
+    } else if(k==='wolf'){ // Garouga: the twin-headed wolf; spins into a drill when charging
+      if(cr.spin>0){ // a spinning drill of fur, point first
+        ctx.save(); ctx.translate(0,-100); ctx.fillStyle='#f0f0f6'; ctx.beginPath(); ctx.moveTo(150,0); ctx.lineTo(-90,-80); ctx.quadraticCurveTo(-130,0,-90,80); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.clip(); ctx.strokeStyle='#a8a8b8'; ctx.lineWidth=6; for(let i=0;i<9;i++){ const x=-110+((i*30+t*900)%270); ctx.beginPath(); ctx.moveTo(x,-90); ctx.quadraticCurveTo(x+30,0,x,90); ctx.stroke(); } ctx.restore();
+        ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=3; for(let i=0;i<5;i++){ ctx.beginPath(); ctx.moveTo(-100-i*20,-100+rand(-60,60)); ctx.lineTo(-170-i*24,-100+rand(-60,60)); ctx.stroke(); } }
+      else { for(const lx of [-80,-50,60,90]){ ctx.lineWidth=16; ctx.strokeStyle='#e0e0e8'; ctx.beginPath(); ctx.moveTo(lx,-70); ctx.lineTo(lx+8,0); ctx.stroke(); } ctx.lineWidth=3; ctx.strokeStyle=ln;
+        E(0,-100,120,58,'#f4f4f8'); ctx.fillStyle='#f4f4f8'; ctx.beginPath(); ctx.moveTo(-110,-110); ctx.quadraticCurveTo(-180,-150,-170,-200); ctx.quadraticCurveTo(-150,-140,-100,-130); ctx.fill(); ctx.stroke();
+        for(const [hx,hy] of [[120,-170],[96,-120]]){ E(hx,hy,48,32,'#f4f4f8'); ctx.fillStyle='#f4f4f8'; ctx.beginPath(); ctx.moveTo(hx-30,hy-20); ctx.lineTo(hx-20,hy-56); ctx.lineTo(hx-4,hy-28); ctx.closePath(); ctx.fill(); ctx.stroke(); E(hx+48,hy+6,22,14,'#f4f4f8'); ctx.fillStyle='#c81e1e'; ctx.beginPath(); ctx.moveTo(hx+4,hy-8); ctx.lineTo(hx+30,hy+4); ctx.lineTo(hx+6,hy+4); ctx.closePath(); ctx.fill(); ctx.fillStyle='#14141a'; ctx.beginPath(); ctx.arc(hx+20,hy-10,4,0,TAU); ctx.arc(hx+68,hy+4,5,0,TAU); ctx.fill(); } }
+    } else { // Manda: coils on the ground, the neck rises and lunges (cr.neck)
+      E(-20,-26,150,30,'#6a3aa0'); E(0,-70,120,28,'#7a4ab0'); E(-10,-108,90,24,'#6a3aa0');
+      const hx=lerp(90,(cr.lunge||360),cr.neck), hy=lerp(-240,-110,cr.neck);
+      ctx.lineWidth=46; ctx.strokeStyle='#7a4ab0'; ctx.beginPath(); ctx.moveTo(-10,-110); ctx.bezierCurveTo(60,-150,lerp(10,hx-80,cr.neck),lerp(-260,hy,cr.neck),hx,hy); ctx.stroke();
+      ctx.lineWidth=20; ctx.strokeStyle='#c8a8e8'; ctx.stroke(); ctx.lineWidth=3; ctx.strokeStyle=ln;
+      ctx.save(); ctx.translate(hx,hy); E(14,-6,56,32,'#7a4ab0'); eye(10,-24,10,'#f0d040',true);
+      ctx.fillStyle='#2a0a3a'; ctx.beginPath(); ctx.moveTo(0,4); ctx.lineTo(74,-2); ctx.lineTo(70,4+cr.open*36); ctx.closePath(); ctx.fill();
+      if(cr.open>.3){ ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.moveTo(50,0); ctx.lineTo(56,18*cr.open); ctx.lineTo(62,0); ctx.moveTo(30,2); ctx.lineTo(36,16*cr.open); ctx.lineTo(42,2); ctx.fill(); }
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+  /* the holds of ULTS.bind; st.k = how far the hold has reached (0-1), st.a = fade, st.sq = how tight it is */
+  drawBind(ctx,m,st,A,D,dx,f,fx){
+    const t=this.t/1000, k=st.k, cy=GY-95; if(st.a<=0) return;
+    ctx.save(); ctx.globalAlpha=st.a; ctx.lineCap='round'; ctx.lineJoin='round';
+    if(m==='shadow'){
+      const x1=lerp(A.x,dx,Math.min(1,k*1.5)); ctx.fillStyle='rgba(12,8,20,.88)'; ctx.beginPath(); ctx.moveTo(A.x,GY-2);
+      for(let x=A.x;f>0?x<=x1:x>=x1;x+=f*10) ctx.lineTo(x,GY+2+Math.sin(x*.08+t*6)*3-6); for(let x=x1;f>0?x>=A.x:x<=A.x;x-=f*10) ctx.lineTo(x,GY+8+Math.sin(x*.05)*2); ctx.fill();
+      if(k>.6){ const g=(k-.6)/.4; ctx.fillStyle='#120c1c'; for(let i=0;i<12;i++){ const bx=dx+(i-5.5)*14, tx=dx+(i-5.5)*3, ty=lerp(GY,cy-40+(i%4)*22,g); ctx.beginPath(); ctx.moveTo(bx-4,GY+4); ctx.lineTo(tx,ty); ctx.lineTo(bx+4,GY+4); ctx.closePath(); ctx.fill(); } }
+    } else if(m==='trunk'){ // behind the target
+      const h=k*230, w=34; ctx.fillStyle='#5a3a22'; ctx.strokeStyle='rgba(0,0,0,.55)'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(dx+f*20-w,GY+4); ctx.quadraticCurveTo(dx+f*30-w*.6,GY-h*.5,dx+f*24-w*.4,GY-h); ctx.lineTo(dx+f*24+w*.4,GY-h); ctx.quadraticCurveTo(dx+f*30+w*.6,GY-h*.5,dx+f*20+w,GY+4); ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if(m==='tree'){ // branches wrap around the front of the target
+      const h=k*230;
+      if(k>.5){ const g=(k-.5)/.5; ctx.strokeStyle='#6a4a2a'; ctx.lineWidth=11; for(const [y,s] of [[cy-50,1],[cy,-1],[cy+40,1]]){ ctx.beginPath(); ctx.moveTo(dx+f*24,y-20); ctx.quadraticCurveTo(dx-f*40*s*g,y,dx-f*30*g,y+18*g); ctx.stroke(); } ctx.fillStyle='#4a9a4a'; for(let i=0;i<14;i++){ ctx.beginPath(); ctx.arc(dx+f*24+Math.cos(i*2.4)*60*g,GY-h+Math.sin(i*1.7)*30*g,9,0,TAU); ctx.fill(); } }
+    } else if(m==='mind'){
+      if(st.g>0) this.drawFighter(ctx,A,{x:st.gx,pose:POSES.dodge,alpha:.55,tint:fx.c,lift:GY-st.gy-90});
+      if(k>0){ ctx.globalCompositeOperation='lighter'; ctx.strokeStyle=fx.c; for(let i=0;i<4;i++){ const r=((t*120+i*40)%160)*k; ctx.globalAlpha=st.a*(1-r/160); ctx.lineWidth=4; ctx.beginPath(); ctx.arc(dx,GY-160,r,0,TAU); ctx.stroke(); } }
+    } else if(m==='ritual'){
+      if(st.g>0){ ctx.save(); ctx.translate(A.x,GY+6); ctx.scale(1,.28); ctx.strokeStyle='#c81e1e'; ctx.lineWidth=7; ctx.globalAlpha=st.a*st.g; ctx.beginPath(); ctx.arc(0,0,80*st.g,0,TAU); ctx.stroke();
+        ctx.beginPath(); for(let i=0;i<3;i++){ const a=Math.PI/2+i*TAU/3; ctx.lineTo(Math.cos(a)*80*st.g,Math.sin(a)*80*st.g); } ctx.closePath(); ctx.stroke(); ctx.restore(); }
+      if(k>0){ ctx.globalAlpha=st.a*k*.8; this.drawFighter(ctx,A,{x:A.x,pose:A.pose,tint:'#16141a',alpha:k*.8}); // the cursed body: black with a white skeleton
+        const q=skeleton(A.pose); ctx.strokeStyle='#f0f0f0'; ctx.lineWidth=3; ctx.globalAlpha=st.a*k; ctx.beginPath(); for(const [a,b] of [['hip','sh'],['sh','fe'],['fe','fh'],['sh','be'],['be','bh'],['hip','fk'],['fk','ff'],['hip','bk'],['bk','bf']]){ ctx.moveTo(A.x+q[a][0]*A.face,GY-A.lift+q[a][1]); ctx.lineTo(A.x+q[b][0]*A.face,GY-A.lift+q[b][1]); } ctx.stroke();
+        if(st.sq>.4){ ctx.strokeStyle='#d8dde4'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(A.x-A.face*24,GY-120); ctx.lineTo(A.x+A.face*30,GY-80); ctx.stroke(); } }
+    } else if(m==='chains'){
+      const link=(x0,y0,cx,cy2,x1,y1,g)=>{ for(let i=0;i<=24*g;i++){ const q=i/24, x=(1-q)*(1-q)*x0+2*(1-q)*q*cx+q*q*x1, y=(1-q)*(1-q)*y0+2*(1-q)*q*cy2+q*q*y1; ctx.save(); ctx.translate(x,y); ctx.rotate(i%2?.6:-.6); ctx.strokeStyle='#ffd84d'; ctx.lineWidth=3; ctx.beginPath(); ctx.ellipse(0,0,7,4,0,0,TAU); ctx.stroke(); ctx.restore(); } };
+      ctx.shadowColor='#ffd84d'; ctx.shadowBlur=10;
+      [[-120,-1],[-60,1],[0,-1],[60,1],[120,-1]].forEach(([ox,s],i)=>link(dx+ox*1.4,GY+6,dx+ox*.4+s*60,cy-120,dx-s*30*(1-st.sq*.5),cy-30+i*16,k));
+    } else if(m==='hive'){
+      const R=lerp(170,46,Math.min(1,k*.7+st.sq*.3)); ctx.fillStyle=fx.c;
+      for(let i=0;i<380*Math.min(1,k*1.5);i++){ const a=i*2.39+t*(i%2?2:-2), b=Math.acos(1-2*((i*.618)%1)), r=R*(.9+.1*Math.sin(i+t*9)); const x=dx+Math.cos(a)*Math.sin(b)*r, y=cy+Math.cos(b)*r*.95; ctx.fillStyle=i%5?fx.c:fx.c2; ctx.fillRect(x-2,y-2,4,4); }
+    } else if(m==='water'){
+      const R=110*k; ctx.fillStyle='rgba(60,140,230,.32)'; ctx.strokeStyle='rgba(200,235,255,.8)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(dx,cy,R,0,TAU); ctx.fill(); ctx.stroke();
+      if(k>.5) for(let i=0;i<3;i++){ const a=t*2.4+i*2.09, sx=dx+Math.cos(a)*R*.7, sy=cy+Math.sin(a)*R*.55, dir=-Math.sin(a)>0?1:-1; ctx.save(); ctx.translate(sx,sy); ctx.scale(dir,1); ctx.fillStyle='#3a5a8a'; ctx.beginPath(); ctx.ellipse(0,0,26,9,0,0,TAU); ctx.fill(); ctx.beginPath(); ctx.moveTo(-4,-6); ctx.lineTo(4,-20); ctx.lineTo(10,-6); ctx.moveTo(-24,0); ctx.lineTo(-36,-10); ctx.lineTo(-36,10); ctx.closePath(); ctx.fill(); ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.moveTo(14,2); ctx.lineTo(26,0); ctx.lineTo(16,6); ctx.fill(); ctx.restore(); }
+      ctx.fillStyle='rgba(220,240,255,.7)'; for(let i=0;i<8;i++){ ctx.beginPath(); ctx.arc(dx+Math.sin(i*3+t)*R*.6,cy+R*.6-((t*60+i*30)%(R*1.2)),3,0,TAU); ctx.fill(); }
+    } else if(m==='threads'){
+      const hs=[jointAt('fh',A.x,A.face,A.pose,1,A.lift),jointAt('bh',A.x,A.face,A.pose,1,A.lift)];
+      ctx.globalCompositeOperation='lighter'; ctx.strokeStyle='#8fd8ff'; ctx.lineWidth=1.4; ctx.globalAlpha=st.a*.8;
+      ['hd','fh','bh','ff','bf','sh','fk','bk','hip','fe'].forEach((j,i)=>{ const p=jointAt(j,D.x,D.face,D.pose,D.scale,D.lift), h=hs[i%2], e2={x:lerp(h.x,p.x,k),y:lerp(h.y,p.y,k)}; ctx.beginPath(); ctx.moveTo(h.x,h.y); ctx.quadraticCurveTo((h.x+e2.x)/2,Math.min(h.y,e2.y)-30,e2.x,e2.y); ctx.stroke(); });
+    }
+    ctx.restore();
+  }
   /* chakra threads from the master's fingers to each puppet's head, shoulders and hands */
   drawThreads(ctx,f){
     if(!f.pups.length||f.dead||f.alpha<.05) return;
@@ -1797,9 +1929,14 @@ class Stage{
     }
     ctx.restore();
   }
+  /* the look with gates open: from the Gate of Life the skin flushes red and veins stand out; the aura takes the gate's colour */
+  gateLook(f){
+    const g=f.gates; f._gl=f._gl||{}; if(f._gl[g]) return f._gl[g];
+    const L=f.look; return f._gl[g]=Object.assign({},L,{sk:g>=3?mix(L.sk,'#e0503a',g>=8?.5:g>=6?.38:.26):L.sk,mr:g>=3&&!L.mr.includes('vein')?L.mr.concat('vein'):L.mr,glow:GATES[g].c});
+  }
   drawFighter(ctx,f,o){
     o=o||{};
-    const L=f.look, tint=o.tint, face=f.face, x=o.x!==undefined?o.x:f.x, t=this.t/1000;
+    const L=f.gates>0?this.gateLook(f):f.look, tint=o.tint, face=f.face, x=o.x!==undefined?o.x:f.x, t=this.t/1000;
     let p=o.pose||f.pose;
     const run=o.pose?o.run:f.run;
     if(run){ const ph=Math.sin(t*24); p=Object.assign({},p,{fl1:ph*.95,fl2:.55+Math.max(0,-ph)*.9,bl1:-ph*.95,bl2:.55+Math.max(0,ph)*.9,fa1:-ph*.9+.1,fa2:1.0,ba1:ph*.9+.1,ba2:1.0}); }
@@ -2263,7 +2400,10 @@ class Stage{
     this.hpDone=false;
     if(this.onSay) this.onSay('pre',e);
     try{
+      if(e.gt) this.f.forEach((f,i)=>{ if(!(e.gate&&e.att===i)) f.gates=e.gt[i]; });
+      if(e.gate&&e.att!==null) await this.openGates(this.f[e.att],e.gate,e);
       if(e.type==='heal') await this.heal(e);
+      else if(e.type==='drain') await this.drain(e);
       else if(e.type==='focus') await this.focus(e);
       else if(e.type==='guard') await this.guardUp(e);
       else if(e.skip) await this.stunSkip(e);
@@ -2291,6 +2431,26 @@ class Stage{
     else for(let i=0;i<8;i++) this.spawn({x:f.x+rand(-26,26),y:GY-rand(20,120),vy:-rand(.05,.1),life:rand(500,800),size:rand(4,7),col:'#7fe3a0',shape:'plus'});
     this.popup('+'+e.heal,f.x,GY-190,'#7fe3a0',24,'#0a4a22'); this.sfx('heal');
     await this.wait(this.d(260));
+  }
+  /* Eight Gates: open every gate from the current one up to n; a jump of several gates flashes through them */
+  async openGates(A,n,e){
+    const from=A.gates+1; if(n<from){ A.gates=n; return; }
+    this.front=A.i; this.pose(A,'charge',this.d(140)); A.aura=1; this.sfx('charge');
+    for(let g=from;g<=n;g++){
+      const G=GATES[g], last=g===n, ms=last?300:Math.max(90,260/(n-from+1));
+      A.gates=g; this.ring(A.x,GY-90,G.c,12,last?150:90,this.d(last?520:300),last?6:3); A.flash=.7;
+      if(last){ this.popup(`GATE ${g}: ${G.n.toUpperCase()}`,clamp(A.x,190,SW-190),GY-220,G.c,g>=7?26:22,g>=8?'#5a0a00':'#0a3a14'); this.shake(g>=7?16:8,300); if(g>=7) this.flash(G.c,.45); this.sfx(g>=6?'boom':'hit'); }
+      for(let k=0;k<(last?10:4);k++) this.spawn({x:A.x+rand(-30,30),y:GY-rand(10,140),vx:rand(-.06,.06),vy:-rand(.15,.35),life:rand(400,700),size:rand(8,16),grow:.01,col:g>=8?'#ff5a3a':'#ffffff',shape:'smoke'});
+      await this.wait(this.d(ms));
+    }
+    if(e&&e.heal>0){ this.popup(`+${e.heal} HP`,A.x,GY-190,'#7fe3a0',22,'#0a4a22'); this.sfx('heal'); }
+    A.aura=0; await this.pose(A,'idle',this.d(100));
+  }
+  async drain(e){
+    const f=this.f[e.who], G=GATES[f.gates]||GATES[8];
+    for(let k=0;k<10;k++) this.spawn({x:f.x+rand(-24,24),y:GY-rand(20,150),vx:rand(-.03,.03),vy:-rand(.1,.22),life:rand(500,800),size:rand(8,15),grow:.012,col:f.gates>=8?'#ff4a3a':'#ffb0a0',shape:'smoke'});
+    this.popup(`-${e.dmg}`,f.x,GY-190,'#ffb08a',22,'#5a1a0a'); this.pose(f,'hurt',this.d(80)); f.flash=.6; this.sfx('poof');
+    await this.wait(this.d(300)); await this.pose(f,'idle',this.d(120));
   }
   async guardUp(e){
     const A=this.f[e.att], P=this.pupFree(A); this.front=A.i;
@@ -2519,7 +2679,7 @@ const SIGMAP={
   zabuza:['iai'],mifune:['iai'],
   hiruzen:['flame'],asuma:['flame'],kakuzu:['flame'],jiraiya:['flame'],
   temari:['wind'],danzo:['wind'],
-  lee1:['lotus'],lee2:['lotus',{gates:true,c:'#7fe28a'}],guy1:['elephant'],guy2:['elephant',{night:true}],
+  lee1:['lotus'],lee2:['lotus',{c:'#7fe28a'}],guy:['elephant',{c:'#ff8a3a',c2:'#ffe08a',peacock:true}],
   neji:['gentle'],hinata1:['gentle'],hinata2:['gentle',{twin:true}],
   shino:['swarm'],zetsu:['swarm'],sai:['swarm'],hanzo:['swarm',{mist:true}],
   kankuro:['puppetry',{m:'crow'}],chiyo:['puppetry',{m:'pair'}],sasori:['puppetry',{m:'sand',c:'#4a4a5c',c2:'#b8b8cc'}],
@@ -2762,7 +2922,6 @@ const STYLES={
 
   async lotus(e,A,D,fx,P){
     const f=A.face, dx=D.x;
-    if(P.gates){ A.aura=1; this.ring(A.x,GY-80,'#7fe28a',10,150,500,5); this.shake(6,400); this.sfx('charge'); await this.wait(this.d(260)); }
     A.run=true; A.trail=true; this.sfx('whoosh'); this.pose(A,'run',this.d(50));
     await this.tween(A,{x:dx-f*58},this.d(190),ease.inout);
     A.run=false; A.trail=false;
@@ -2791,6 +2950,7 @@ const STYLES={
     const wave=size=>{
       const r={x:A.x+f*56};
       this.fxAdd(this.d(400),(ctx,k)=>{ ctx.save(); ctx.translate(r.x,GY-98); ctx.scale(f,1); ctx.strokeStyle=col; ctx.lineWidth=size/3*(1-k*.4); ctx.beginPath(); ctx.ellipse(0,0,size*.35,size,0,-1.2,1.2); ctx.stroke(); ctx.strokeStyle='#ffffff'; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(0,0,size*.35,size*.9,0,-1,1); ctx.stroke(); ctx.restore(); });
+      if(P.peacock) this.fxAdd(this.d(320),(ctx,k)=>{ ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=1-k; const g=ctx.createRadialGradient(r.x,GY-98,2,r.x,GY-98,size*.7); g.addColorStop(0,'#fff6c0'); g.addColorStop(.4,fx.c); g.addColorStop(1,'rgba(255,90,0,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(r.x,GY-98,size*.7,0,TAU); ctx.fill(); ctx.restore(); }); // Morning Peacock: the punches catch fire
       return this.tween(r,{x:dx},this.d(190),ease.lin);
     };
     for(let i=0;i<9;i++){
@@ -2799,6 +2959,7 @@ const STYLES={
       await this.wait(this.d(70));
     }
     await this.pose(A,'punch',this.d(70)); this.lines=this.d(450);
+    if(P.peacock) this.fxAdd(this.d(700),(ctx,k)=>{ ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=Math.sin(Math.PI*k); for(let j=0;j<9;j++){ const a=-1.25+j*.31; ctx.fillStyle=j%2?fx.c:fx.c2; ctx.beginPath(); ctx.ellipse(dx+Math.cos(a)*f*-60,GY-98+Math.sin(a)*90,14,40,a+1.5708,0,TAU); ctx.fill(); } ctx.restore(); }); // the peacock's fan of flame
     await wave(120);
     this.flash(col,.6);
     await this.impact(e,A,D,fx,dx,GY-98,{pd,knock:80});
@@ -3314,7 +3475,7 @@ const ULTMAP={
   narutosix:{s:'planet',c:'#cfe8ff',c2:'#ffffff',n:'Six Paths: Planetary Truth-Seeking Devastation'},
   pain:{s:'planet',rock:true,c:'#c9a8ff',c2:'#ffffff',n:'Chibaku Tensei: Planetary Devastation'},
   madara2:{s:'planet',rock:true,big:true,c:'#ff7a2e',c2:'#ffd9a0',n:'Tengai Shinsei: Planetary Devastation'},
-  hagoromo:{s:'planet',c:'#fff2c0',c2:'#ffffff',n:'Sage of Six Paths: Creation of All Things'},
+  hagoromo:{s:'barrage',mode:'tsb',c:'#fff2c0',c2:'#ffffff',n:'Truth-Seeking Balls: Creation of All Things'},
   madara1:{s:'titan',mode:'sword',c:'#ff7a2e',c2:'#ffd9a0',n:'Perfect Susanoo: Heaven-Sundering Blade'},
   itachi2:{s:'titan',mode:'sword',c:'#c9a8ff',c2:'#ffffff',n:'Susanoo: Totsuka Sealing Blade'},
   sasuke3:{s:'titan',mode:'arrow',c:'#7fa8ff',c2:'#ffffff',n:"Indra's Arrow: Perfect Susanoo"},
@@ -3338,10 +3499,10 @@ const ULTMAP={
   jiraiya:{s:'inferno',c:'#ff8f3d',c2:'#ffe08a',n:'Sage Art: Great Toad Oil Fire Bomb'},
   asuma:{s:'inferno',c:'#ffb36b',c2:'#ffffff',n:'Burning Ash: Blaze Barrage'},
   kakuzu:{s:'inferno',c:'#ff5a2a',c2:'#ffd0a0',n:'Five Hearts: Elemental Fusion Cataclysm'},
-  lee1:{s:'rushUlt',gates:true,c:'#7fe28a',c2:'#ffffff',n:'Eight Gates: Gate of Joy Morning Peacock'},
-  lee2:{s:'rushUlt',gates:true,c:'#ff5a5a',c2:'#ffd0a0',n:'Gate of Death: Hidden Lotus Final'},
-  guy1:{s:'rushUlt',gates:true,c:'#ff8a3a',c2:'#ffe08a',n:'Eight Gates: Daylight Tiger'},
-  guy2:{s:'rushUlt',gates:true,c:'#ff3a2a',c2:'#ffd0a0',n:'Eighth Gate: Evening Elephant'},
+  lee1:{s:'rushUlt',gates:true,gate:5,c:'#7fe28a',c2:'#ffffff',n:'Fifth Gate: Hidden Lotus'},
+  lee2:{s:'rushUlt',gates:true,gate:6,c:'#5ad86a',c2:'#ffffff',n:'Sixth Gate: Leaf Hurricane Barrage'},
+  guy1:{s:'rushUlt',gates:true,gate:6,c:'#ff8a3a',c2:'#ffe08a',n:'Sixth Gate: Leaf Hurricane Barrage'},
+  guy2:{s:'gatesKin',mode:'elephant',gate:8,c:'#ff3a2a',c2:'#ffd0a0',n:'Eighth Gate: Evening Elephant'},
   neji:{s:'rushUlt',palms:true,c:'#8fc8ff',c2:'#ffffff',n:'Revolving Heaven: 128 Palms'},
   hinata1:{s:'rushUlt',palms:true,c:'#8fc8ff',c2:'#ffffff',n:'Gentle Fist: Eight Trigrams Barrage'},
   hinata2:{s:'rushUlt',palms:true,c:'#8fc8ff',c2:'#ffffff',n:'Twin Lion Fist: Lion Barrage'},
@@ -3352,7 +3513,7 @@ const ULTMAP={
   mifune:{s:'rushUlt',slashes:true,c:'#ffffff',c2:'#cfe8ff',n:'Iai: Ten Thousand Cuts'},
   iruka:{s:'rushUlt',c:'#ffffff',c2:'#cfe8ff',n:'Academy Fury: Chakra Blade Rush'},
   haku:{s:'mirrorsUlt',c:'#bfeaff',c2:'#ffffff',n:'Demonic Ice Mirrors: Thousand Needles'},
-  orochimaru:{s:'hydra',c:'#a06bd0',c2:'#e8d0ff',n:'Summoning: Manda, Serpent King Strike'},
+  orochimaru:{s:'summon',kind:'snake',c:'#a06bd0',c2:'#e8d0ff',n:'Summoning: Manda, Serpent King Strike'},
   kabuto:{s:'hydra',c:'#9fe7a8',c2:'#ffffff',n:'Sage Art: Dragon Heads Rampage'},
   anko:{s:'hydra',c:'#a06bd0',c2:'#e8d0ff',n:'Hidden Shadow Snake Hands: Hydra'},
   tenten:{s:'rainUlt',c:'#dddddd',c2:'#ffffff',n:'Weapon Storm: Thousand Blades Detonation'},
@@ -3361,7 +3522,7 @@ const ULTMAP={
   zetsu:{s:'plague',c:'#2a2a2a',c2:'#d8d8d8',n:'Spore Plague: Endless Clone Flood'},
   hanzo:{s:'plague',c:'#8fd070',c2:'#e0ffd0',n:'Salamander Venom: Poison Mist Apocalypse'},
   sai:{s:'plague',c:'#2a2a34',c2:'#8a8a98',n:'Super Beast Scroll: Ink Flood'},
-  onoki:{s:'disintegrate',c:'#c28a4f',c2:'#f0d0a0',n:'Dust Release: Detachment of the Primitive World'}
+  onoki:{s:'skyfall',mode:'boulder',c:'#c28a4f',c2:'#f0d0a0',n:'Earth Release: Added Weight Mountain Drop'}
 };
 const ULTFB={nin:'bijuu',tai:'rushUlt',gen:'dimension'};
 function ultOf(d){ return ULTMAP[d.id]||ULTMAP[d.base]||{s:ULTFB[d.sigType]||'bijuu',look:'void',n:d.sig+': Final Form'}; }
@@ -3372,81 +3533,81 @@ const SUPERMAP={
   tobirama:{s:'flood',kind:'water',c:'#3a8ad5',c2:'#cfe8ff',n:'Water Release: Great Exploding Water Shockwave'},
   hiruzen:{s:'reaper',c:'#d8d0ff',c2:'#ffffff',n:'Dead Demon Consuming Seal'},
   minato:{s:'reaper',c:'#ffe08a',c2:'#ffffff',n:'Reaper Death Seal: Eight Trigrams Sealing'},
-  tsunade:{s:'quake',c:'#ffd84d',c2:'#fff2b0',n:'Creation Rebirth: Heavenly Heel Drop Cataclysm'},
+  tsunade:{s:'skyfall',mode:'heel',c:'#ffd84d',c2:'#fff2b0',n:'Creation Rebirth: Heavenly Heel Drop Cataclysm'},
   kakashi:{s:'titan',mode:'sword',c:'#8fd0ff',c2:'#ffffff',n:'Perfect Susanoo: Kamui Raikiri'},
   kakashi6:{s:'kirin',c:'#b38aff',n:'Purple Lightning: Thunder God Spear'},
   danzo:{s:'dimension',look:'void',c:'#cfe8ff',c2:'#ffffff',n:'Reverse Tetragram Sealing'},
   naruto1:{s:'bijuu',head:'fox',c:'#ff5a2a',c2:'#ffb08a',n:'Four-Tails Cloak: Mini Tailed Beast Bomb'},
-  narutosage:{s:'bijuu',shuriken:true,c:'#ffb347',c2:'#ffffff',n:'Sage Art: Many Ultra-Big Ball Rasenshuriken'},
-  narutokcm:{s:'bijuu',head:'fox',shuriken:true,c:'#ffc533',c2:'#fff1a0',n:'Kurama Mode: Tailed Beast Rasenshuriken'},
+  narutosage:{s:'barrage',mode:'shuriken',c:'#8fd8ff',c2:'#ffffff',n:'Sage Art: Many Ultra-Big Ball Rasenshuriken'},
+  narutokcm:{s:'barrage',mode:'shuriken',c:'#ffc533',c2:'#fff1a0',n:'Kurama Mode: Tailed Beast Rasenshuriken Volley'},
   narutobary:{s:'rushUlt',gates:true,c:'#ff8f3a',c2:'#ffd0a0',n:'Baryon Mode: Life-Burning Final Strike'},
-  narutosix:{s:'planet',c:'#ffe680',c2:'#ffffff',n:'Six Paths Chibaku Tensei: Sealing of the Moon'},
-  naruto7:{s:'bijuu',head:'fox',c:'#ff9a2a',c2:'#ffe08a',n:'Kurama Link Mode: Tailed Beast Bomb Barrage'},
-  sasuke1:{s:'kirin',c:'#9a8aff',n:'Curse Mark Level Two: Black Chidori Spear'},
+  narutosix:{s:'barrage',mode:'tsb',c:'#ffe680',c2:'#ffffff',n:'Six Paths: Truth-Seeking Ball Barrage'},
+  naruto7:{s:'barrage',mode:'bomb',c:'#ff9a2a',c2:'#ffe08a',n:'Kurama Link Mode: Tailed Beast Bomb Barrage'},
+  sasuke1:{s:'beam',mode:'spear',c:'#9a6aff',c2:'#e0d0ff',n:'Curse Mark Level Two: Black Chidori Spear'},
   sasuke2:{s:'titan',mode:'arrow',c:'#a05aff',c2:'#ffffff',n:'Susanoo: Blaze Release Kagutsuchi Arrow'},
   sasuke3:{s:'kirin',c:'#c9a8ff',n:"Six Paths Indra's Arrow: Valley of the End"},
   itachi1:{s:'titan',mode:'sword',c:'#ff5a3a',c2:'#ffd0a0',n:'Susanoo: Totsuka Blade and Yata Mirror'},
   itachi2:{s:'dimension',look:'tsukuyomi',c:'#ff2a3a',c2:'#ffb0b0',n:'Izanami: The Loop of Fate'},
   shisui:{s:'dimension',look:'tsukuyomi',c:'#ff5a5a',c2:'#ffffff',n:'Kotoamatsukami: Supreme Illusion'},
   gaara:{s:'bijuu',c:'#d6b46a',c2:'#f3e2b0',n:'Shukaku Full Release: Sand Tailed Beast Bomb'},
-  temari:{s:'storm',kind:'wind',c:'#bfe9d0',c2:'#ffffff',n:'Summoning: Kamatari Blade Dance Typhoon'},
-  kankuro:{s:'threepup',sasori:true,c:'#b0402a',c2:'#ffd0b0',n:'Black Secret: Sasori Puppet Finale'},
-  chiyo:{s:'army',pk:CHIKA.concat(['mother','father']),per:12,c:'#c8a0ff',c2:'#ffffff',n:'White Secret: Chikamatsu Collection, Final Act'},
-  rasa:{s:'storm',kind:'sand',c:'#ffd84d',c2:'#fff4c0',n:'Gold Dust: Golden Waterfall Burial'},
-  lee1:{s:'rushUlt',gates:true,c:'#ff8a3a',c2:'#ffe08a',n:'Gate of Wonder: Daytime Tiger'},
-  lee2:{s:'rushUlt',gates:true,c:'#ff3a2a',c2:'#ffd0a0',n:'Gate of Wonder: Evening Elephant'},
-  guy1:{s:'rushUlt',gates:true,c:'#ff3a2a',c2:'#ffd0a0',n:'Seventh Gate: Evening Elephant'},
-  guy2:{s:'rushUlt',gates:true,c:'#ff2a1a',c2:'#ff9a6a',n:'Eighth Gate Release: Night Guy'},
-  neji:{s:'rushUlt',palms:true,c:'#bfe0ff',c2:'#ffffff',n:'Eight Trigrams: Vacuum Wall Palm'},
-  hinata1:{s:'rushUlt',palms:true,c:'#a8c8ff',c2:'#ffffff',n:'Eight Trigrams: Protection of Sixty-Four Palms'},
-  hinata2:{s:'rushUlt',palms:true,c:'#e0d0ff',c2:'#ffffff',n:"Twin Lion Fists: Hamura's Chakra"},
-  sakura:{s:'quake',c:'#ff8ac0',c2:'#ffe0f0',pink:true,n:'Strength of a Hundred: Katsuyu Final Impact'},
+  temari:{s:'summon',kind:'weasel',c:'#bfe9d0',c2:'#ffffff',n:'Summoning: Kamatari, Blade Dance'},
+  kankuro:{s:'army',pk:['sasoriP','crow','ant','sal'],cnt:8,per:10,c:'#b0402a',c2:'#ffd0b0',n:'Black Secret: Puppet Corps Assault'},
+  chiyo:{s:'bind',mode:'threads',c:'#8fd8ff',c2:'#ffffff',n:'Puppet Technique: Living Puppet'},
+  rasa:{s:'skyfall',mode:'gold',c:'#ffd84d',c2:'#fff4c0',n:'Gold Dust: Golden Waterfall Burial'},
+  lee1:{s:'gatesKin',mode:'drunk',c:'#ff9a5a',c2:'#ffe0b0',n:'Drunken Fist: Leaf Hurricane Frenzy'},
+  lee2:{s:'gatesKin',mode:'peacock',gate:6,c:'#ff8a3a',c2:'#ffe08a',n:'Sixth Gate: Morning Peacock'},
+  guy1:{s:'gatesKin',mode:'tiger',gate:7,c:'#5ab8ff',c2:'#e0f4ff',n:'Seventh Gate: Daytime Tiger'},
+  guy2:{s:'gatesKin',mode:'night',gate:8,c:'#ff2a1a',c2:'#ff9a6a',n:'Eighth Gate: Night Guy'},
+  neji:{s:'trigram',mode:'vacuum',c:'#bfe0ff',c2:'#ffffff',n:'Eight Trigrams: Vacuum Wall Palm'},
+  hinata1:{s:'trigram',mode:'palms64',c:'#a8c8ff',c2:'#ffffff',n:'Eight Trigrams: Protection of Sixty-Four Palms'},
+  hinata2:{s:'trigram',mode:'lions',c:'#a08aff',c2:'#e8e0ff',n:"Twin Lion Fists: Hamura's Chakra"},
+  sakura:{s:'summon',kind:'slug',c:'#9fe070',c2:'#e0ffd0',n:'Summoning: Katsuyu, Acid Rain'},
   choji1:{s:'quake',c:'#ffb347',n:'Spiked Human Boulder: Full Expansion'},
-  choji2:{s:'quake',c:'#ff9ad0',c2:'#ffe0f0',n:'Butterfly Mode: Ultra Big Ball Bomb'},
-  kiba:{s:'rushUlt',c:'#e8e8f0',c2:'#ffffff',n:'Twin-Headed Wolf: Tunneling Fang Storm'},
-  iruka:{s:'rushUlt',c:'#ffd08a',c2:'#ffffff',n:'Chakra Blade: The Last Lesson'},
-  shikamaru:{s:'dimension',look:'void',c:'#7a5ad0',c2:'#e8d8ff',n:'Shadow Imitation: Thousand-Strand Stitching'},
-  shino:{s:'plague',c:'#2a2a2a',c2:'#b0b0b0',n:'Kikaichu Sphere: Hive Collapse'},
+  choji2:{s:'giant',mode:'butterfly',c:'#ff9ad0',c2:'#ffe0f0',n:'Butterfly Mode: Super Expansion Fist'},
+  kiba:{s:'summon',kind:'wolf',c:'#e8e8f0',c2:'#ffffff',n:'Twin-Headed Wolf: Tunneling Fang Storm'},
+  iruka:{s:'rainUlt',c:'#ffd08a',c2:'#ffffff',n:'Giant Shuriken Rain: The Last Lesson'},
+  shikamaru:{s:'bind',mode:'shadow',c:'#7a5ad0',c2:'#e8d8ff',n:'Shadow Imitation: Thousand-Strand Stitching'},
+  shino:{s:'bind',mode:'hive',c:'#2a2a2a',c2:'#8a8a8a',n:'Kikaichu Sphere: Hive Collapse'},
   tenten:{s:'storm',kind:'wind',c:'#ffd0a0',c2:'#ffffff',n:'Treasure Tool: Banana Palm Fan Tempest'},
-  ino:{s:'dimension',look:'void',c:'#ffd0ff',c2:'#ffffff',n:'Mind Destruction: Total Mental Collapse'},
+  ino:{s:'bind',mode:'mind',c:'#e8a0ff',c2:'#ffffff',n:'Mind Destruction: Total Mental Collapse'},
   asuma:{s:'rushUlt',slashes:true,c:'#bfe9ff',c2:'#ffffff',n:'Wind Release: Flying Swallow Thousand Blades'},
-  kushina:{s:'bijuu',head:'fox',c:'#ff5a3a',c2:'#ffd0a0',n:'Adamantine Chains: Nine-Tails Barrier Crush'},
+  kushina:{s:'bind',mode:'chains',c:'#ffd84d',c2:'#fff4c0',n:'Adamantine Sealing Chains: Barrier Crush'},
   yamato:{s:'hydra',c:'#6abf6a',c2:'#d6ffd9',n:'Wood Release: Ten Thousand Branch Dragon Prison'},
   sai:{s:'hydra',c:'#3a3a48',c2:'#b0b0c0',n:'Super Beast Scroll: Ink Dragon Swarm'},
-  anko:{s:'hydra',c:'#7a3ad0',c2:'#e8d0ff',n:'Twin Snakes Mutual Death'},
-  kurenai:{s:'dimension',look:'void',c:'#ff4a6a',c2:'#ffffff',n:'Demonic Illusion: Forest of Binding Death'},
+  anko:{s:'summon',kind:'snake',c:'#7a3ad0',c2:'#e8d0ff',n:'Summoning: Giant Snake, Twin Snakes Mutual Death'},
+  kurenai:{s:'bind',mode:'tree',c:'#ff4a6a',c2:'#ffffff',n:'Demonic Illusion: Tree Binding Death'},
   konohamaru:{s:'bijuu',shuriken:true,c:'#8fd8ff',c2:'#ffffff',n:'Rasenshuriken: Will of Fire'},
   boruto:{s:'planet',c:'#b0e0ff',c2:'#ffffff',n:'Karma Mode: Giant Vanishing Rasengan'},
-  jiraiya:{s:'inferno',c:'#ff6a2a',c2:'#ffe08a',n:'Sage Art: Goemon Inferno'},
+  jiraiya:{s:'summon',kind:'toad',c:'#ff6a2a',c2:'#ffe08a',n:'Summoning: Gamabunta, Toad Oil Flame Bullet'},
   orochimaru:{s:'hydra',c:'#8a3ad0',c2:'#e8d0ff',n:'Eight Branches Technique: Yamata no Orochi'},
   kabuto:{s:'dimension',look:'void',c:'#9fe7a8',c2:'#ffffff',n:'Sage Art: Inorganic Reincarnation'},
   pain:{s:'supernova',c:'#c9a8ff',c2:'#ffffff',n:'Shinra Tensei: Destruction of the Leaf'},
-  konan:{s:'rainUlt',paper:true,c:'#ffd84d',c2:'#ffffff',n:'Six Hundred Billion Explosive Tags'},
-  kisame:{s:'flood',kind:'water',sharks:true,c:'#2a6ad5',c2:'#bfe0ff',n:'Great Shark Prison: Ocean of a Thousand Sharks'},
+  konan:{s:'supernova',c:'#ffd84d',c2:'#ffffff',n:'Six Hundred Billion Explosive Tags'},
+  kisame:{s:'bind',mode:'water',c:'#2a6ad5',c2:'#bfe0ff',n:'Water Prison Shark Dance'},
   deidara:{s:'supernova',c:'#ffe28a',c2:'#ffffff',n:'C0: Ultimate Art Self-Detonation'},
   sasori:{s:'storm',kind:'sand',c:'#6a6a7a',c2:'#c8c8d8',n:'Iron Sand: World Order'},
-  hidan:{s:'dimension',look:'void',c:'#ff1a1a',c2:'#ffd0d0',n:'Jashin Curse: Immortal Death Ritual'},
-  kakuzu:{s:'inferno',c:'#ff3a1a',c2:'#ffd0a0',n:'Earth Grudge Fear: Five Masks Rampage'},
+  hidan:{s:'bind',mode:'ritual',c:'#ff1a1a',c2:'#ffd0d0',n:'Jashin Curse: Immortal Death Ritual'},
+  kakuzu:{s:'hydra',c:'#3a2a2a',c2:'#ff6a3a',n:'Earth Grudge Fear: Thread Monster Rampage'},
   obito1:{s:'bijuu',head:'eye',c:'#b36bff',c2:'#ffffff',n:'Ten-Tails Revival: Tailed Beast Bomb'},
   obito2:{s:'planet',c:'#e8e8f0',c2:'#ffffff',n:'Six Paths: Truth-Seeking Shakujo Strike'},
-  zetsu:{s:'plague',c:'#1a1a1a',c2:'#ffffff',n:'Will of Kaguya: Infinite Spores'},
+  zetsu:{s:'army',clones:true,c:'#e8e8e8',c2:'#ffffff',n:'Will of Kaguya: White Zetsu Army'},
   madara1:{s:'planet',rock:true,c:'#ff7a2e',c2:'#ffd9a0',n:'Tengai Shinsei: Twin Falling Heavens'},
   madara2:{s:'dimension',look:'tsukuyomi',c:'#ff3a3a',c2:'#ffffff',n:'Infinite Tsukuyomi'},
   kaguya:{s:'planet',c:'#ffffff',c2:'#c9a8ff',n:'Expansive Truth-Seeking Ball'},
   hagoromo:{s:'planet',c:'#fff2c0',c2:'#ffffff',n:'Six Paths: Birth of the Moon'},
-  raikage:{s:'kirin',c:'#ffe08a',n:'Lightning Oppression: Guillotine Drop'},
-  bee:{s:'bijuu',head:'octo',c:'#c27bff',c2:'#ffffff',n:'Eight-Tails: Tailed Beast Bomb Barrage'},
+  raikage:{s:'skyfall',mode:'guillotine',c:'#bfe4ff',c2:'#ffffff',n:'Lightning Oppression: Guillotine Drop'},
+  bee:{s:'barrage',mode:'bomb',c:'#c27bff',c2:'#ffffff',n:'Eight-Tails: Tailed Beast Bomb Barrage'},
   onoki:{s:'disintegrate',c:'#e8b06f',c2:'#fff0c0',n:'Dust Release: Primitive World Twin Cube'},
-  mei:{s:'flood',kind:'lava',c:'#ff3a0a',c2:'#ffd060',n:'Lava Release: Molten Planet Flood'},
-  yagura:{s:'bijuu',head:'turtle',c:'#3a90ff',c2:'#ffffff',n:'Three-Tails: Coral Tidal Bomb'},
-  darui:{s:'kirin',c:'#cfe8ff',n:'Storm Release: Laser Circus'},
+  mei:{s:'barrage',mode:'lava',c:'#ff3a0a',c2:'#ffd060',n:'Lava Release: Melting Apparition Barrage'},
+  yagura:{s:'barrage',mode:'coral',c:'#3a90ff',c2:'#ffffff',n:'Three-Tails: Coral Tidal Bomb'},
+  darui:{s:'beam',mode:'circus',c:'#8fd8ff',c2:'#ffffff',n:'Storm Release: Laser Circus'},
   zabuza:{s:'flood',kind:'water',c:'#5aa0ff',c2:'#ffffff',n:'Water Dragon Bullet: Demon of the Hidden Mist'},
-  haku:{s:'mirrorsUlt',c:'#dff4ff',c2:'#ffffff',n:'Ice Release: Black Swallow Blizzard'},
-  kimimaro:{s:'rushUlt',c:'#ffffff',c2:'#c8d0d8',n:'Dance of the Clematis: Flower Drill Spear'},
-  suigetsu:{s:'flood',kind:'water',c:'#4ab0ff',c2:'#ffffff',n:'Water Release: Giant Arm Executioner Slash'},
-  jugo:{s:'quake',c:'#ff7a2a',n:'Sage Transformation: Natural Energy Cannon'},
-  mifune:{s:'rushUlt',slashes:true,c:'#ffffff',c2:'#ffe8a0',n:'Iai: Final Draw of the Samurai'},
-  hanzo:{s:'plague',c:'#7ad050',c2:'#e0ffd0',n:'Summoning: Ibuse, Salamander Venom Breath'}
+  haku:{s:'barrage',mode:'swallows',c:'#8fd0ff',c2:'#ffffff',n:'Ice Release: Swallow Snowstorm'},
+  kimimaro:{s:'beam',mode:'bone',c:'#ffffff',c2:'#c8d0d8',n:'Dance of the Clematis: Flower Drill Spear'},
+  suigetsu:{s:'giant',mode:'hydro',c:'#4ab0ff',c2:'#ffffff',n:'Hydrification: Giant Executioner Slash'},
+  jugo:{s:'beam',mode:'cannon',c:'#ff9a3a',c2:'#ffe0b0',n:'Sage Transformation: Natural Energy Cannon'},
+  mifune:{s:'blitz',c:'#ffffff',c2:'#ffe8a0',n:'Iai: Final Draw of the Samurai'},
+  hanzo:{s:'summon',kind:'salamander',c:'#8a5ab0',c2:'#e0d0ff',n:'Summoning: Ibuse, Salamander Venom Breath'}
 };
 const SUPFB={nin:'planet',tai:'rushUlt',gen:'dimension'};
 function supOf(d){ return SUPERMAP[d.id]||SUPERMAP[d.base]||{s:SUPFB[d.sigType]||'planet',look:'void',n:d.sig+': Final Awakening'}; }
@@ -3844,14 +4005,382 @@ const ULTS={
     await this.ultHit(e,A,D,fx,dx,GY-100,{pd,knock:140});
   },
 
-  /* Kankuro's Black Secret: Salamander shields him, Black Ant swallows the target, Crow's blades run it through.
-     u.sasori: the Sasori puppet joins and drives its cable tail in last (the Kinjutsu). */
+  /* Eight Gates finishers (Lee, Guy). u.mode: 'drunk' = Drunken Fist, staggering then hitting from impossible angles;
+     'peacock' = Morning Peacock, kick the target up and set a fan of fire behind it with flaming punches;
+     'tiger' = Daytime Tiger, a single punch that fires a tiger's head of compressed air;
+     'elephant' = Evening Elephant, five giant air-pressure punches, each a step forward;
+     'night' = Night Guy, a kick so fast it leaves a blood-red dragon of steam behind it. */
+  async gatesKin(e,A,D,fx,u){
+    const f=A.face, dx=D.x, m=u.mode, hits=n=>{ if(e.dodge) return; D.flash=1; this.sfx('hit',.8); this.shake(8,90); this.stopFor(18); this.addExcite(.1); };
+    this.fade('vigA',.45,this.d(300));
+    if(m==='drunk'){
+      this.mood={col:'#2a1200',a:0}; this.tween(this.mood,{a:.22},this.d(400));
+      for(let k=0;k<3;k++){ this.tween(A.pose,{lean:k%2?-.45:.5,rot:(k%2?-.22:.28)*f,hd:k%2?.3:-.3},this.d(220),ease.inout); this.tween(A,{x:A.x+f*(k%2?-14:22)},this.d(220),ease.inout); this.popup('*hic*',A.x+f*20,GY-200,'#ffd0a0',18,'#5a2a00'); this.sfx('poof'); await this.wait(this.d(260)); }
+      const pd=this.pdodge(e,A,D); this.camTo((A.x+dx)/2,GY-110,1.2,400);
+      for(let k=1;k<=4;k++){ this.tween(A.pose,{rot:(k%2?.4:-.3)*f},this.d(110)); await this.tween(A,{x:lerp(A.x,dx-f*60,k/4),lift:k%2?46:0},this.d(110),ease.inout); }
+      A.lift=0;
+      for(let i=0;i<14;i++){
+        Object.assign(A.pose,pick([POSES.punch,POSES.kick,POSES.slam,POSES.punchWind])); A.pose.rot=rand(-.8,.8)*f; A.lift=i%3===2?rand(20,60):0;
+        const hx=dx-f*14+rand(-10,10), hy=GY-rand(50,150);
+        if(!e.dodge){ this.burst(hx,hy,fx.c,7,.55,4); this.sparks(hx,hy,'#ffffff',5); this.ring(hx,hy,'#ffffff',4,44,200,3); this.knock(A,D,2); this.pose(D,'hurt',this.d(30)); } hits();
+        if(i%4===3) this.popup('*hic*',A.x,GY-210,'#ffd0a0',16,'#5a2a00');
+        await this.wait(this.d(60));
+      }
+      A.lift=0; await this.tween(A.pose,{rot:f*6.283},this.d(260),ease.in); A.pose.rot=0; await this.pose(A,'kick',this.d(50));
+      await this.ultHit(e,A,D,fx,dx,GY-100,{pd,knock:160});
+      return;
+    }
+    if(m==='tiger'){
+      const tg={x:A.x+f*60,s:0,a:0}, col=fx.c;
+      const ef=this.fxAdd(this.d(9000),ctx=>{ if(tg.a<=0) return; ctx.save(); ctx.translate(tg.x,GY-100); ctx.scale(f*tg.s,tg.s); ctx.globalAlpha=tg.a; ctx.globalCompositeOperation='lighter';
+        const g=ctx.createRadialGradient(0,0,10,0,0,120); g.addColorStop(0,'#ffffff'); g.addColorStop(.45,col+'cc'); g.addColorStop(1,'rgba(90,180,255,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,120,0,TAU); ctx.fill();
+        ctx.globalCompositeOperation='source-over'; ctx.fillStyle='rgba(230,245,255,.75)'; ctx.strokeStyle='#ffffff'; ctx.lineWidth=4;
+        ctx.beginPath(); ctx.moveTo(-40,-50); ctx.lineTo(-62,-96); ctx.lineTo(-14,-66); ctx.closePath(); ctx.moveTo(30,-56); ctx.lineTo(44,-104); ctx.lineTo(62,-48); ctx.closePath(); ctx.fill(); ctx.stroke(); // ears
+        ctx.beginPath(); ctx.ellipse(10,0,78,66,0,0,TAU); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.ellipse(62,22,34,26,.2,0,TAU); ctx.fill(); ctx.stroke(); // head and muzzle
+        ctx.strokeStyle='#2a6ad0'; ctx.lineWidth=6; ctx.beginPath(); for(const y of [-40,-18,4]){ ctx.moveTo(-50,y); ctx.lineTo(-18,y+10); } ctx.moveTo(4,-60); ctx.lineTo(10,-30); ctx.stroke(); // stripes
+        ctx.fillStyle='#0a2a6a'; ctx.beginPath(); ctx.ellipse(38,-14,10,6,.3,0,TAU); ctx.fill(); ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.moveTo(70,40); ctx.lineTo(80,62); ctx.lineTo(88,38); ctx.closePath(); ctx.fill(); // eye, fang
+        ctx.restore(); });
+      A.aura=1; this.pose(A,'block',this.d(220)); this.sfx('charge'); this.shake(6,800);
+      for(let k=0;k<14;k++) this.spawn({x:A.x+f*rand(20,70),y:GY-rand(60,140),vx:-f*rand(.05,.15),vy:rand(-.05,.05),life:300,size:rand(4,8),col:col,shape:'glow'});
+      await this.wait(this.d(600)); this.popup('HIRUDORA!',A.x,GY-230,'#e0f4ff',30,'#0a2a6a');
+      const pd=this.pdodge(e,A,D); await this.pose(A,'punch',this.d(70)); this.sfx('boom'); this.lines=this.d(600); this.camTo((A.x+dx)/2,GY-110,1.15,300);
+      await this.tween(tg,{s:1,a:1},this.d(200),ease.out);
+      await this.tween(tg,{x:dx},this.d(420),ease.in); A.aura=0;
+      await this.tween(tg,{s:1.6,a:0},this.d(160),ease.out); ef.t=ef.dur;
+      await this.ultHit(e,A,D,fx,dx,GY-100,{pd,knock:200});
+      return;
+    }
+    if(m==='elephant'){
+      this.mood={col:'#1a0400',a:0}; this.tween(this.mood,{a:.3},this.d(400));
+      A.aura=1; this.pose(A,'charge',this.d(220)); this.sfx('charge'); await this.wait(this.d(500));
+      const pd=this.pdodge(e,A,D); this.camTo((A.x+dx)/2,GY-110,1.12,400);
+      for(let i=0;i<5;i++){
+        await this.tween(A,{x:A.x+f*16},this.d(80),ease.out); await this.pose(A,'punch',this.d(60)); this.sfx('boom');
+        const c={x:A.x+f*40}, sz=150+i*14; // a column of compressed air, as big as an elephant's leg
+        const col=this.fxAdd(this.d(520),(ctx,k)=>{ ctx.save(); ctx.globalAlpha=(1-k)*.8; ctx.translate(c.x,GY-110); ctx.scale(f,1); ctx.fillStyle='rgba(255,230,210,.18)'; ctx.strokeStyle=fx.c; ctx.lineWidth=10*(1-k*.5); ctx.beginPath(); ctx.ellipse(0,0,sz*.28,sz*.75,0,0,TAU); ctx.fill(); ctx.stroke(); ctx.strokeStyle='#ffffff'; ctx.lineWidth=3; ctx.beginPath(); ctx.ellipse(-12,0,sz*.2,sz*.62,0,-1.3,1.3); ctx.stroke(); ctx.restore(); });
+        await this.tween(c,{x:dx},this.d(160),ease.in);
+        this.popup(['FIRST STEP','SECOND STEP','THIRD STEP','FOURTH STEP','FIFTH STEP'][i],dx,GY-240+i*6,'#ffd0a0',22,'#5a0a00');
+        if(!e.dodge){ this.burst(dx,GY-100,fx.c,16,.9,6); this.knock(A,D,12); this.pose(D,'hurt',this.d(40)); } dust(this,dx,24); this.shake(14,200); hits();
+        await this.wait(this.d(120)); col.t=col.dur; this.pose(A,'punchWind',this.d(50));
+      }
+      A.aura=0; await this.ultHit(e,A,D,fx,D.x,GY-100,{pd,knock:180});
+      return;
+    }
+    if(m==='night'){
+      this.mood={col:'#0a0000',a:0}; this.tween(this.mood,{a:.7},this.d(500));
+      const pts=[], dr={on:false,a:1};
+      const ef=this.fxAdd(this.d(9000),ctx=>{
+        if(!dr.on||pts.length<2) return; const t=this.t/1000; ctx.save(); ctx.globalAlpha=dr.a; ctx.globalCompositeOperation='lighter'; ctx.lineCap='round'; ctx.lineJoin='round';
+        for(const [w,c,al] of [[46,'#ff2a1a',.35],[24,'#ff6a3a',.7],[8,'#ffe0c0',.9]]){ ctx.strokeStyle=c; ctx.globalAlpha=dr.a*al; ctx.lineWidth=w; ctx.beginPath(); pts.forEach((p,i)=>{ const y=p.y+Math.sin(i*.6+t*8)*14; i?ctx.lineTo(p.x,y):ctx.moveTo(p.x,y); }); ctx.stroke(); }
+        const h=pts[pts.length-1]; ctx.globalAlpha=dr.a; ctx.translate(h.x,h.y); ctx.scale(f,1); ctx.fillStyle='#ff3a1a'; // the dragon's head
+        ctx.beginPath(); ctx.moveTo(60,-6); ctx.lineTo(-10,-40); ctx.lineTo(-30,-14); ctx.lineTo(-10,0); ctx.lineTo(-30,18); ctx.lineTo(-6,34); ctx.closePath(); ctx.fill();
+        ctx.fillStyle='#fff0c0'; ctx.beginPath(); ctx.arc(8,-18,5,0,TAU); ctx.fill(); ctx.strokeStyle='#ff6a3a'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(-14,-34); ctx.lineTo(-40,-64); ctx.moveTo(-4,-36); ctx.lineTo(-18,-72); ctx.stroke();
+        ctx.restore(); });
+      A.aura=1; this.pose(A,'charge',this.d(300)); this.sfx('charge'); this.shake(10,1400);
+      for(let k=0;k<30;k++) this.spawn({x:A.x+rand(-40,40),y:GY-rand(0,170),vx:rand(-.05,.05),vy:-rand(.15,.4),life:rand(500,900),size:rand(10,20),grow:.01,col:pick(['#ff2a1a','#ff6a3a','#ffb08a']),shape:'smoke'});
+      await this.wait(this.d(700)); this.popup('SEKIZO!',A.x,GY-230,'#ff9a6a',30,'#3a0000');
+      const pd=this.pdodge(e,A,D); this.pose(A,'kick',this.d(80)); this.camTo((A.x+dx)/2,GY-120,1.2,300); this.sfx('whoosh'); this.lines=this.d(800);
+      dr.on=true; const x0=A.x, n=22;
+      for(let i=1;i<=n;i++){ const k=i/n; A.x=lerp(x0,dx-f*40,k); A.lift=Math.sin(Math.PI*k)*90; pts.push({x:A.x,y:GY-A.lift-100}); if(i%4===0) this.ring(A.x,GY-A.lift-100,'#ff6a3a',6,60,200,3); await this.wait(this.d(18)); }
+      A.lift=0; this.stopFor(240); this.flash('#ff2a1a',.8); hits();
+      this.ring(dx,GY-100,'#ffffff',10,300,this.d(500),8); this.ring(dx,GY-100,'#ff2a1a',6,420,this.d(700),10); // space itself bends
+      await this.ultHit(e,A,D,fx,dx,GY-100,{pd,knock:220});
+      await this.tween(dr,{a:0},this.d(300)); ef.t=ef.dur;
+      return;
+    }
+    // peacock: kick the target into the air, then a fan of fire from flaming punches
+    const fan=[], fe=this.fxAdd(this.d(9000),ctx=>{ ctx.save(); const t=this.t/1000;
+      fan.forEach((p,i)=>{ const fl=1+.12*Math.sin(t*20+i); ctx.globalAlpha=p.a; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.ang); // a flame feather of the peacock's tail
+        for(const [k,c] of [[1,'rgba(255,70,10,.75)'],[.72,fx.c],[.42,fx.c2]]){ ctx.fillStyle=c; ctx.beginPath(); ctx.moveTo(0,-p.r*1.25*k*fl); ctx.quadraticCurveTo(p.r*.55*k,0,0,p.r*.6*k); ctx.quadraticCurveTo(-p.r*.55*k,0,0,-p.r*1.25*k*fl); ctx.fill(); }
+        ctx.restore(); }); ctx.restore(); });
+    A.aura=1; this.pose(A,'charge',this.d(200)); this.sfx('charge'); await this.wait(this.d(400));
+    const pd=this.pdodge(e,A,D);
+    A.run=true; A.trail=true; this.pose(A,'run',this.d(50)); this.sfx('whoosh'); await this.tween(A,{x:dx-f*58},this.d(200),ease.in); A.run=false; A.trail=false;
+    await this.pose(A,'kick',this.d(60)); this.camTo(dx,GY-180,1.1,300);
+    const up=e.dodge?Promise.resolve():this.tween(D,{lift:150},this.d(340),ease.out); if(!e.dodge){ D.flash=1; this.sfx('hit',1); this.pose(D,'hurt',this.d(40)); }
+    await this.tween(A,{lift:170,x:dx-f*40},this.d(300),ease.out); await up;
+    const cy=GY-(e.dodge?0:D.lift)-90;
+    for(let i=0;i<16;i++){
+      await this.pose(A,i%2?'punch':'punchWind',this.d(34));
+      const ang=-1.4+i*(2.8/15), r=70+rand(0,40), p={x:dx+Math.cos(ang+Math.PI*(f>0?0:1))*r*.9-f*30,y:cy+Math.sin(ang)*r,r:rand(26,40),ang:ang+1.5708,a:1};
+      fan.push(p); this.burst(p.x,p.y,fx.c,5,.4,4); hits(); await this.wait(this.d(36));
+    }
+    this.popup('MORNING PEACOCK!',dx,GY-260,'#ffe08a',28,'#5a2a00'); this.sfx('boom'); this.flash(fx.c,.5);
+    await this.pose(A,'slam',this.d(80));
+    await Promise.all([this.tween(A,{lift:0},this.d(260),ease.in),this.tween(D,{lift:0},this.d(260),ease.in)]);
+    fan.forEach(p=>this.tween(p,{a:0},this.d(300))); A.aura=0;
+    await this.ultHit(e,A,D,fx,dx,GY-80,{pd,knock:120});
+    fe.t=fe.dur;
+  },
+
+  /* Summoning: a giant creature appears in a cloud of smoke. u.kind: 'toad' (Gamabunta, fire and oil), 'slug' (Katsuyu,
+     acid), 'salamander' (Ibuse, poison mist), 'weasel' (Kamatari, a wind scythe), 'wolf' (Kiba and Akamaru's twin-headed
+     wolf, a spinning charge), 'snake' (Manda, a lunging bite). The summoner rides on its head where it makes sense. */
+  async summon(e,A,D,fx,u){
+    const f=A.face, dx=D.x, k=u.kind, ride=k==='toad'||k==='slug'||k==='salamander'||k==='snake';
+    const S=k==='toad'||k==='slug'||k==='snake'?.78:1, H={toad:206,slug:186,salamander:96,snake:124,weasel:0,wolf:0}[k]*S, cr={x:k==='weasel'?A.x+f*70:A.x-f*(k==='salamander'?40:16),a:0,s:.5,open:0,neck:0,spin:0,lift:0};
+    this.fade('vigA',.45,this.d(300)); this.mood={col:'#0a0a12',a:0}; this.tween(this.mood,{a:.3},this.d(400));
+    const ef=this.fxAdd(this.d(12000),ctx=>{ if(cr.a>0) this.drawSummon(ctx,k,cr,f); },true);
+    this.pose(A,'charge',this.d(200)); A.aura=1; this.sfx('charge'); await this.wait(this.d(350));
+    await this.pose(A,'slam',this.d(90)); this.sfx('boom'); this.shake(16,500); this.popup('SUMMONING JUTSU!',clamp(A.x,170,SW-170),GY-250,'#ffffff',26,'#3a2a10');
+    for(let i=0;i<5;i++) this.smoke(cr.x+rand(-60,60),GY-rand(40,180),4);
+    this.tween(cr,{a:1,s:S},this.d(300),ease.out);
+    if(ride) await this.tween(A,{lift:H,x:cr.x+f*(k==='salamander'?-10:k==='snake'?-30:-20)*S},this.d(300),ease.out); else await this.wait(this.d(300));
+    if(k==='wolf') A.alpha=0; // Kiba and Akamaru have become the wolf
+    A.aura=0; this.pose(A,ride?'cast':'up',this.d(160)); await this.wait(this.d(350));
+    const pd=this.pdodge(e,A,D); this.camTo((cr.x+dx)/2,GY-150,1.06,400);
+    if(k==='toad'||k==='slug'||k==='salamander'){ // breath: fire with oil, acid, or poison mist
+      const mouth=()=>({x:cr.x+f*(k==='salamander'?200:k==='slug'?130:140)*cr.s,y:GY-(k==='salamander'?62:k==='slug'?124:124)*cr.s});
+      const cols=k==='toad'?['#ff8a2a','#ffd060','#ff4a1a']:k==='slug'?['#9fe070','#d8ff9a','#5ab040']:['#8a5ab0','#c8a0e8','#5a3a7a'];
+      this.tween(cr,{open:1},this.d(200)); this.sfx('whoosh'); this.lines=this.d(700);
+      for(let i=0;i<34;i++){ const m=mouth(); for(let j=0;j<3;j++) this.spawn({x:m.x,y:m.y+rand(-6,6),vx:(dx-m.x)/rand(330,430),vy:(GY-100-m.y)/rand(330,430)+rand(-.05,.05),life:rand(380,460),size:rand(12,24),grow:.03,col:pick(cols),shape:k==='salamander'?'smoke':'glow'}); if(i%6===5&&!e.dodge){ D.flash=1; this.sfx('hit',.6); this.shake(6,80); } await this.wait(this.d(26)); }
+      this.tween(cr,{open:0},this.d(200));
+    } else if(k==='weasel'){ // Kamatari swings the scythe: a crescent of wind
+      await this.tween(cr,{spin:1},this.d(260),ease.in); this.sfx('whoosh');
+      const bl={x:cr.x+f*40,a:1};
+      const be=this.fxAdd(this.d(900),ctx=>{ ctx.save(); ctx.translate(bl.x,GY-110); ctx.scale(f,1); ctx.globalAlpha=bl.a; ctx.strokeStyle='#ffffff'; ctx.lineWidth=14; ctx.lineCap='round'; ctx.shadowColor=fx.c; ctx.shadowBlur=24; ctx.beginPath(); ctx.arc(-40,0,140,-1.1,1.1); ctx.stroke(); ctx.strokeStyle=fx.c; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(-50,0,128,-1,1); ctx.stroke(); ctx.restore(); });
+      await this.tween(bl,{x:dx},this.d(300),ease.in); be.t=be.dur;
+      for(let i=0;i<4;i++) this.slash(dx-90,GY-200+i*30,dx+90,GY-40+i*10,'#ffffff',this.d(240),5);
+    } else if(k==='wolf'){ // Fang Over Fang: the wolf spins into a drill
+      await this.tween(cr,{spin:1},this.d(200)); this.sfx('whoosh'); this.lines=this.d(500);
+      await this.tween(cr,{x:dx-f*40},this.d(380),ease.in);
+      for(let i=0;i<8;i++){ if(!e.dodge){ D.flash=1; this.sparks(dx,GY-90,'#ffffff',5); this.sfx('hit',.6); this.knock(A,D,4); } this.shake(6,80); await this.wait(this.d(45)); }
+    } else { // Manda lunges and bites
+      cr.lunge=Math.abs(dx-cr.x)/cr.s-40; await this.tween(cr,{open:1},this.d(220)); this.sfx('whoosh');
+      await this.tween(cr,{neck:1},this.d(260),ease.in); if(!e.dodge){ D.flash=1; this.sfx('hit',1); }
+      this.tween(cr,{open:0},this.d(120));
+    }
+    await this.ultHit(e,A,D,fx,dx,GY-100,{pd,knock:150});
+    for(let i=0;i<4;i++) this.smoke(cr.x+rand(-60,60),GY-rand(40,160),3); this.sfx('poof');
+    cr.a=0; ef.t=ef.dur; A.alpha=1;
+  },
+  /* Binding and sealing: the target is caught, held, then finished. u.mode: 'shadow' (Shikamaru: the shadow crosses the
+     ground and stitches the target with shadow needles), 'tree' (Kurenai: a tree binds the target, she steps out of the trunk
+     behind it), 'mind' (Ino: her spirit leaves her body and tears through the target's mind), 'ritual' (Hidan: the Jashin
+     circle, then he stabs himself and the target takes it), 'chains' (Kushina: adamantine chains), 'hive' (Shino: a
+     sphere of insects that collapses), 'water' (Kisame: a water prison full of sharks), 'threads' (Chiyo: chakra threads
+     turn the target into her puppet). */
+  async bind(e,A,D,fx,u){
+    const f=A.face, dx=D.x, m=u.mode, st={k:0,a:1,g:0,gx:0,gy:0,sq:0};
+    this.fade('vigA',.5,this.d(300)); this.mood={col:m==='water'?'#02101e':m==='chains'?'#140c00':'#08040c',a:0}; this.tween(this.mood,{a:.45},this.d(400));
+    const ef=this.fxAdd(this.d(12000),ctx=>this.drawBind(ctx,m,st,A,D,dx,f,fx)), eb=m==='tree'?this.fxAdd(this.d(12000),ctx=>this.drawBind(ctx,'trunk',st,A,D,dx,f,fx),true):null;
+    this.pose(A,m==='mind'||m==='tree'?'gen':m==='ritual'?'up':'cast',this.d(220)); A.aura=1; this.sfx('charge'); this.shake(6,900);
+    await this.wait(this.d(450));
+    const pd=this.pdodge(e,A,D); this.camTo((A.x+dx)/2,GY-110,1.12,500);
+    const held=!e.dodge;
+    if(m==='mind'){ // the spirit flies over, the body slumps
+      this.pose(A,'stun',this.d(200)); st.gx=A.x; st.gy=GY-120; st.g=1; this.sfx('whoosh');
+      await this.tween(st,{gx:dx,gy:GY-110},this.d(520),ease.inout); st.g=0;
+    } else if(m==='ritual'){ // the circle is drawn in blood first
+      await this.tween(st,{g:1},this.d(500));
+    }
+    await this.tween(st,{k:1},this.d(m==='shadow'?700:560),ease.out);
+    if(held){ D.dizzy=false; this.pose(D,m==='water'?'hurt':'stun',this.d(120)); if(m==='water') this.tween(D,{lift:34},this.d(300)); }
+    for(let i=0;i<5;i++){ // the hold tightens
+      if(m==='threads'&&held){ Object.assign(D.pose,pick([POSES.up,POSES.kick,POSES.punch,POSES.dodge])); this.sfx('whoosh'); }
+      if(m==='ritual'&&i===2){ this.pose(A,'hurt',this.d(80)); this.popup('LINKED!',dx,GY-250,'#ff6a6a',26,'#3a0000'); this.flash('#ff1a1a',.35); }
+      if(held){ D.flash=1; this.burst(dx+rand(-20,20),GY-100+rand(-40,40),fx.c,8,.5,4); this.sfx('hit',.6); this.shake(6,90); }
+      st.sq=i/4; await this.wait(this.d(150));
+    }
+    if(m==='tree'){ // Kurenai steps out of the trunk behind the target
+      this.smoke(dx+f*40,GY-100,4); A.x=dx+f*46; A.face=-f; A.lift=40; A.alpha=1; await this.pose(A,'punch',this.d(80)); this.sfx('hit',1);
+    }
+    if(m==='threads'&&held){ await this.tween(D,{lift:120},this.d(200),ease.out); D.pose.rot=-1.2*f; await this.tween(D,{lift:0},this.d(160),ease.in); D.pose.rot=0; dust(this,dx,30); }
+    if(m==='mind'){ this.pose(A,'idle',this.d(150)); this.ring(dx,GY-150,fx.c,6,200,this.d(500),5); }
+    this.flash(fx.c2,.6);
+    await this.ultHit(e,A,D,fx,dx,GY-100,{pd,knock:m==='water'?60:120});
+    await this.tween(st,{a:0},this.d(260)); ef.t=ef.dur; if(eb) eb.t=eb.dur;
+  },
+
+  /* A volley of big projectiles formed around the user, fired one after another. u.mode: 'bomb' (Tailed Beast Bombs),
+     'shuriken' (Rasenshuriken), 'coral' (Three-Tails coral bombs: coral grows where they land), 'tsb' (nine Truth-Seeking
+     Balls orbit, then fly as spears), 'lava' (lava globs lobbed in arcs), 'swallows' (a stream of ice swallows). */
+  async barrage(e,A,D,fx,u){
+    const f=A.face, dx=D.x, m=u.mode, N={bomb:5,shuriken:4,coral:3,tsb:9,lava:7,swallows:16}[m], ps=[], coral={g:0};
+    this.fade('vigA',.5,this.d(300)); this.mood={col:m==='lava'?'#200600':m==='swallows'?'#06101c':'#0a0614',a:0}; this.tween(this.mood,{a:.42},this.d(400));
+    for(let i=0;i<N;i++){ const a=m==='tsb'?i*TAU/N:-Math.PI/2+(i-(N-1)/2)*(m==='swallows'?.12:.55);
+      ps.push({i,a,x:A.x+(m==='tsb'?Math.cos(a)*52:m==='swallows'?f*30:Math.cos(a)*f*110+f*10),y:GY-(m==='tsb'?110+Math.sin(a)*52:m==='lava'?120:m==='swallows'?110:150-Math.sin(a)*110),s:0,live:true,rot:0}); }
+    const ef=this.fxAdd(this.d(12000),ctx=>{ const t=this.t/1000;
+      if(coral.g>0){ ctx.save(); ctx.strokeStyle='#f0d8e0'; ctx.lineCap='round'; for(let j=0;j<7;j++){ const bx=dx+(j-3)*26, h=coral.g*(60+(j%3)*30); ctx.lineWidth=9; ctx.beginPath(); ctx.moveTo(bx,GY+4); ctx.lineTo(bx+(j-3)*6,GY-h); ctx.stroke(); ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(bx+(j-3)*3,GY-h*.5); ctx.lineTo(bx+(j%2?18:-18),GY-h*.75); ctx.stroke(); } ctx.restore(); }
+      ps.forEach(p=>{ if(!p.live||p.s<=0) return; ctx.save(); ctx.translate(p.x,p.y); const r=p.s;
+        if(m==='bomb'||m==='coral'){ const R=(m==='bomb'?36:26)*r, g=ctx.createRadialGradient(0,0,2,0,0,R*1.6); g.addColorStop(0,m==='bomb'?'#ffffff':'#e0f4ff'); g.addColorStop(.3,m==='bomb'?'#2a1040':fx.c); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,R*1.6,0,TAU); ctx.fill(); ctx.fillStyle=m==='bomb'?'#140820':fx.c; ctx.beginPath(); ctx.arc(0,0,R,0,TAU); ctx.fill(); ctx.strokeStyle=fx.c2; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(0,0,R*.7,t*8,t*8+2.4); ctx.stroke(); }
+        else if(m==='shuriken'){ const R=34*r; ctx.rotate(t*16); ctx.fillStyle='rgba(235,245,255,.85)'; for(let b=0;b<4;b++){ ctx.rotate(Math.PI/2); ctx.beginPath(); ctx.moveTo(0,-6); ctx.quadraticCurveTo(R*1.4,-R*.8,R*2.1,0); ctx.quadraticCurveTo(R*1.2,-R*.1,0,6); ctx.fill(); } const g=ctx.createRadialGradient(0,0,2,0,0,R*.8); g.addColorStop(0,'#ffffff'); g.addColorStop(1,fx.c); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,R*.6,0,TAU); ctx.fill(); }
+        else if(m==='tsb'){ ctx.rotate(p.rot); ctx.fillStyle='#0e0e14'; ctx.strokeStyle='rgba(200,180,255,.6)'; ctx.lineWidth=2; if(p.rot){ ctx.beginPath(); ctx.moveTo(30*r,0); ctx.lineTo(-30*r,-7*r); ctx.lineTo(-30*r,7*r); ctx.closePath(); ctx.fill(); ctx.stroke(); } else { ctx.beginPath(); ctx.arc(0,0,11*r,0,TAU); ctx.fill(); ctx.stroke(); } }
+        else if(m==='lava'){ const R=20*r; ctx.fillStyle='#ff5a1a'; ctx.beginPath(); ctx.arc(0,0,R,0,TAU); ctx.fill(); ctx.fillStyle='#ffd060'; ctx.beginPath(); ctx.arc(-R*.25,-R*.25,R*.45,0,TAU); ctx.fill(); ctx.fillStyle='#5a1a08'; for(let j=0;j<3;j++){ ctx.beginPath(); ctx.arc(Math.cos(j*2.1)*R*.6,Math.sin(j*2.1)*R*.6,R*.18,0,TAU); ctx.fill(); } }
+        else { ctx.scale(f,1); ctx.rotate(p.rot); const w=Math.sin(t*30+p.i)*.5; ctx.fillStyle='#e8f6ff'; ctx.strokeStyle=fx.c; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(16*r,0); ctx.lineTo(-6*r,-4*r); ctx.lineTo(-14*r,-16*r*(1+w)); ctx.lineTo(-4*r,0); ctx.lineTo(-14*r,16*r*(1-w)); ctx.lineTo(-6*r,4*r); ctx.closePath(); ctx.fill(); ctx.stroke(); } // an ice swallow
+        ctx.restore(); }); });
+    this.pose(A,m==='lava'||m==='swallows'?'cast':'up',this.d(240)); A.aura=1; this.sfx('charge'); this.shake(6,1000);
+    for(const p of ps){ this.tween(p,{s:1},this.d(260),ease.out); await this.wait(this.d(m==='swallows'?25:70)); }
+    if(m==='tsb'){ for(let r=0;r<20;r++){ ps.forEach(p=>{ p.a+=.12; p.x=A.x+Math.cos(p.a)*52; p.y=GY-110+Math.sin(p.a)*52; }); await this.wait(this.d(30)); } }
+    await this.wait(this.d(250)); A.aura=0; this.pose(A,'cast',this.d(100));
+    const pd=this.pdodge(e,A,D); this.camTo((A.x+dx)/2,GY-120,1.1,400); this.lines=this.d(600);
+    const fire=async p=>{
+      const tx=dx+rand(-16,16), ty=GY-100+rand(-26,26), x0=p.x, y0=p.y, ms=m==='swallows'?320:280;
+      if(m==='tsb'||m==='swallows') p.rot=Math.atan2(ty-y0,(tx-x0)*(m==='swallows'?f:1));
+      this.sfx('whoosh');
+      await this.tween(p,{x:tx,y:ty},this.d(ms),ease.in);
+      p.live=false; this.burst(tx,ty,m==='bomb'?'#8a5ad0':m==='lava'?'#ff7a2a':fx.c,m==='swallows'?4:14,.7,5); if(m!=='swallows') this.ring(tx,ty,fx.c2,6,90,300,4);
+      if(m==='coral') this.tween(coral,{g:Math.min(1,coral.g+.4)},this.d(200));
+      if(!e.dodge){ D.flash=1; this.sfx('hit',.7); this.shake(m==='swallows'?3:9,100); this.stopFor(14); }
+    };
+    if(m==='lava'){ // lobbed: animate along a parabola by hand
+      for(const p of ps){ const x0=p.x, y0=p.y, tx=dx+rand(-20,20), q={k:0};
+        const step=()=>{ p.x=lerp(x0,tx,q.k); p.y=lerp(y0,GY-90,q.k)-Math.sin(Math.PI*q.k)*140; };
+        this.sfx('whoosh'); const tw=this.tween(q,{k:1},this.d(420),ease.lin); const iv=(async()=>{ while(q.k<1&&!this.skipping){ step(); await this.wait(this.d(16)); } step(); })(); await tw; await iv;
+        p.live=false; this.burst(p.x,p.y,'#ff7a2a',14,.7,5); this.spawn({x:p.x,y:GY-4,life:600,size:30,grow:.05,col:'#ff5a1a',shape:'glow'}); if(!e.dodge){ D.flash=1; this.sfx('hit',.7); this.shake(8,100); }
+        await this.wait(this.d(40)); }
+    } else for(const p of ps){ fire(p); await this.wait(this.d(m==='swallows'?45:m==='tsb'?70:180)); }
+    await this.wait(this.d(300));
+    await this.ultHit(e,A,D,fx,dx,GY-100,{pd,knock:130});
+    await this.tween(coral,{g:0},this.d(250)); ef.t=ef.dur;
+  },
+
+  /* Something comes down from the sky. u.mode: 'heel' (Tsunade leaps out of sight and drops heel first, splitting the
+     ground), 'guillotine' (the Raikage's lightning leg drop), 'gold' (Rasa's gold dust pours down like a waterfall),
+     'boulder' (Onoki drops a mountain-sized rock). */
+  async skyfall(e,A,D,fx,u){
+    const f=A.face, dx=D.x, m=u.mode, ob={y:-260,a:0,s:1}, cr={g:0,a:1}, jumps=m==='heel'||m==='guillotine';
+    this.fade('vigA',.45,this.d(300)); this.mood={col:m==='gold'?'#1a1200':'#0a0a12',a:0}; this.tween(this.mood,{a:.35},this.d(400));
+    const ef=this.fxAdd(this.d(12000),ctx=>{ const t=this.t/1000;
+      if(cr.g>0){ ctx.save(); ctx.globalAlpha=cr.a; ctx.strokeStyle='#1a1008'; ctx.lineWidth=6; ctx.lineJoin='round'; // the ground splits
+        for(let j=0;j<6;j++){ const dir=j<3?-1:1, len=cr.g*(120+j%3*70); ctx.beginPath(); ctx.moveTo(dx,GY+6); for(let q=1;q<=6;q++) ctx.lineTo(dx+dir*len*q/6,GY+6+(q%2?-4:4)+(j%3)*6*q/6); ctx.stroke(); }
+        ctx.fillStyle=fx.c; ctx.globalAlpha=cr.a*.35; ctx.beginPath(); ctx.ellipse(dx,GY+6,150*cr.g,16*cr.g,0,0,TAU); ctx.fill(); ctx.restore(); }
+      if(ob.a<=0) return; ctx.save(); ctx.globalAlpha=ob.a;
+      if(m==='gold'){ const top=-40, w=130; const g=ctx.createLinearGradient(dx-w/2,0,dx+w/2,0); g.addColorStop(0,'rgba(200,150,40,.2)'); g.addColorStop(.5,'#ffd84d'); g.addColorStop(1,'rgba(200,150,40,.2)'); ctx.fillStyle=g; ctx.fillRect(dx-w/2,top,w,ob.y-top);
+        ctx.fillStyle='#fff0a0'; for(let i=0;i<60;i++){ const y=top+((i*37+t*900)%(Math.max(1,ob.y-top))); ctx.fillRect(dx-w/2+((i*53)%w),y,3,8); } }
+      else if(m==='boulder'){ ctx.translate(dx,ob.y); ctx.rotate(t*.6); ctx.scale(ob.s,ob.s); ctx.fillStyle='#8a7a62'; ctx.strokeStyle='rgba(0,0,0,.6)'; ctx.lineWidth=4; ctx.beginPath(); for(let i=0;i<10;i++){ const a=i*TAU/10, r=110+((i*37)%5)*9; ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r); } ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle='rgba(40,30,20,.6)'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(-60,-30); ctx.lineTo(10,0); ctx.lineTo(40,50); ctx.moveTo(10,0); ctx.lineTo(70,-40); ctx.stroke(); ctx.fillStyle='rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(-30,-40,40,0,TAU); ctx.fill(); }
+      ctx.restore(); });
+    if(jumps){
+      this.pose(A,'charge',this.d(200)); A.aura=1; this.sfx('charge');
+      if(m==='guillotine') for(let i=0;i<6;i++){ this.bolts.push({x1:A.x+rand(-40,40),y1:GY-rand(120,200),x2:A.x+rand(-30,30),y2:GY-rand(0,60),life:this.d(160),col:fx.c,w:4}); await this.wait(this.d(60)); }
+      else { this.popup('STRENGTH OF A HUNDRED!',clamp(A.x,170,SW-170),GY-230,fx.c2,22,'#5a3a00'); await this.wait(this.d(360)); }
+      this.pose(A,'up',this.d(80)); this.sfx('whoosh'); await this.tween(A,{lift:520},this.d(260),ease.in); A.aura=0;
+      const pd=this.pdodge(e,A,D); await this.wait(this.d(350));
+      A.x=dx-f*8; Object.assign(A.pose,POSES.kick); A.pose.rot=f*1.1; A.trail=true; this.camTo(dx,GY-140,1.12,200); this.lines=this.d(500); this.sfx('whoosh');
+      if(m==='guillotine') this.bolts.push({x1:dx,y1:-20,x2:dx,y2:GY,life:this.d(420),col:fx.c,w:10});
+      await this.tween(A,{lift:30},this.d(240),ease.in); A.trail=false; A.pose.rot=0; this.pose(A,'slam',this.d(60));
+      this.tween(cr,{g:1},this.d(260),ease.out); dust(this,dx,50); this.shake(30,600);
+      await this.ultHit(e,A,D,fx,dx,GY-60,{pd,knock:160});
+    } else {
+      this.pose(A,'up',this.d(240)); A.aura=1; this.sfx('charge'); this.shake(8,1200);
+      await this.wait(this.d(300)); ob.a=1; if(m==='boulder'){ ob.s=.4; this.tween(ob,{s:1},this.d(600)); }
+      const pd=this.pdodge(e,A,D); this.camTo(dx,GY-150,1.05,400);
+      await this.tween(ob,{y:m==='gold'?-30:-120},this.d(400),ease.out); this.sfx('whoosh');
+      await this.tween(ob,{y:m==='gold'?GY:GY-110},this.d(m==='gold'?520:420),ease.in);
+      if(m==='gold') for(let i=0;i<40;i++) this.spawn({x:dx+rand(-60,60),y:GY-rand(0,20),vx:rand(-.5,.5),vy:-rand(.2,.6),g:.0016,life:rand(500,900),size:rand(3,6),col:pick(['#ffd84d','#fff0a0','#c8962a']),shape:'dot'});
+      else { ob.a=0; for(let i=0;i<24;i++) this.spawn({x:dx+rand(-80,80),y:GY-rand(40,180),vx:rand(-.5,.5),vy:-rand(.1,.5),g:.0018,life:rand(600,1000),size:rand(8,16),col:pick(['#8a7a62','#6a5a46','#a8987e']),shape:'paper',rot:rand(0,6),vr:rand(-.02,.02)}); }
+      this.tween(cr,{g:1},this.d(260),ease.out); A.aura=0;
+      await this.ultHit(e,A,D,fx,dx,GY-80,{pd,knock:120});
+      if(m==='gold') await this.tween(ob,{a:0},this.d(260));
+    }
+    await this.tween(cr,{a:0},this.d(300)); ef.t=ef.dur;
+  },
+
+  /* A beam from the user's hand. u.mode: 'cannon' (Jugo's arm becomes a cannon of natural energy), 'circus' (Darui's
+     Laser Circus: many curving beams), 'spear' (Sasuke's black Chidori stretched into a spear), 'bone' (Kimimaro's bone drill). */
+  async beam(e,A,D,fx,u){
+    const f=A.face, dx=D.x, m=u.mode, bm={len:0,w:0,a:1,arm:0};
+    this.fade('vigA',.5,this.d(300)); this.mood={col:m==='spear'?'#08040e':'#080a10',a:0}; this.tween(this.mood,{a:.45},this.d(400));
+    const hand=()=>jointAt('fh',A.x,A.face,A.pose,A.scale,A.lift);
+    const ef=this.fxAdd(this.d(12000),ctx=>{ const t=this.t/1000, h=hand(); if(bm.a<=0) return; ctx.save(); ctx.globalAlpha=bm.a; ctx.lineCap='round';
+      if(m==='cannon'&&bm.arm>0){ ctx.save(); ctx.translate(h.x,h.y); ctx.scale(f,1); ctx.fillStyle='#c86a2a'; ctx.strokeStyle='rgba(0,0,0,.6)'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(-30,-22*bm.arm); ctx.lineTo(30,-30*bm.arm); ctx.lineTo(30,30*bm.arm); ctx.lineTo(-30,22*bm.arm); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle='#ffd08a'; ctx.beginPath(); ctx.ellipse(30,0,8,26*bm.arm,0,0,TAU); ctx.fill(); ctx.restore(); }
+      if(m==='bone'&&bm.len>0){ ctx.save(); ctx.translate(h.x,h.y); ctx.scale(f,1); ctx.fillStyle='#f0ece0'; ctx.strokeStyle='rgba(60,50,40,.7)'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,-18); ctx.lineTo(bm.len,0); ctx.lineTo(0,18); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); for(let x=10;x<bm.len;x+=18){ const r=18*(1-x/bm.len); ctx.moveTo(x,-r); ctx.lineTo(x+9,r); } ctx.stroke(); ctx.restore(); }
+      if(bm.w>0&&m!=='bone'){ const x1=h.x+f*bm.len;
+        if(m==='cannon'){ ctx.globalCompositeOperation='lighter'; for(const [w,c] of [[bm.w*1.6,fx.c+'55'],[bm.w,fx.c],[bm.w*.4,'#ffffff']]){ ctx.strokeStyle=c; ctx.lineWidth=w; ctx.beginPath(); ctx.moveTo(h.x+f*30,h.y); ctx.lineTo(x1,h.y+Math.sin(t*40)*2); ctx.stroke(); } }
+        else if(m==='spear'){ ctx.shadowColor=fx.c; ctx.shadowBlur=18; ctx.strokeStyle='#14081c'; ctx.lineWidth=bm.w; ctx.beginPath(); ctx.moveTo(h.x,h.y); for(let q=1;q<=14;q++){ const x=lerp(h.x,x1,q/14); ctx.lineTo(x,h.y+(q<14?rand(-9,9):0)); } ctx.stroke(); ctx.strokeStyle=fx.c; ctx.lineWidth=2; ctx.stroke(); }
+        else { ctx.globalCompositeOperation='lighter'; for(let j=0;j<8;j++){ const k=Math.min(1,bm.len/Math.max(1,Math.abs(dx-h.x))*(1-j*.04)); const cx=lerp(h.x,dx,.5), cy=h.y-160+j*45; ctx.strokeStyle=j%2?fx.c:'#ffffff'; ctx.lineWidth=bm.w*(j%2?.5:.3); ctx.beginPath(); ctx.moveTo(h.x,h.y); for(let q=1;q<=20*k;q++){ const s=q/20; ctx.lineTo((1-s)*(1-s)*h.x+2*(1-s)*s*cx+s*s*dx,(1-s)*(1-s)*h.y+2*(1-s)*s*cy+s*s*(GY-100)); } ctx.stroke(); } }
+      }
+      ctx.restore(); });
+    this.pose(A,m==='circus'?'up':'charge',this.d(220)); A.aura=1; this.sfx('charge'); this.shake(8,1000);
+    if(m==='cannon'){ await this.pose(A,'cast',this.d(160)); await this.tween(bm,{arm:1},this.d(300),ease.out); this.popup('NATURAL ENERGY!',clamp(A.x,140,SW-140),GY-230,fx.c2,22,'#5a2a00'); }
+    await this.gather(A,this.d(520),fx.c); await this.pose(A,m==='circus'?'up':'cast',this.d(90));
+    const pd=this.pdodge(e,A,D); this.camTo((A.x+dx)/2,GY-110,1.1,300); this.sfx(m==='spear'?'zap':'boom'); this.lines=this.d(600);
+    const dist=Math.abs(dx-hand().x)+(m==='bone'?-10:40);
+    if(m!=='bone') bm.w=m==='cannon'?46:m==='spear'?12:12;
+    await this.tween(bm,{len:dist},this.d(m==='bone'?260:200),ease.in);
+    for(let i=0;i<6;i++){ if(!e.dodge){ D.flash=1; this.burst(dx-f*10,GY-100+rand(-30,30),fx.c,8,.6,4); this.sfx('hit',.7); this.shake(8,90); this.knock(A,D,3); } if(m==='spear'&&i%2===0) this.bolts.push({x1:dx,y1:GY-100,x2:dx+rand(-60,60),y2:GY-rand(40,180),life:this.d(120),col:fx.c,w:4}); await this.wait(this.d(80)); }
+    A.aura=0; await this.ultHit(e,A,D,fx,dx,GY-100,{pd,knock:140});
+    await this.tween(bm,{a:0},this.d(240)); ef.t=ef.dur;
+  },
+
+  /* The user grows to giant size and crushes the target. u.mode: 'butterfly' (Choji's Butterfly Mode: chakra wings, a
+     giant fist), 'hydro' (Suigetsu swells into a giant water body and brings the Executioner's Blade down). */
+  async giant(e,A,D,fx,u){
+    const f=A.face, dx=D.x, m=u.mode, wg={a:0}, S=2.3;
+    this.fade('vigA',.45,this.d(300)); this.mood={col:m==='hydro'?'#021020':'#140810',a:0}; this.tween(this.mood,{a:.35},this.d(400));
+    const ef=this.fxAdd(this.d(12000),ctx=>{ if(wg.a<=0) return; const t=this.t/1000, sh=jointAt('sh',A.x,A.face,A.pose,A.scale,A.lift); ctx.save(); ctx.globalAlpha=wg.a;
+      if(m==='butterfly'){ ctx.globalCompositeOperation='lighter'; ctx.translate(sh.x-f*10*A.scale,sh.y); ctx.scale(-f,1); const fl=1+.08*Math.sin(t*10);
+        for(const [r,sx,sy,c] of [[-.5,90,60,fx.c],[.4,70,46,fx.c2]]){ ctx.save(); ctx.rotate(r); ctx.scale(fl*A.scale/1.4,A.scale/1.4); const g=ctx.createRadialGradient(sx*.5,0,4,sx*.5,0,sx); g.addColorStop(0,'#ffffff'); g.addColorStop(.4,c); g.addColorStop(1,'rgba(255,120,180,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.ellipse(sx*.55,0,sx,sy,0,0,TAU); ctx.fill(); ctx.restore(); } }
+      else { ctx.strokeStyle='rgba(150,210,255,.55)'; ctx.lineWidth=3; for(let i=0;i<10;i++){ const y=GY-((t*140+i*40)%(170*A.scale)); ctx.beginPath(); ctx.arc(A.x+Math.sin(i*2+t*3)*30*A.scale,y,4+i%3*2,0,TAU); ctx.stroke(); } }
+      ctx.restore(); },true);
+    this.pose(A,'charge',this.d(220)); A.aura=1; this.sfx('charge'); this.shake(10,1200);
+    this.tween(wg,{a:1},this.d(400)); await this.wait(this.d(300));
+    this.popup(m==='butterfly'?'SUPER EXPANSION!':'HYDRIFICATION!',clamp(A.x,150,SW-150),GY-120,fx.c2,24,'#3a0a2a'); this.sfx('boom');
+    await this.tween(A,{scale:S,x:A.x-f*30},this.d(520),ease.out); A.aura=0;
+    const pd=this.pdodge(e,A,D); this.camTo((A.x+dx)/2,GY-170,1,400);
+    if(m==='butterfly'){
+      await this.pose(A,'punchWind',this.d(160)); this.sfx('whoosh'); this.lines=this.d(400);
+      this.tween(A,{x:dx-f*150},this.d(200),ease.in); await this.pose(A,'punch',this.d(200));
+    } else {
+      await this.pose(A,'up',this.d(220)); this.sfx('whoosh');
+      this.tween(A,{x:dx-f*160},this.d(200),ease.in); await this.pose(A,'slam',this.d(180));
+      this.slash(dx-f*40,GY-330,dx+f*40,GY-10,'#d8f0ff',this.d(300),16); for(let i=0;i<20;i++) this.spawn({x:dx+rand(-60,60),y:GY-rand(0,40),vx:rand(-.4,.4),vy:-rand(.3,.7),g:.0018,life:rand(500,800),size:rand(4,8),col:'#8fd0ff',shape:'dot'});
+    }
+    dust(this,dx,40); this.shake(30,500);
+    await this.ultHit(e,A,D,fx,dx,GY-110,{pd,knock:170});
+    await Promise.all([this.tween(A,{scale:1},this.d(300),ease.inout),this.tween(wg,{a:0},this.d(300))]); ef.t=ef.dur;
+  },
+
+  /* Hyuga Gentle Fist finishers on an eight-trigram circle. u.mode: 'vacuum' (Neji: a palm-shaped wall of air),
+     'palms64' (Hinata: a whirling dome of chakra blades carried into the target), 'lions' (Hinata: Twin Lion Fists). */
+  async trigram(e,A,D,fx,u){
+    const f=A.face, dx=D.x, m=u.mode, tr={r:0,a:1}, w={x:0,a:0,s:1}, dome={r:0,a:0};
+    this.fade('vigA',.5,this.d(300)); this.mood={col:'#04081a',a:0}; this.tween(this.mood,{a:.45},this.d(400));
+    const eb=this.fxAdd(this.d(12000),ctx=>{ if(tr.r<=0) return; ctx.save(); ctx.globalAlpha=tr.a; ctx.translate(A.x,GY+6); ctx.scale(1,.3); ctx.strokeStyle=fx.c; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(0,0,tr.r,0,TAU); ctx.stroke(); ctx.beginPath(); ctx.arc(0,0,tr.r*.62,0,TAU); ctx.stroke();
+      for(let i=0;i<8;i++){ ctx.save(); ctx.rotate(i*TAU/8); for(let b=0;b<3;b++){ ctx.fillStyle=fx.c; ctx.fillRect(tr.r*.68+b*9,-8+((i+b)%2?0:0),5,(i>>b)&1?16:7); } ctx.restore(); } ctx.restore(); },true);
+    const ef=this.fxAdd(this.d(12000),ctx=>{ const t=this.t/1000; ctx.save();
+      if(dome.a>0){ ctx.globalAlpha=dome.a; ctx.globalCompositeOperation='lighter'; ctx.strokeStyle=fx.c; ctx.lineWidth=3; const cx=A.x, cy=GY-90;
+        for(let i=0;i<14;i++){ const a=t*9+i*TAU/14; ctx.beginPath(); ctx.ellipse(cx,cy,dome.r,dome.r*Math.abs(Math.cos(a))+6,i*.22,0,TAU); ctx.stroke(); } }
+      if(w.a>0){ ctx.globalAlpha=w.a; ctx.translate(w.x,GY-110); ctx.scale(f*w.s,w.s);
+        if(m==='vacuum'){ ctx.fillStyle='rgba(200,230,255,.45)'; ctx.strokeStyle='#ffffff'; ctx.lineWidth=4; ctx.beginPath(); ctx.ellipse(0,20,40,70,0,0,TAU); ctx.fill(); ctx.stroke(); // a palm of air, fingers up
+          for(let i=0;i<4;i++){ ctx.beginPath(); ctx.ellipse(-24+i*16,-66-(i===1||i===2?14:0),9,34,(i-1.5)*.08,0,TAU); ctx.fill(); ctx.stroke(); } ctx.beginPath(); ctx.ellipse(44,10,10,30,-.7,0,TAU); ctx.fill(); ctx.stroke(); }
+      }
+      ctx.restore();
+      if(m==='lions'&&w.a>0) for(const k of ['fh','bh']){ const h=jointAt(k,A.x,A.face,A.pose,A.scale,A.lift); ctx.save(); ctx.globalAlpha=w.a; ctx.translate(h.x,h.y); ctx.scale(f*w.s,w.s); // a lion's head of chakra on each fist
+        ctx.shadowColor=fx.c; ctx.shadowBlur=16; ctx.fillStyle='#6a58e0'; ctx.strokeStyle='rgba(30,20,90,.6)'; ctx.lineWidth=2;
+        ctx.beginPath(); for(let i=0;i<14;i++){ const a=i*TAU/14, r=i%2?30:44; ctx.lineTo(Math.cos(a)*r-6,Math.sin(a)*r); } ctx.closePath(); ctx.fill(); ctx.stroke(); // mane
+        ctx.shadowBlur=0; ctx.fillStyle=fx.c2; ctx.beginPath(); ctx.ellipse(2,0,22,20,0,0,TAU); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.ellipse(20,8,12,9,0,0,TAU); ctx.fill(); ctx.stroke(); // face, muzzle
+        ctx.fillStyle='#2a1a6a'; ctx.beginPath(); ctx.arc(8,-7,3.2,0,TAU); ctx.arc(-6,-7,3.2,0,TAU); ctx.fill(); ctx.beginPath(); ctx.moveTo(26,4); ctx.lineTo(32,6); ctx.lineTo(27,10); ctx.fill(); ctx.strokeStyle='#2a1a6a'; ctx.beginPath(); ctx.moveTo(14,14); ctx.quadraticCurveTo(22,18,30,13); ctx.stroke(); ctx.restore(); }
+      });
+    A.eye=1; A.eyeCol='#e8f0ff'; this.pose(A,'block',this.d(220)); A.aura=1; this.sfx('charge'); this.tween(tr,{r:110},this.d(400),ease.out);
+    await this.wait(this.d(450));
+    const pd=this.pdodge(e,A,D); this.camTo((A.x+dx)/2,GY-110,1.12,400);
+    if(m==='vacuum'){
+      await this.pose(A,'punch',this.d(80)); this.sfx('boom'); this.lines=this.d(500); w.x=A.x+f*60; w.a=1; w.s=.6;
+      this.tween(w,{s:1.4},this.d(300)); await this.tween(w,{x:dx},this.d(300),ease.in); this.tween(w,{a:0,s:1.8},this.d(220));
+      if(!e.dodge){ D.flash=1; this.sfx('hit',1); }
+    } else if(m==='palms64'){
+      await this.tween(dome,{r:70,a:1},this.d(300),ease.out); this.sfx('whoosh');
+      await this.tween(A,{x:dx-f*40},this.d(320),ease.in);
+      for(let i=0;i<8;i++){ if(!e.dodge){ D.flash=1; this.sparks(dx,GY-100+rand(-30,30),'#ffffff',5); this.sfx('hit',.6); this.knock(A,D,3); this.pose(D,'hurt',this.d(30)); } this.popup(`${2<<i>64?64:2<<i} PALMS`,dx,GY-240,fx.c2,20,'#10304a'); this.shake(5,80); await this.wait(this.d(70)); }
+      this.tween(dome,{r:120,a:0},this.d(240));
+    } else {
+      w.a=1; w.s=.4; await this.tween(w,{s:1},this.d(300),ease.out); this.popup('TWIN LIONS!',clamp(A.x,120,SW-120),GY-230,fx.c2,24,'#2a1a6a');
+      A.run=true; this.sfx('whoosh'); this.pose(A,'run',this.d(50)); await this.tween(A,{x:dx-f*60},this.d(260),ease.in); A.run=false;
+      await this.pose(A,'cast',this.d(70)); if(!e.dodge){ D.flash=1; this.sfx('hit',1); } this.tween(w,{s:1.8,a:0},this.d(240));
+    }
+    A.aura=0; await this.ultHit(e,A,D,fx,dx,GY-100,{pd,knock:150});
+    A.eye=0; await this.tween(tr,{a:0},this.d(250)); eb.t=eb.dur; ef.t=ef.dur;
+  },
+
+  /* Kankuro's Black Secret: Salamander shields him, Black Ant swallows the target, Crow's blades run it through. */
   async threepup(e,A,D,fx,u){
     const f=A.face, dx=D.x, own=this.pupFree(A), crow=own||Object.assign(this.mkPup(A,'crow',0),{alpha:0});
-    const ant=this.mkPup(A,'ant',0), sal=this.mkPup(A,'sal',0), sp=u.sasori?this.mkPup(A,'sasoriP',0):null;
+    const ant=this.mkPup(A,'ant',0), sal=this.mkPup(A,'sal',0);
     Object.assign(sal,{x:A.x+f*64,lift:0,alpha:0,scale:1.05}); Object.assign(ant,{x:A.x-f*40,lift:60,alpha:0,scale:1.15});
-    if(sp) Object.assign(sp,{x:A.x-f*70,lift:40,alpha:0,scale:1});
-    const extra=[sal,ant].concat(sp?[sp]:[],own?[]:[crow]), blades=[], shut={k:0};
+    const extra=[sal,ant].concat(own?[]:[crow]), blades=[], shut={k:0};
     this.fade('vigA',.4,this.d(300)); this.mood={col:'#0a0610',a:0}; this.tween(this.mood,{a:.45},this.d(400));
     const ef=this.fxAdd(this.d(12000),ctx=>{
       const hs=[jointAt('fh',A.x,f,A.pose,1,A.lift),jointAt('bh',A.x,f,A.pose,1,A.lift)];
@@ -3883,11 +4412,6 @@ const ULTS={
       blades.push(b); this.tween(b,{x:tx,y:ty},this.d(110),ease.in); await this.wait(this.d(110));
       this.sparks(tx,ty,'#ffffff',5); this.sfx('hit',.6); this.shake(6,90); this.stopFor(20);
       if(!e.dodge) this.popup(`${i+1} BLADE${i?'S':''}`,dx,GY-262,'#ffe28a',22,'#6a3a00');
-    }
-    if(sp){ // the Sasori puppet's cable tail drives in last
-      this.pose(sp,'slam',this.d(120)); await this.tween(sp,{x:dx-f*110,lift:30},this.d(260),ease.inout);
-      const b={x:sp.x,y:GY-sp.lift-150,a:0}; b.a=Math.atan2(GY-92-b.y,dx-b.x); blades.push(b);
-      await this.tween(b,{x:dx-f*6,y:GY-96},this.d(140),ease.in); this.flash('#ffffff',.5); this.sfx('boom'); this.shake(14,200);
     }
     await this.wait(this.d(200));
     blades.length=0; shut.k=0; D.alpha=e.dodge?D.alpha:1; this.smoke(dx,GY-90,10);
@@ -4088,6 +4612,9 @@ const LINES={
   hitSup:[`THE ${KINU} LANDS! {dmg} damage! {d} is at {hp} HP.`,'{d} takes the full {move}: {dmg} damage!'],
   supReady:[`{x} can unseal a ${KIN}!`,'{x} has the forbidden technique ready!'],
   guardUp:['{x} braces for impact.','{x} raises a guard.','{x} plays it safe and guards.'],
+  gate:['{a} forces open the {g}!','{a} opens the {g}! The power keeps climbing!','Gate {n}, the {g}! {a} is glowing!'],
+  gateDeath:['{a} OPENS THE GATE OF DEATH! There is no coming back from this!','The Eighth Gate! {a} is burning his own life force!'],
+  drain:['The gates are burning {x} up: -{h} HP.','{x} pays for the open gates, -{h} HP.','Steam pours off {x}. -{h} HP.'],
   focus:['{x} steps back to gather chakra.','{x} focuses: +{h} chakra.','{x} takes a breath and refills, +{h} chakra.']
 };
 class Announcer{
@@ -4111,7 +4638,9 @@ class Announcer{
     if(e.type==='heal') return this.fill(this.line('heal'),v);
     if(e.type==='focus') return this.fill(this.line('focus'),v);
     if(e.type==='guard') return this.fill(this.line('guardUp'),v);
+    if(e.type==='drain') return this.fill(this.line('drain'),Object.assign(v,{h:e.dmg}));
     if(e.skip) return this.fill(this.line('skip'),v);
+    if(e.gate) return this.fill(this.line(e.gate>=8?'gateDeath':'gate'),Object.assign(v,{g:GATES[e.gate].n,n:e.gate}));
     if(e.mv==='ult'){ this.ready[e.att]=false; this.sready[e.att]=false; return this.fill(this.line(e.sup?'supPre':'ultPre'),v); }
     const key=e.mv==='tai'?'taiPre':e.mv==='nin'?'ninPre':e.mv==='gen'?'genPre':'sigPre';
     return this.fill(this.line(key),v);
@@ -4986,6 +5515,7 @@ function hudSide(f,s){
     <div class="cbar${r}" aria-hidden="true"><b id="cb${s}"></b></div>
     <div class="ubar${r}" id="ubar${s}" aria-hidden="true"><b id="ub${s}"></b></div>
     <div class="ulbl" id="ul${s}">Ultimate 0%</div>
+    ${f.gates?`<div class="glbl" id="gl${s}">Eight Gates: 0 of ${f.gates} open</div>`:''}
   </div>`;
 }
 function buildArena(a,b,label,intro,note,theme){
@@ -4998,12 +5528,13 @@ function buildArena(a,b,label,intro,note,theme){
     <ul class="log" id="log" aria-live="polite">${lines.map(t=>`<li class="info">${esc(t)}</li>`).join('')}</ul>`;
   const st=new Stage($('stage'),a,b,{theme:theme||0,mul:state.speed==='fast'?.55:1,calm:reduced});
   st.paused=state.paused;
-  st.onHp=e=>setHp(e.hp,e.ch,e.um,e.sm,e.uu);
+  st.onHp=e=>setHp(e.hp,e.ch,e.um,e.sm,e.uu,e.gt);
   state.stage=st;
   return st;
 }
-function setHp(hp,ch,um,sm,uu){
+function setHp(hp,ch,um,sm,uu,gt){
   ['A','B'].forEach((s,i)=>{
+    const gl=$('gl'+s); if(gl&&gt){ const g=gt[i], G=GATES[g]; gl.textContent=g?`Gate ${g}: ${G.n}, +${Math.round((G.pw-1)*100)}% power${G.dr?`, -${G.dr} HP a turn`:''}`:gl.textContent; gl.classList.toggle('open',g>0); gl.classList.toggle('death',g>=8); }
     const bar=$('hpbar'+s), n=$('hpn'+s); if(!bar) return;
     const v=hp[i]; bar.setAttribute('aria-valuenow',v);
     const b=bar.firstElementChild; b.style.width=v+'%';
@@ -5043,7 +5574,7 @@ function showFinal(m,r){
   const last=m.result.log[m.result.log.length-1];
   const st=buildArena(m.a,m.b,`${roundName(r)}, result`,'',hasSquad(m)?'Your fighter was in this one':'',themeFor(r));
   m.result.log.forEach(addLine);
-  st.setFinal(last.win,m.result.ko); setHp(last.hp,last.ch,last.um,last.sm,last.uu); markWinner(last.win);
+  st.setFinal(last.win,m.result.ko); setHp(last.hp,last.ch,last.um,last.sm,last.uu,last.gt); markWinner(last.win);
   const ce=state.champion&&r===nRounds()-1?state.story.find(e=>e.k==='champ'):null;
   setTicker(ce?ce.x:new Announcer(m.a,m.b,f=>inSquad(f.id)).end(last),true);
 }
@@ -5068,7 +5599,7 @@ async function playSim(m,sim,r,real){
     addLine(e);
     if(e.type==='info') continue;
     try{ await Promise.race([e.type==='end'?st.finale(e):st.playEntry(e),stageGuard(st,12000)]); }catch(err){ console.error(err); }
-    setHp(e.hp,e.ch,e.um,e.sm,e.uu);
+    setHp(e.hp,e.ch,e.um,e.sm,e.uu,e.gt);
     if(e.type==='end') markWinner(e.win);
   }
   st.skipping=false;
@@ -5159,8 +5690,10 @@ function duelPanel(){
     <div class="cmdh"><span class="you">You: <b>${me.short}</b></span><span>Chakra <b>${o.ch}</b>/${o.max}</span><span>${o.ult.used?'Big move <b>spent</b>':o.super.gauge>0?`${KIN} <b>${o.super.gauge}%</b>`:`Ultimate <b>${o.ult.gauge}%</b>`}</span><span class="cmds">${head}</span></div>
     <div class="cmdg">
       ${b('tai',0,'tai','Taijutsu',`Hit ${o.tai.hit}%, +3 chakra`,o.tai.ok)}
-      ${b('nin',1,'nin','Ninjutsu',o.nin.ok?`10 chakra, hit ${o.nin.hit}%`:'Needs 10 chakra',o.nin.ok)}
-      ${b('gen',2,'gen','Genjutsu',o.gen.stunned?`${foe.short} is already trapped`:o.gen.ok?`8 chakra, trap ${o.gen.trap}%`:'Needs 8 chakra',o.gen.ok)}
+      ${o.taiOnly?b('gate',1,'gate',o.gate.next?`Gate ${o.gate.open+1}: ${o.gate.next.n.replace('Gate of ','')}`:'All gates open',o.gate.next?`+${Math.round((o.gate.next.pw-1)*100)}% power${o.gate.next.dr?`, -${o.gate.next.dr} HP/turn`:''}, and strike`:`${o.gate.open} of ${o.gate.max} open, +${o.gate.pw}% power`,o.gate.ok)
+        :b('nin',1,'nin','Ninjutsu',o.nin.ok?`10 chakra, hit ${o.nin.hit}%`:'Needs 10 chakra',o.nin.ok)}
+      ${o.taiOnly?b('gen',2,'gen','Genjutsu','Taijutsu only',false)
+        :b('gen',2,'gen','Genjutsu',o.gen.stunned?`${foe.short} is already trapped`:o.gen.ok?`8 chakra, trap ${o.gen.trap}%`:'Needs 8 chakra',o.gen.ok)}
       ${b('sig',3,'sig',me.sig,o.sig.cd>0?`Ready in ${o.sig.cd} turn${o.sig.cd>1?'s':''}`:o.sig.ok?`28 chakra, hit ${o.sig.hit}%`:'Needs 28 chakra',o.sig.ok)}
       ${o.ult.used?b('ult',4,'ult','Big move','Spent this fight',false)
         :o.super.ok?b('super',4,'ult sup',KINU,`${supOf(me).n}. READY, hit ${o.super.hit}%`,true)
@@ -5212,7 +5745,7 @@ async function playControlled(a,b,me,o){
       const e=D.log[ptr++]; if(gone()) return false;
       addLine(e); if(e.type==='info') continue;
       try{ await Promise.race([e.type==='end'?st.finale(e):st.playEntry(e),stageGuard(st,12000)]); }catch(err){ console.error(err); }
-      setHp(e.hp,e.ch,e.um,e.sm,e.uu); if(e.type==='end') markWinner(e.win);
+      setHp(e.hp,e.ch,e.um,e.sm,e.uu,e.gt); if(e.type==='end') markWinner(e.win);
     }
     return !gone();
   };
@@ -5312,7 +5845,9 @@ document.addEventListener('keydown',e=>{
   if(!state.duel||!state.duel.waiting||e.ctrlKey||e.metaKey||e.altKey) return;
   const t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='SELECT'||t.tagName==='TEXTAREA')) return;
   let k=MOVE_KEYS[+e.key-1]; if(!k) return;
-  if(k==='big') k=state.duel.D.options(state.duel.me).super.ok?'super':'ult';
+  const o=state.duel.D.options(state.duel.me);
+  if(k==='big') k=o.super.ok?'super':'ult';
+  if(k==='nin'&&o.taiOnly) k='gate'; // key 2 opens a gate for Lee and Guy
   e.preventDefault(); chooseMove(k);
 });
 

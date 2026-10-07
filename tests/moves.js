@@ -2,6 +2,7 @@
 //   node tests/moves.js all            (sig + ult + super + basic moves + focus + guard, every version; a few minutes)
 //   node tests/moves.js ult 0 3        (shard 1 of 3: run three shards in parallel to go faster)
 //   node tests/moves.js sig itachi1    (one version)
+//   Eight Gates users (Lee, Guy) also play 'gate' (open gates 1-3 and strike) and 'drain' (HP burned by open gates).
 // Variants alternate sides: hit/ko are played by the left fighter, dodge/crit by the right one.
 // "skip" presses Skip animation part-way through and expects the entry to finish at once.
 const { open, shard } = require('./lib');
@@ -14,7 +15,8 @@ const { open, shard } = require('./lib');
   const mvs = mode === 'all' ? ['sig', 'ult', 'super', 'tai', 'nin', 'gen', 'focus', 'guard'] : mode === 'basic' ? ['tai', 'nin', 'gen', 'focus', 'guard'] : [mode];
   const variants = ['hit', 'dodge', 'ko', 'crit', 'skip'];
   let runs = 0, fails = 0; const t0 = Date.now();
-  for (const id of ids) for (const mv of mvs) for (const v of (mv === 'sig' || mv === 'ult' || mv === 'super' ? variants : mv === 'focus' || mv === 'guard' ? ['hit', 'skip'] : ['hit', 'dodge', 'ko'])) {
+  const gateUsers = await page.evaluate(() => ROSTER.filter(f => f.gates).map(f => f.id));
+  for (const id of ids) for (const mv of mvs.concat(mode === 'all' && gateUsers.includes(id) ? ['gate', 'drain'] : [])) for (const v of (mv === 'sig' || mv === 'ult' || mv === 'super' ? variants : mv === 'focus' || mv === 'guard' || mv === 'drain' ? ['hit', 'skip'] : ['hit', 'dodge', 'ko'])) {
     const r = await page.evaluate(([id, mv, v]) => {
       const variant = v === 'skip' ? 'hit' : v, att = (v === 'dodge' || v === 'crit') ? 1 : 0;
       return T.play(id, T.foe(id), mv, variant, { att, skipAt: v === 'skip' ? 1200 : 0, settle: 1500 }).then(r => {

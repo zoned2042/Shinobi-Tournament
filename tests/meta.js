@@ -10,6 +10,23 @@ const path = require('path');
   const shot = async name => { const f = path.join(__dirname, 'out', `meta_${name}.png`); await page.screenshot({ path: f, fullPage: false }); console.log(f); };
   await page.evaluate(() => { try { localStorage.removeItem('fst_hist'); } catch (e) {} HIST = emptyHist(); });
 
+  // 0. moves: every Kinjutsu plays a different animation from its Ultimate (style + mode/kind/look/head),
+  //    and the Eight Gates users (Lee, Guy) never use ninjutsu or genjutsu, open gates, and pay for them in HP
+  const moveCheck = await page.evaluate(() => {
+    const err = [], sig = u => u.s + ':' + (u.mode || u.kind || u.look || u.head || '');
+    ROSTER.forEach(f => { if (sig(ultOf(f)) === sig(supOf(f))) err.push(`${f.id}: Kinjutsu ${sig(supOf(f))} = Ultimate`); if (!ULTS[supOf(f).s] || !ULTS[ultOf(f).s]) err.push(`${f.id}: missing style`); });
+    let gates = 0, drained = 0;
+    for (const g of ROSTER.filter(f => f.gates)) for (let k = 0; k < 150; k++) {
+      const o = ROSTER[k % ROSTER.length]; if (o.id === g.id) continue;
+      const r = k % 2 ? simFight(o, g) : simFight(g, o), me = k % 2 ? 1 : 0;
+      r.log.forEach(e => { if (e.att === me && (e.mv === 'nin' || e.mv === 'gen')) err.push(`${g.id} used ${e.mv}`); if (e.att === me && e.gate) gates++; if (e.type === 'drain' && e.who === me) drained++; if (e.gt && e.gt[me] > g.gates) err.push(`${g.id} opened ${e.gt[me]} gates`); });
+      const D = makeDuel(g, o); if (D.options(0).nin.ok || D.options(0).gen.ok || !D.options(0).gate.ok) err.push(`${g.id}: command bar offers nin/gen or no gate`);
+    }
+    if (!gates) err.push('no gate was ever opened'); if (!drained) err.push('open gates never cost HP');
+    return [...new Set(err)];
+  });
+  ok(!moveCheck.length, 'moves: ' + moveCheck.slice(0, 8).join('; '));
+
   // 1. every tournament type builds valid fields at every allowed size
   const modes = await page.evaluate(() => {
     const out = [];

@@ -9,19 +9,26 @@ window.T = {
     const v = variant || 'hit';
     if (mv === 'guard') return { text: '', type: 'guard', hp: [70, 70], ch: [50, 50], um: [0, 0], att, tgt: null, mv: null, name: '', dmg: 0,
       dodge: false, crit: false, guard: false, stun: false, surv: false, ko: false, skip: false, resist: false, who: att, st: A.sigType, heal: 10, win: null };
-    if (mv === 'super') { const e = T.entry(A, D, att, 'ult', variant); e.sup = true; e.name = supOf(A).n; return e; }
+    if (mv === 'super') { const e = T.entry(A, D, att, 'ult', variant); e.sup = true; const u = supOf(A); e.name = u.n; T.gates(e, A, att, u.gate); return e; }
+    if (mv === 'gate') { const e = T.entry(A, D, att, 'tai', variant); T.gates(e, A, att, 3); e.heal = 8; return e; } // opens gates 1-3, then strikes
+    if (mv === 'drain') { const e = T.entry(A, D, att, 'focus', variant); Object.assign(e, { type: 'drain', att: null, who: att, dmg: 4, heal: 0, gt: att ? [0, 6] : [6, 0] }); return e; }
     if (mv === 'focus') return { text: '', type: 'focus', hp: [70, 70], ch: [50, 50], um: [0, 0], att, tgt: null, mv: null, name: '', dmg: 0,
       dodge: false, crit: false, guard: false, stun: false, surv: false, ko: false, skip: false, resist: false, who: att, st: A.sigType, heal: 25, win: null };
     const name = mv === 'ult' ? ultOf(A).n : mv === 'sig' ? A.sig : mv === 'nin' ? (A.mv && A.mv[0]) || 'a Fireball Jutsu'
       : mv === 'gen' ? ((A.gj && A.gj[0]) || 'an illusion') : (A.tm && A.tm[0]) || 'a rapid combo';
     const dmg = v === 'dodge' ? 0 : v === 'ko' ? 58 : v === 'crit' ? 44 : mv === 'gen' ? 3 : 27;
     const hp = [70, 70]; hp[1 - att] = v === 'ko' ? 0 : Math.max(0, 70 - dmg);
-    return {
+    const e = {
       text: '', type: mv === 'ult' ? 'ult' : mv, hp, ch: [50, 50], um: [0, 0], att, tgt: v === 'dodge' ? null : 1 - att, mv, name, dmg,
       dodge: v === 'dodge', crit: v === 'crit', guard: v === 'guard', stun: mv === 'gen' && v !== 'dodge', surv: v === 'surv', ko: v === 'ko',
       skip: false, resist: false, who: null, st: A.sigType, heal: 0, win: null
     };
+    if (mv === 'ult') T.gates(e, A, att, ultOf(A).gate);
+    if (mv === 'sig') T.gates(e, A, att, A.sg);
+    return e;
   },
+  /* an Eight Gates user's move that forces gates open (as makeDuel logs it) */
+  gates(e, A, att, n) { if (!A.gates || !n) return; e.gate = Math.min(n, A.gates); e.gt = [0, 0]; e.gt[att] = e.gate; },
 
   /* play one entry on an offscreen stage.
      o.every: capture a frame every N ms of real time (0 = no capture); o.from: first capture time;

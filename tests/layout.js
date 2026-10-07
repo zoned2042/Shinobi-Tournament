@@ -62,6 +62,7 @@ const path = require('path');
   await shot('12_spectate'); await overflow('spectate');
   await tap('[data-action="newdraft"]'); await page.waitForTimeout(150);
   await tap('[data-action="quick"]'); await page.waitForTimeout(150);
+  await page.evaluate(() => { state.vs.me = 'lee2'; if (state.vs.foe === 'lee1' || byId(state.vs.foe).base === 'lee') state.vs.foe = 'kakashi1'; renderVersus(); }); // an Eight Gates user: the command bar shows Open Gate
   await tap('[data-action="vsfight"]');
   await page.waitForFunction(() => state.duel && state.duel.waiting, null, { timeout: 15000 }).catch(() => problems.push('quick fight never asked for a move'));
   await page.evaluate(() => document.getElementById('arena').scrollIntoView()); await page.waitForTimeout(200);

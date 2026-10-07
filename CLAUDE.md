@@ -9,7 +9,7 @@ Shinobi Life" and the footer links that repo. The UI follows Shinobi Life's look
 amber `#e08a3c` accent) and "Old Scroll" light theme, Georgia serif titles, spaced-caps kicker lines, film grain and
 rising embers. CSS tokens live on `:root` (`--serif`, `--soft`, `--glow`, `--edge`); the canvas keeps its own fonts.
 
-- Entry point: `index.html` (about 4,600 lines, HTML + CSS + one `<script>`, no build step, no dependencies).
+- Entry point: `index.html` (about 6,000 lines, HTML + CSS + one `<script>`, no build step, no dependencies).
 - Originally built and published as a Claude artifact: https://claude.ai/artifact/Ng4jRYAvPF7r3B9QLgtmZ3
 - Keep it a SINGLE self-contained HTML file. It must keep working when published as an artifact
   (CSP allows scripts only from cdnjs/jsdelivr/jquery, nothing else; fonts come from Google Fonts with fallbacks).
@@ -22,10 +22,12 @@ npm install                       # installs playwright only (used by tests)
 npx playwright install chromium   # skip if a Chromium build is already present (set CHROMIUM_PATH to use another one)
 npm run serve                     # or just open index.html in a browser
 npm run test:smoke                # all bracket sizes, one-version-per-character, skip mid-fight, replay, new draft mid-fight
-npm run test:meta                 # tournament types (every size/seed/field), squad names, story, history + reload,
+npm run test:meta                 # every Kinjutsu animates differently from its Ultimate, Lee/Guy never use nin/gen and do
+                                  #   open gates; tournament types (every size/seed/field), squad names, story, history + reload,
                                   #   spectator (pause, skip to the final), spins/XP, fight it yourself, quick fight,
                                   #   clear history; screenshots in tests/out/meta_*.png
-node tests/moves.js all           # every version x {sig,ult,super,tai,nin,gen,focus,guard} x {hit,dodge,ko,crit,skip}, checks for errors,
+node tests/moves.js all           # every version x {sig,ult,super,tai,nin,gen,focus,guard} x {hit,dodge,ko,crit,skip} (+ gate/drain for
+                                  #   Lee and Guy), checks for errors,
                                   #   hangs, leftover fx/props/mood/camera and fighters not reset (~2,300 runs, ~1 min;
                                   #   split with: node tests/moves.js ult 0 3 / 1 3 / 2 3, or name ids: node tests/moves.js sig itachi1)
 npm run test:balance              # Ultimate/Kinjutsu rate, damage caps, KO rate, upsets, champion spread (exits 1 if a target is missed)
@@ -48,18 +50,19 @@ Google Fonts through curl so the canvas text uses the real fonts.
 
 | Section | What lives there |
 |---|---|
-| `ROSTER` | `C(id,name,short,base,tags,form,[nin,tai,gen,spd,sta,int],sig,sigType,opts)`. 91 versions of 64 characters. `id` = unique version, `base` = character family, `short` = unique display name. opts: `regen`, `guard` (chance to halve damage), `last` (survive one lethal hit), `mv` (ninjutsu names). Stats 0-130. |
+| `ROSTER` | `C(id,name,short,base,tags,form,[nin,tai,gen,spd,sta,int],sig,sigType,opts)`. 91 versions of 64 characters. `id` = unique version, `base` = character family, `short` = unique display name. opts: `regen`, `guard` (chance to halve damage), `last` (survive one lethal hit), `mv` (ninjutsu names), `gates` (Eight Gates user: how many gates it can open; makes it taijutsu only), `sg` (gate its signature forces open). Stats 0-130. |
 | `MOVES` | Per-`base` lists: `tm` taijutsu, `mv` ninjutsu, `gj` genjutsu names. Merged into ROSTER at load. `jutsuFx(name,baseFx)` picks projectile visuals from keywords in the name. |
 | `FX` | Per-`base` projectile colours/shape (`orb`, `rasen`, `bolt`, `wave`, `swarm`, `shards`). |
 | `LK` / `lookOf` | Per-`base` and per-`id` look: skin `sk`, hair `hr`/`hs` (style), eyes `ey`/`es`, outfit `tp bt sl sv os vs`, headband `bd`, mask `mk`, marks `mr[]`, back item `bk`, glow, `bw` body width. Hokage tag auto-applies robe+hat; `Edo` tag auto-applies cracked grey skin. `cl` = Akatsuki clouds (`drawCloud`), `hc` = high collar on the portrait, `chk` = glowing chakra-cloak body with seal markings (Kurama/Baryon/Six Paths Naruto), `nohat` = Hokage without the auto hat, `bd:'helmet'`, `mk:'bandage'`, `bk:'cleaver'`, `sv:'warm'` (arm warmers). |
 | `drawHead`, `hairFront/Back`, `drawMarks`, `drawEye`, `drawPortrait`, `faceURL`, `drawCloud` | Head-frame drawing (origin at head centre, +x forward, -y up). Used by in-fight fighters, both cut-ins and face icons. |
 | `RULES` | All big-move and Guard numbers in one place (gauge gains, thresholds, AI fire chances, damage bases and caps, Guard multiplier). Re-run `npm run test:balance` after touching it. |
-| `makeDuel(A,B)` / `simFight(A,B)` | `makeDuel` is the rules, one action at a time: `act(i,choice)` (no choice = the AI's weighted pick; `tai nin gen sig ult super guard focus` = the player's), `order()` (speed roll per turn), `endTurn()` (chakra, gauge, cooldown, regen), `over()`, `options(i)` (what is usable + hit/trap odds for the command bar), `result()`. `simFight` loops it with the AI on both sides and returns `{winner,loser,ko,hpLeft,log,turns,ultW,ultL,supW,supL}` (`ultW` = winner landed a big move, `supW` = it was the Super). `focus` (+30 chakra) and `guard` (all damage that turn x0.4, +10 chakra, always acts first) exist only for the player; log types `'focus'` / `'guard'`. Log entries also carry `sm` (Super charge 0-100) and `uu` (2 = big move spent); a Super is `mv:'ult'` with `sup:true`. |
-| `SUPERMAP` / `supOf` / `KIN` | Kinjutsu ("forbidden technique"; called "super" in code, e.g. `e.sup`, `supOf`): the tier above the Ultimate, each character's top technique. The player-facing name is the one constant `KIN`. Hashirama's is Sage Art Shinsu Senju, Thousand-Armed Kannon. Same format and styles as `ULTMAP`; played with `big:true`, a gold "KINJUTSU" cut-in (`ultCut.sup`) and a gold impact (`stage.superOn` in `ultHit`). `titan` has a `kannon` mode (golden halo of 40 arms striking in three waves). |
+| `GATES` / `taiOnly` | Eight Gates (Rock Lee 5 / Gates Lee 6 / Might Guy 7 / Eighth Gate Guy 8). Gate users are taijutsu only (`canUse` refuses nin/gen; the command bar shows "Gate N" on key 2 and a disabled Genjutsu). The `gate` move opens the next gate and strikes in the same turn; open gates stack: `GATES[g]` = state with g open, `pw` damage multiplier on tai/sig/big moves (1.04 to 1.5), `sp` speed bonus (dodge and turn order), `dr` HP burned at the end of each turn from gate 4 (never below 1 HP, log type `'drain'`), the Gate of Healing gives 8 HP once. A signature (`d.sg`) or big move (`u.gate`) that needs more gates forces them open. The AI climbs early and saves the Gate of Death for when it is losing. Log entries carry `gt:[g0,g1]` (open gates) and `gate` (highest gate opened by this entry); the Stage plays `openGates` before the move, keeps steam, a gate-coloured aura and (from gate 3) red skin on the fighter (`gateLook`), and `drain()` for the cost. HUD line `#glA/#glB`. |
+| `makeDuel(A,B)` / `simFight(A,B)` | `makeDuel` is the rules, one action at a time: `act(i,choice)` (no choice = the AI's weighted pick; `tai nin gen sig ult super guard focus gate` = the player's), `order()` (speed roll per turn), `endTurn()` (chakra, gauge, cooldown, regen), `over()`, `options(i)` (what is usable + hit/trap odds for the command bar), `result()`. `simFight` loops it with the AI on both sides and returns `{winner,loser,ko,hpLeft,log,turns,ultW,ultL,supW,supL}` (`ultW` = winner landed a big move, `supW` = it was the Super). `focus` (+30 chakra) and `guard` (all damage that turn x0.4, +10 chakra, always acts first) exist only for the player; log types `'focus'` / `'guard'`. Log entries also carry `sm` (Super charge 0-100) and `uu` (2 = big move spent); a Super is `mv:'ult'` with `sup:true`. |
+| `SUPERMAP` / `supOf` / `KIN` | Kinjutsu ("forbidden technique"; called "super" in code, e.g. `e.sup`, `supOf`): the tier above the Ultimate, each character's top technique. The player-facing name is the one constant `KIN`. Hashirama's is Sage Art Shinsu Senju, Thousand-Armed Kannon. Same format and styles as `ULTMAP`; played with `big:true`, a gold "KINJUTSU" cut-in (`ultCut.sup`) and a gold impact (`stage.superOn` in `ultHit`). Rule (checked by `tests/meta.js`): a version's Kinjutsu never plays the same style+mode as its Ultimate. `titan` has a `kannon` mode (golden halo of 40 arms striking in three waves). |
 | `Sfx` | Tiny WebAudio synth (no assets). `tone(...,at)` schedules on the audio clock. Measured worst case (stacked KO impacts) peaks at ~0.55 of full scale, so there is no limiter. |
 | `class Stage` | Canvas renderer + animation engine. Fighters are skeletons driven by pose angles (`POSES`). Plays log entries as animations. `titleLayout` breaks Ultimate titles into 1-4 lines. |
 | `SIGMAP` / `STYLES` | 33 staged signature moves, keyed by id or base. Unmapped characters fall back to a generic move by `sigType` (currently none). |
-| `ULTMAP` / `ULTS` | 20 Ultimate choreographies, keyed by id or base. Fallback by sigType via `ULTFB`. |
+| `ULTMAP` / `ULTS` | 28 Ultimate/Kinjutsu choreographies, keyed by id or base. Fallback by sigType via `ULTFB`. Mostly Kinjutsu-tier ones with modes: `gatesKin` (`drunk` Drunken Fist, `peacock` Morning Peacock, `tiger` Daytime Tiger, `elephant` Evening Elephant, `night` Night Guy), `summon` (`kind` toad/slug/salamander/weasel/wolf/snake, drawn by `Stage.drawSummon`), `bind` (`mode` shadow/tree/mind/ritual/chains/hive/water/threads, drawn by `Stage.drawBind`), `barrage` (bomb/shuriken/coral/tsb/lava/swallows), `skyfall` (heel/guillotine/gold/boulder), `beam` (cannon/circus/spear/bone), `giant` (butterfly/hydro, grows the fighter with `scale`), `trigram` (vacuum/palms64/lions). |
 | `PUPPETS` / `PUP_LOOK` / `mkPup` / `pupFree` / `pupHome` | Puppet masters (Kankuro: Crow; Chiyo: Mother and Father; both Sasoris: the Third Kazekage). `Stage.mk` gives each fighter `f.pups`: pseudo-fighters drawn with `drawFighter` (look from `PUP_LOOK`, `pup:true` = wooden limbs with ball joints and a hinged jaw; `arms4`, `tail`, `bk:'shell'`) that hover behind their master (`p.off`) on chakra threads (`drawThreads`) while `p.follow` is set, and drop when the master is KO'd (`p.down`). The puppet does the master's tai and nin (`pupFree` takes it off follow), steps in front on Guard, raises its arms during other big moves. Signature style `puppetry` (`m:'crow'|'pair'|'sand'`), Ultimate styles `army` with `pk` (real puppet looks: `CHIKA` ten, `HUNDRED` for Sasori) and `threepup` (Kankuro: Salamander shields, Black Ant swallows, Crow's blades; `sasori:true` adds the Sasori puppet for the Kinjutsu). `recover()` hands every puppet back (`pupHome`); `T.check` fails a run that leaves a puppet off its threads. |
 | `LINES` / `Announcer` | Live commentary ticker text. |
 | `APP STATE AND UI` | Draft screen, settings, bracket tabs, arena HUD, `playSim`, scoring (`finalize`), events. |
@@ -69,13 +72,13 @@ Google Fonts through curl so the canvas text uses the real fonts.
 | `tell` / `storyFight` / `storyRound` / `storyChampion` / `storyline` | The tournament story: events `{k,t,x,r,mi}` (kind, title, text, round, match index or null for round-level). Shown as the headline strip, the Story tab, ribbons on match cards and round notes. `storyline(a,b)` = pre-fight talking points (defending champ, head-to-head, streaks, upsets, titles, captain). |
 | `spectateLoop` / `worthWatching` | Spectator mode: no squad, auto-runs. Sims each fight first (pure), plays it only if worth watching (quarterfinals on, upsets, Ultimates, close finishes, story fighters, at least one per round), batches the rest "off camera". |
 | `renderHistory` | History screen: tournament cards, champions table, records table (by version or character). |
-| `playControlled` / `duelPanel` / `fightYourself` / `renderVersus` | Fights you control. `playControlled(a,b,me,o)` steps a `makeDuel`, asks for your move (`askMove`, buttons or keys 1-6), lets the opponent's AI answer, and plays every new log entry on the Stage; returns a `simFight`-style result, so `finalize`, replays, history and story treat it like any fight. The command bar renders into `#cmdslot` under the canvas; the stage shrinks (`.arena.duel`) so both fit on a laptop screen. "Fight it yourself" appears when your squad member is up; Quick fight (`state.vs`) is its own screen, a win gives 15 XP. "Let the AI finish" hands the rest of the fight to the AI. |
+| `playControlled` / `duelPanel` / `fightYourself` / `renderVersus` | Fights you control. `playControlled(a,b,me,o)` steps a `makeDuel`, asks for your move (`askMove`, buttons or keys 1-7; key 2 is Open Gate for gate users), lets the opponent's AI answer, and plays every new log entry on the Stage; returns a `simFight`-style result, so `finalize`, replays, history and story treat it like any fight. The command bar renders into `#cmdslot` under the canvas; the stage shrinks (`.arena.duel`) so both fit on a laptop screen. "Fight it yourself" appears when your squad member is up; Quick fight (`state.vs`) is its own screen, a win gives 15 XP. "Let the AI finish" hands the rest of the fight to the AI. |
 | `PROF` / `grantXP` / `RANKS` / `RARITY` / `doSpin` | Ninja profile saved under `fst_prof` `{xp,spins,day}`. XP per finished tournament = squad points + 25 (x2 for a spun squad, 10 for spectating); level L needs `xpAt(L)=30L(L+1)` XP; each level gives 5 spins, a squad title 3, a new day 10 (`dailySpins`). Rarity is the tier: C Common, B Rare, A Legendary, S Mythic. Spin draft (`state.settings.draft='spin'`) rolls rarity by weight (50/30/15/5) among eligible characters not already in the squad, with a reel animation (plain `setTimeout`: UI, not the Stage). |
 
 ## Core contracts
 
-**Log entry** (from `simFight`, consumed by `Stage.playEntry`): `{text,type,hp:[a,b],ch:[a,b],um:[a,b],att,tgt,mv,name,dmg,dodge,crit,guard,stun,surv,ko,skip,resist,who,heal,st,win}`
-where `mv` is `tai|nin|gen|sig|ult`, `att/tgt` are 0/1, `st` is the attacker's sigType. `type:'info'` is the intro, `'heal'` is regen, `'end'` is the result.
+**Log entry** (from `simFight`, consumed by `Stage.playEntry`): `{text,type,hp:[a,b],ch:[a,b],um:[a,b],sm,uu,gt:[a,b],gate,att,tgt,mv,name,dmg,dodge,crit,guard,stun,surv,ko,skip,resist,who,heal,st,win}`
+where `mv` is `tai|nin|gen|sig|ult`, `att/tgt` are 0/1, `st` is the attacker's sigType. `type:'info'` is the intro, `'heal'` is regen, `'drain'` is HP burned by open gates (`who`, `dmg`), `'end'` is the result. `gate` > 0 = this entry opened gates up to that number (`heal` then holds the Gate of Healing HP).
 
 **Stage conventions** (break these and animations hang or desync):
 - Every duration goes through `this.d(ms)` (playback speed). Never use raw `setTimeout` for animation.
@@ -120,6 +123,14 @@ Verified (Oct 2026):
   Edo defender. Every Ultimate and signature cut-in title was looked at (`tests/titles.js`), none overflow.
 - Shino/Zetsu/Hanzo/Sai plague swarm redone and checked (it used to read as falling snow).
 - Akatsuki Itachi has a custom signature (`crows`: crow flock + Mangekyo Tsukuyomi), checked in hit/dodge/KO.
+- Eight Gates (Oct 2026): Lee and Guy are taijutsu only and climb the gates (`GATES`). Simulated win rates vs random
+  opponents: Rock Lee ~46%, Gates Lee ~66%, Might Guy ~65%, Eighth Gate Guy ~91% (same as before the gates; his `last`
+  trait, see below). Frames looked at: a gate opening, every gate finisher, the command bar at 390 px and on desktop.
+- Distinct Kinjutsu (Oct 2026): 53 versions used to replay their Ultimate's animation; every Kinjutsu now has its own
+  (new styles above, plus remaps: Zetsu army, Konan supernova, Iruka rainUlt, Mifune blitz, Kakuzu hydra, Kankuro's
+  puppet corps; and new Ultimates for Orochimaru (summon Manda), Hagoromo (Truth-Seeking Balls), Onoki (mountain drop),
+  Eighth Gate Guy (Evening Elephant)). Key frames of every new Kinjutsu were looked at. `node tests/moves.js all`:
+  2,568 runs, 0 failures.
 - Puppet masters fight with visible puppets (see `PUPPETS`): moves suite 2,548 runs clean, plus every version's sig/ult/tai/nin/gen
   (hit/KO/skip) against Chiyo and Kankuro as defenders (2,700 runs, 0 failures). Frames looked at: idle, tai, nin, Guard, every
   puppet signature, all three puppet Ultimates (hit/dodge/KO) and Kankuro's Kinjutsu, a puppet master KO'd.
@@ -127,7 +138,7 @@ Verified (Oct 2026):
   clipping. The effects have still never been HEARD by a person: listen to `tests/out/sfx.wav`.
 - Phone layout at 390 and 360 px: no horizontal overflow; squad tray is one scrolling row, the live ticker sits under
   the canvas instead of covering the fighters. Checked on Chromium's mobile emulation only, not a real device.
-- Balance targets pass: big move in ~64% of fights (Kinjutsu ~14%), 28-29 distinct champions / 300 brackets, top fighter ~15-19%,
+- Balance targets pass: big move in ~64% of fights (Kinjutsu ~15%), 28-31 distinct champions / 300 brackets, top fighter ~15-19%,
   Edo champions ~39-46% across runs (was ~49%).
 - Every Kinjutsu title fits its cut-in (`tests/titles.js`); Kinjutsu frames looked at for Hashirama (Kannon), Kurama
   Naruto, Prime Madara, Pain, Night Guy.
