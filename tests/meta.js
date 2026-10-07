@@ -18,9 +18,9 @@ const path = require('path');
       const mx = maxSize(), bases = modeBases();
       for (const size of [8, 16, 32, 64].filter(n => n <= mx)) for (const seed of ['random', 'rating']) for (const field of ['random', 'strong']) {
         state.settings.size = size; state.settings.seed = seed; state.settings.field = field; fitSettings();
-        // a random eligible squad
+        // a random squad of what the player may draft
         const picks = [], seen = new Set();
-        for (const f of shuffle(ROSTER.filter(x => eligible(x)))) { if (picks.length >= state.settings.squadSize) break; if (!seen.has(f.base)) { seen.add(f.base); picks.push(f.id); } }
+        for (const f of shuffle(ROSTER.filter(x => draftable(x)))) { if (picks.length >= state.settings.squadSize) break; if (!seen.has(f.base)) { seen.add(f.base); picks.push(f.id); } }
         state.squad = picks; state.captain = picks[0];
         state.mode = M.id; state.era = era; state.N = size;
         const list = buildField();
@@ -30,8 +30,12 @@ const path = require('path');
         if (new Set(bs).size !== size) err.push('duplicate character');
         if (M.id !== 'chaos' && !picks.every(id => ids.includes(id))) err.push('squad missing');
         if (M.ok && M.id !== 'chaos' && !list.every(f => eligible(f, M.id, era))) err.push('ineligible fighter: ' + list.filter(f => !eligible(f, M.id, era)).map(f => f.id));
-        if (M.id === 'akatsuki') for (let i = 0; i < size; i += 2) if (AKA_BASES.has(list[i].base) === AKA_BASES.has(list[i + 1].base)) err.push('akatsuki pairing ' + list[i].id + '/' + list[i + 1].id);
-        if (M.id === 'edo') { const edoBases = new Set(ROSTER.filter(isEdo).map(f => f.base)); const want = Math.min(size - picks.filter(id => !isEdo(byId(id))).length, [...edoBases].filter(b => !picks.some(id => byId(id).base === b)).length + picks.filter(id => isEdo(byId(id))).length); const got = list.filter(isEdo).length; if (got < want) err.push(`edo ${got} < ${want}`); }
+        if (M.id === 'akatsuki') for (let i = 0; i < size; i += 2) if (akaSide(list[i]) === akaSide(list[i + 1])) err.push('akatsuki pairing ' + list[i].id + '/' + list[i + 1].id);
+        if (M.id === 'edo') {
+          const edoBases = new Set(ROSTER.filter(isEdo).map(f => f.base)), want = Math.min(size, edoBases.size), got = list.filter(isEdo).length;
+          if (!picks.every(id => isEdo(byId(id)))) err.push('non-Edo squad pick');
+          if (got < want) err.push(`edo ${got} < ${want}`);
+        }
         if (err.length) out.push(`${M.id}${M.id === 'canon' ? era : ''} ${size} ${seed} ${field}: ${err.join(', ')}`);
       }
       out.push(`#${M.id}${M.id === 'canon' ? era : ''}: ${bases} characters, max ${mx}`);
@@ -53,6 +57,22 @@ const path = require('path');
   // 3. draft screen with a squad, a custom name and a captain
   await page.click('[data-action="mode"][data-val="legends"]');
   ok(await page.evaluate(() => state.settings.size <= maxSize() && [...document.querySelectorAll('#grid .card')].every(c => byId(c.dataset.id).ovr >= 85)), 'legends grid shows ineligible versions');
+  await page.click('[data-action="mode"][data-val="edo"]');
+  const edo = await page.evaluate(() => { const cards = [...document.querySelectorAll('#grid .card')].map(c => c.dataset.id); return { n: cards.length, allEdo: cards.every(id => isEdo(byId(id))), max: maxSize() }; });
+  ok(edo.n === 12 && edo.allEdo && edo.max === 16, 'edo rising draft grid: ' + JSON.stringify(edo));
+  // Akatsuki War: only Shippuden / Fourth War versions anywhere (no Kushina, no Young Naruto, no Boruto era)
+  await page.click('[data-action="mode"][data-val="akatsuki"]');
+  const aw = await page.evaluate(() => { const cards = [...document.querySelectorAll('#grid .card')].map(c => byId(c.dataset.id)); return { n: cards.length, bad: cards.filter(f => !/[SW]/.test(ERA[f.id] || '')).map(f => f.id), max: maxSize() }; });
+  ok(aw.n > 40 && !aw.bad.length && aw.max === 32, 'akatsuki war draft grid: ' + JSON.stringify(aw));
+  for (let i = 0; i < 5; i++) { await page.click('[data-action="random"]'); ok(await page.evaluate(() => state.squad.every(id => /[SW]/.test(ERA[id] || ''))), 'akatsuki war random squad out of era: ' + await page.evaluate(() => state.squad.join())); }
+  await page.click('[data-action="mode"][data-val="edo"]');
+  await page.click('[data-action="random"]');
+  ok(await page.evaluate(() => state.squad.length === state.settings.squadSize && state.squad.every(id => isEdo(byId(id)))), 'edo rising random squad has living fighters');
+  await page.evaluate(() => { state.squad = []; PROF.spins = Math.max(PROF.spins, 3); });
+  await page.click('[data-action="set"][data-key="draft"][data-val="spin"]');
+  for (let i = 0; i < 3; i++) { await page.click(`.sslot[data-i="${i}"] [data-action="spin"]`); await page.waitForFunction(() => state.spinning === null, null, { timeout: 10000 }).catch(() => fail.push('edo spin never landed')); }
+  ok(await page.evaluate(() => state.squad.length === 3 && state.squad.every(id => isEdo(byId(id)))), 'edo rising spin rolled a living fighter');
+  await page.click('[data-action="set"][data-key="draft"][data-val="pick"]');
   await page.click('[data-action="mode"][data-val="classic"]');
   await page.evaluate(() => { state.squad = ['madara1', 'itachi1', 'sasuke2']; state.captain = 'itachi1'; draftChanged(); });
   await page.evaluate(() => window.scrollTo(0, 0)); await shot('1_draft');

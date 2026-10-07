@@ -4027,24 +4027,32 @@ const ERA={
 const VILLAINS=['orochimaru','kabuto','pain','konan','kisame','deidara','deidaraE','sasori','sasoriE','hidan','kakuzu','kakuzuE','obito1','obito2','zetsu',
   'madara1','madara2','kaguya','itachi1','zabuza','zabuzaE','haku','hakuE','kimimaro','kimimaroE','danzo','hanzo','sasuke2','gaara1','yagura','suigetsu','jugo'];
 const LEADERS=['pain','hanzo','mifune'];
-const AKA_BASES=new Set(ROSTER.filter(f=>f.tags.includes('Akatsuki')).map(f=>f.base));
+// Akatsuki War is set in Shippuden and the Fourth War. Sides go by version: the Akatsuki and the fighters on their
+// side of the war (Madara, Obito, Kabuto, Kaguya, the Edo Tensei summons, Team Hawk) against the Allied Forces.
+const AKA_ALLIES=['obito2','madara1','madara2','kabuto','zabuzaE','hakuE','kimimaroE','hanzo','kaguya','sasuke2','suigetsu','jugo'];
+const akaSide=f=>f.tags.includes('Akatsuki')||AKA_ALLIES.includes(f.id);
+const inEra=(f,eras)=>[...(ERA[f.id]||'')].some(e=>eras.includes(e));
+// Taijutsu Masters: the fighters known for fighting hand to hand (or blade to blade)
+const TAI_MASTERS=['lee1','lee2','guy1','guy2','neji','hinata2','tsunade','sakura2','raikage','bee','kimimaro','kimimaroE','choji2','mifune','zabuza','zabuzaE','kisame','jugo','kiba','hidan'];
 const isEdo=f=>f.tags.includes('Edo');
 const MODES=[
   {id:'classic',t:'Classic',d:'Every character can enter. The standard tournament.'},
   {id:'legends',t:'Legends',d:'S and A-tier versions only (overall 85 and up).',ok:f=>f.ovr>=85},
   {id:'kage',t:'Kage Clash',d:'Every Kage version, plus the leaders of the Rain and the Land of Iron.',ok:f=>f.tags.includes('Hokage')||f.tags.includes('Kage')||LEADERS.includes(f.id)},
-  {id:'akatsuki',t:'Akatsuki War',d:'Half the bracket is Akatsuki, half is the Allied Forces, and every first-round fight is Akatsuki against the Alliance.',max:16},
-  {id:'edo',t:'Edo Rising',d:'Every character with a reanimated version enters as Edo Tensei. The living fill the rest of the bracket.'},
+  {id:'akatsuki',t:'Akatsuki War',d:'Shippuden and the Fourth War only: no Part I versions, nobody who was already dead, nothing from the Boruto era. Half the bracket is the Akatsuki and its allies, half is the Allied Forces, and every first-round fight is one against the other.',ok:f=>inEra(f,'SW'),max:32},
+  {id:'edo',t:'Edo Rising',d:'The Fourth War: the dead walk. Your squad is reanimated: only Edo Tensei versions can be drafted or spun. All 12 reanimated fighters enter; at 16, four living Fourth War defenders make a last stand.',ok:f=>isEdo(f)||inEra(f,'W'),pick:isEdo,max:16},
   {id:'underdogs',t:'Underdogs',d:'B and C-tier versions only (overall under 85).',ok:f=>f.ovr<85},
   {id:'chaos',t:'Random Chaos',d:'Versions are rolled for everyone when the bracket is drawn, your squad included. Random field, random seeds.'},
   {id:'canon',t:'Canon',d:'Only the versions that fit one era of the story.',ok:(f,era)=>(ERA[f.id]||'').includes(era)},
   {id:'villains',t:'Villains',d:'Antagonists and rogue ninja only.',ok:f=>VILLAINS.includes(f.id)},
-  {id:'tai',t:'Taijutsu Masters',d:'Fighters who settle it hand to hand.',ok:f=>f.sigType==='tai'||(f.tai>=85&&f.tai>=f.nin+5)||(f.tai>=95&&f.tai>=f.nin)}
+  {id:'tai',t:'Taijutsu Masters',d:'The fighters known for settling it hand to hand: the Gates, the Gentle Fist, super strength, the Lariat, the Swordsmen.',ok:f=>TAI_MASTERS.includes(f.id)}
 ];
 const modeById=id=>MODES.find(x=>x.id===id)||MODES[0];
 const dmode=()=>modeById(state.settings.mode);
 const tmode=()=>modeById(state.mode);
 const eligible=(f,mid,era)=>{ const M=modeById(mid===undefined?state.settings.mode:mid); return !M.ok||M.ok(f,era===undefined?state.settings.era:era); };
+// what the player may draft or spin: the field filter, plus a mode's own squad rule (Edo Rising: reanimated only)
+const draftable=f=>{ const M=dmode(); return eligible(f)&&(!M.pick||M.pick(f)); };
 const modeBases=()=>new Set(ROSTER.filter(f=>eligible(f)).map(f=>f.base)).size;
 function maxSize(){ const n=Math.min(64,modeBases()), M=dmode(); let s=8; while(s*2<=n) s*=2; return M.max?Math.min(M.max,s):s; }
 const modeLabel=(mid,era)=>{ const M=modeById(mid); return M.id==='canon'?`Canon: ${(ERAS.find(e=>e.v===era)||ERAS[0]).t}`:M.t; };
@@ -4053,7 +4061,7 @@ function fitSettings(){
   const s=state.settings, mx=maxSize();
   if(s.size>mx) s.size=mx;
   const ok=[3,5,8].filter(x=>x<=s.size/2); if(!ok.includes(s.squadSize)) s.squadSize=ok[ok.length-1];
-  state.squad=state.squad.filter(id=>eligible(byId(id))).slice(0,s.squadSize);
+  state.squad=state.squad.filter(id=>draftable(byId(id))).slice(0,s.squadSize);
   if(!state.squad.includes(state.captain)) state.captain=state.squad[0]||null;
 }
 
@@ -4275,7 +4283,7 @@ function storyFight(m,r,mi,pre){
   }
 }
 function warReport(r){
-  const ak=state.mode==='akatsuki', test=ak?f=>AKA_BASES.has(f.base):isEdo;
+  const ak=state.mode==='akatsuki', test=ak?akaSide:isEdo;
   const start=fieldOf(), sa=start.filter(test).length; if(!sa||sa===start.length) return;
   const before=state.rounds[r].flatMap(m=>[m.a,m.b]), after=state.rounds[r+1]?state.rounds[r+1].flatMap(m=>[m.a,m.b]):[state.champion];
   const pa=before.filter(test).length, pb=before.length-pa, na=after.filter(test).length, nb=after.length-na;
@@ -4304,7 +4312,7 @@ function storyChampion(){
   const rank=field.filter(f=>f.ovr>c.ovr).length+1;
   let x=`${c.short} wins the ${state.mode==='classic'?'':modeLabel(state.mode,state.era)+' '}tournament${prevT?`, title number ${prevT+1}`:''}.`;
   if(rank>state.N/2) x+=` ${c.short} went in rated ${ord(rank)} of ${state.N}.`;
-  if(state.mode==='akatsuki') x+=AKA_BASES.has(c.base)?' The Akatsuki wins the war.':' The Alliance wins the war.';
+  if(state.mode==='akatsuki') x+=akaSide(c)?' The Akatsuki wins the war.':' The Alliance wins the war.';
   if(inSquad(c.id)) x+=' A title for your squad.';
   tell('champ',state.defending===c.id?'Back-to-back':'Champion',x,r,0);
 }
@@ -4381,7 +4389,7 @@ function renderModes(){
   const s=state.settings, M=dmode(), vs=ROSTER.filter(f=>eligible(f)).length;
   $('modes').innerHTML=`<div class="sl">Tournament</div>
     <div class="mchips" role="radiogroup" aria-label="Tournament type">${MODES.map(x=>`<button class="chip" role="radio" aria-checked="${String(x.id===s.mode)}" data-action="mode" data-val="${x.id}">${x.t}</button>`).join('')}</div>
-    <p class="md"><b>${modeLabel(s.mode,s.era)}.</b> ${M.d}${M.ok?` ${vs} versions of ${modeBases()} characters can enter, so the biggest bracket is ${maxSize()}.`:''}</p>
+    <p class="md"><b>${modeLabel(s.mode,s.era)}.</b> ${M.d}${M.ok?` ${vs} versions of ${modeBases()} characters can enter, so the biggest bracket is ${maxSize()}.`:M.pick?` ${ROSTER.filter(draftable).length} versions can be drafted; the biggest bracket is ${maxSize()}.`:''}</p>
     ${M.id==='canon'?`<div class="era"><div class="sl">Era</div><div class="mchips" role="radiogroup" aria-label="Era">${ERAS.map(e=>`<button class="chip" role="radio" aria-checked="${String(s.era===e.v)}" data-action="set" data-key="era" data-val="${e.v}">${e.t}</button>`).join('')}</div></div>`:''}`;
 }
 function renderSettings(){
@@ -4423,7 +4431,7 @@ function renderChips(){
 }
 function listFiltered(){
   const q=state.q.trim().toLowerCase();
-  let list=ROSTER.filter(f=>eligible(f)&&(state.filter==='All'||f.tags.includes(state.filter))&&(!q||(f.short+' '+f.name+' '+f.form+' '+f.tags.join(' ')).toLowerCase().includes(q)));
+  let list=ROSTER.filter(f=>draftable(f)&&(state.filter==='All'||f.tags.includes(state.filter))&&(!q||(f.short+' '+f.name+' '+f.form+' '+f.tags.join(' ')).toLowerCase().includes(q)));
   const k=state.sort, wins=f=>(HIST.f[f.id]||{}).w||0;
   return list.slice().sort((a,b)=>k==='name'?a.short.localeCompare(b.short):k==='wins'?(wins(b)-wins(a))||(b.ovr-a.ovr):(b[k]-a[k])||a.short.localeCompare(b.short));
 }
@@ -4434,7 +4442,7 @@ function repTag(f){
 }
 function cardHTML(f){
   const sel=inSquad(f.id), full=state.squad.length>=state.settings.squadSize&&!sel, lock=lockedBy(f);
-  const tags=[]; if(f.tags.includes('Edo')) tags.push('Edo Tensei'); if(f.regen) tags.push('Regen'); if(f.guard) tags.push('Guard'); if(f.last) tags.push('Last stand');
+  const tags=[]; if(state.settings.mode==='akatsuki') tags.push(akaSide(f)?'Akatsuki side':'Allied Forces'); if(f.tags.includes('Edo')) tags.push('Edo Tensei'); if(f.regen) tags.push('Regen'); if(f.guard) tags.push('Guard'); if(f.last) tags.push('Last stand');
   return `<button class="card ${sel?'sel':''} ${full?'dim':''} ${lock?'locked':''}" data-action="toggle" data-id="${f.id}" aria-pressed="${String(sel)}" ${lock?'disabled':''}>
     <div class="ch">${crest(f)}<div class="ct"><div class="cname">${f.short}</div><div class="cform">${f.form}</div>${rarTag(f)}</div><div class="tier ${f.tier}" title="${RARITY[f.tier].n}, overall ${f.ovr}">${f.tier}</div></div>
     <div class="cs">${STATS.map(([k,l])=>`<div class="st"><span>${l}</span><i><b style="width:${Math.min(100,f[k]/130*100)}%"></b></i><u>${f[k]}</u></div>`).join('')}</div>
@@ -4447,12 +4455,12 @@ function renderGrid(){
   const list=listFiltered();
   const fams=new Map();
   list.forEach(f=>{ if(!fams.has(f.base)) fams.set(f.base,[]); fams.get(f.base).push(f); });
-  const totals={}; ROSTER.forEach(f=>{ if(eligible(f)) totals[f.base]=(totals[f.base]||0)+1; });
+  const totals={}; ROSTER.forEach(f=>{ if(draftable(f)) totals[f.base]=(totals[f.base]||0)+1; });
   const multi=[], single=[];
   fams.forEach((vs,base)=>{ (totals[base]>1?multi:single).push({base,vs}); });
   let html='';
   multi.forEach(({base,vs})=>{
-    const all=ROSTER.filter(f=>f.base===base&&eligible(f));
+    const all=ROSTER.filter(f=>f.base===base&&draftable(f));
     const ordered=state.sort==='name'?vs.slice():vs.slice().sort((a,b)=>a.ovr-b.ovr);
     const picked=state.squad.map(byId).find(x=>x.base===base);
     html+=`<section class="fam"><div class="famh"><h3>${all[0].name}</h3><span class="famn">${vs.length===all.length?`${all.length} versions, pick one`:`${vs.length} of ${all.length} versions shown, pick one`}</span>${picked?`<span class="famp">Picked: ${picked.short}</span>`:''}</div><div class="grid">${ordered.map(cardHTML).join('')}</div></section>`;
@@ -4462,7 +4470,7 @@ function renderGrid(){
     html+=`<section class="fam"><div class="famh"><h3>${multi.length?'Single-version fighters':'Fighters'}</h3><span class="famn">${sf.length} fighters</span></div><div class="grid">${sf.map(cardHTML).join('')}</div></section>`;
   }
   $('grid').innerHTML=html||'<p class="lede">No fighters match that search.</p>';
-  const el=ROSTER.filter(f=>eligible(f)).length;
+  const el=ROSTER.filter(f=>draftable(f)).length;
   $('count').textContent=`${list.length} of ${el} versions`;
 }
 /* ---------- spin draft: roll each slot, like spinning for a bloodline ---------- */
@@ -4486,7 +4494,7 @@ function renderSpin(){
 function doSpin(i){
   if(state.spinning!==null||PROF.spins<=0||state.screen!=='draft') return;
   const keep=state.squad.filter((_,j)=>j!==i), used=new Set(keep.map(id=>byId(id).base));
-  const pool=ROSTER.filter(f=>eligible(f)&&!used.has(f.base)); if(!pool.length) return;
+  const pool=ROSTER.filter(f=>draftable(f)&&!used.has(f.base)); if(!pool.length) return;
   const tier=weighted(RORDER.filter(t=>pool.some(f=>f.tier===t)).map(t=>({t,w:RARITY[t].w}))).t;
   const res=pick(pool.filter(f=>f.tier===tier));
   PROF.spins--; saveProf(); Sfx.init();
@@ -4537,7 +4545,7 @@ function buildField(){
   const take=(arr,n)=>{ if(n<=0) return []; if(n>=arr.length) return arr.slice(); return s.field==='strong'&&M.id!=='chaos'?arr.slice().sort(byOvr).slice(0,n):shuffle(arr).slice(0,n); };
   if(M.id==='akatsuki'){
     // two halves, and every first-round fight is Akatsuki against the Alliance
-    const half=N/2, aka=f=>AKA_BASES.has(f.base);
+    const half=N/2, aka=akaSide;
     const A=squadObjs.filter(aka).concat(take(chosen.filter(aka),half-squadObjs.filter(aka).length));
     const L=squadObjs.filter(f=>!aka(f)).concat(take(chosen.filter(f=>!aka(f)),half-squadObjs.filter(f=>!aka(f)).length));
     let pairs;
@@ -5238,7 +5246,7 @@ app.addEventListener('click',e=>{
   }
   else if(a==='random'){
     const bases=new Set(), picks=[];
-    for(const f of shuffle(ROSTER.filter(x=>eligible(x)))){ if(picks.length>=state.settings.squadSize) break; if(!bases.has(f.base)){ bases.add(f.base); picks.push(f.id); } }
+    for(const f of shuffle(ROSTER.filter(x=>draftable(x)))){ if(picks.length>=state.settings.squadSize) break; if(!bases.has(f.base)){ bases.add(f.base); picks.push(f.id); } }
     state.squad=picks; state.captain=null; draftChanged();
   }
   else if(a==='clear'){ if(state.spinning===null){ state.squad=[]; draftChanged(); } }
