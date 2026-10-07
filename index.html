@@ -1195,8 +1195,10 @@ function jointAt(k,x,face,p,scale,lift){ const j=skeleton(p)[k]; return {x:x+j[0
    ===================================================================== */
 // A duel steps one action at a time, so the same rules drive both the instant simulation (simFight)
 // and fights the player controls. act(i) without a choice is the AI; with a choice it is the player's move.
-// Ultimate / Super Ultimate / Guard tuning. Check with npm run test:balance after changing anything here.
-// One big move per fight. The gauge fills to 100 for the Ultimate and keeps going to 150 for the Super Ultimate,
+// The player-facing name of the tier above the Ultimate (code calls it "super": SUPERMAP, supOf, e.sup).
+const KIN='Kinjutsu', KINU=KIN.toUpperCase();
+// Ultimate / Kinjutsu / Guard tuning. Check with npm run test:balance after changing anything here.
+// One big move per fight. The gauge fills to 100 for the Ultimate and keeps going to 125 for the Kinjutsu,
 // so holding the Ultimate is a gamble. A big move can only be used the turn after its gauge filled (a warning turn).
 const RULES={
   gainDealt:.7,gainTaken:.5,gainTurn:2.5,                 // gauge per point of damage dealt / taken, and per turn
@@ -1280,9 +1282,9 @@ function makeDuel(A,B){
     }
   }
 
-  // the Ultimate, and after it the Super Ultimate: capped so neither can wipe out a healthy fighter in one hit
+  // the Ultimate, or the Kinjutsu if the gauge was held: capped so neither can wipe out a healthy fighter in one hit
   function bigMove(att,def,sup){
-    const a=att.d.short, d=def.d.short, st=att.d.sigType, u=sup?supOf(att.d):ultOf(att.d), word=sup?'SUPER ULTIMATE':'ULTIMATE';
+    const a=att.d.short, d=def.d.short, st=att.d.sigType, u=sup?supOf(att.d):ultOf(att.d), word=sup?KINU:'ULTIMATE';
     att.usedUlt=true; att.um=0;
     att.ch=Math.max(0,att.ch-20);
     if(Math.random()<dodgeOf(att,def)*(sup?R.supDodge:R.ultDodge)){ say(`${d} somehow evades ${a}'s ${word.toLowerCase()}, ${u.n}!`,'ult',{att:att.i,mv:'ult',sup,name:u.n,dodge:true,st}); return; }
@@ -1846,7 +1848,7 @@ class Stage{
   popupDmg(e,D){
     const big=e.mv==='sig'||e.mv==='ult'||e.crit;
     this.popup(`-${e.dmg}`,D.x,GY-196,'#ffffff',e.mv==='ult'?58:(e.crit?48:big?40:30),'#8a1a10');
-    if(e.mv==='ult') this.popup(e.sup?(e.crit?'CRITICAL SUPER ULTIMATE!':'SUPER ULTIMATE!'):e.crit?'CRITICAL ULTIMATE!':'ULTIMATE!',D.x,GY-256,e.sup?'#ffe9a0':'#ffd84d',e.crit?26:32,e.sup?'#7a1a5a':'#5a3a00');
+    if(e.mv==='ult') this.popup(e.sup?(e.crit?`CRITICAL ${KINU}!`:`${KINU}!`):e.crit?'CRITICAL ULTIMATE!':'ULTIMATE!',D.x,GY-256,e.sup?'#ffe9a0':'#ffd84d',e.crit?26:32,e.sup?'#7a1a5a':'#5a3a00');
     else if(e.crit) this.popup('CRITICAL!',D.x,GY-236,'#ffd84d',26,'#5a3a00');
   }
   guardFx(D){ this.ring(D.x,GY-95,'#7fe3ff',20,70,320,4); this.popup('GUARD',D.x+(D.face*-30),GY-150,'#7fe3ff',20,'#0a3a4a'); }
@@ -2011,7 +2013,7 @@ class Stage{
       return false;
     }
     const ko=e.ko; // the KO finisher runs in slow motion: keep the glare short so the knockout stays visible
-    if(this.superOn){ // a Super Ultimate lands harder: gold shockwaves and a wider blast
+    if(this.superOn){ // a Kinjutsu lands harder: gold shockwaves and a wider blast
       this.ring(x,y,'#ffd84d',14,560,this.d(900),14); this.ring(x,y,'#ff4fd8',8,460,this.d(1000),7); this.rays(x,y,'#ffd84d',ko?360:1100,900,26);
       this.burst(x,y,'#ffd84d',60,1.6,7); this.flash('#ffe9a0',1);
     }
@@ -2113,7 +2115,8 @@ class Stage{
     ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.lineJoin='round';
     ctx.font=c.sup?'26px "Dela Gothic One",Impact,sans-serif':'20px "Zen Kaku Gothic New",system-ui,sans-serif'; ctx.fillStyle=c.sup?'#ffd84d':col2; ctx.globalAlpha=tk;
     if(c.sup){ ctx.shadowColor='#ff4fd8'; ctx.shadowBlur=16; }
-    ctx.fillText(c.sup?'SUPER ULTIMATE':'ULTIMATE JUTSU',tx+(1-tk)*80,SH*.34); ctx.shadowBlur=0;
+    const lx=tx+(1-tk)*80; ctx.fillText(c.sup?KINU:'ULTIMATE JUTSU',lx,SH*.34); ctx.shadowBlur=0;
+    if(c.sup){ const lw=ctx.measureText(KINU).width; ctx.font='14px "Zen Kaku Gothic New",system-ui,sans-serif'; ctx.fillStyle='#ffe9a0'; ctx.fillText('FORBIDDEN TECHNIQUE',lx+lw+12,SH*.34+2); }
     ctx.fillStyle=c.sup?'#ffd84d':col; ctx.fillRect(tx+(1-tk)*80,SH*.34+18,(c.sup?250:160)*tk,3);
     if(!c.lay) c.lay=this.titleLayout(ctx,c.name,SW*.49);
     const lines=c.lay.lines, fs=c.lay.fs; ctx.font=`${fs}px "Dela Gothic One",Impact,sans-serif`;
@@ -2127,7 +2130,7 @@ class Stage{
       }
     });
     ctx.globalAlpha=1;
-    if(c.sup){ // gold frame and a slow prismatic sweep around the Super Ultimate card
+    if(c.sup){ // gold frame and a slow prismatic sweep around the Kinjutsu card
       ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=.55*inP;
       const fr=ctx.createLinearGradient(0,0,SW,0); fr.addColorStop(0,'#ffd84d'); fr.addColorStop(.5,'#ff4fd8'); fr.addColorStop(1,'#ffd84d');
       ctx.strokeStyle=fr; ctx.lineWidth=10+4*Math.sin(t*6); ctx.strokeRect(6,6,SW-12,SH-12);
@@ -3205,8 +3208,8 @@ const ULTMAP={
 };
 const ULTFB={nin:'bijuu',tai:'rushUlt',gen:'dimension'};
 function ultOf(d){ return ULTMAP[d.id]||ULTMAP[d.base]||{s:ULTFB[d.sigType]||'bijuu',look:'void',n:d.sig+': Final Form'}; }
-/* Super Ultimates: the very top technique of each character, unlocked once the Ultimate is spent.
-   Same styles as ULTMAP (keyed by id or base); the stage plays them bigger, with a gold cut-in. */
+/* Kinjutsu ("super" in code): the very top, forbidden technique of each character. The gauge charges past the Ultimate to unlock it.
+   Same styles as ULTMAP (keyed by id or base); the stage plays them bigger, with a gold KINJUTSU cut-in. */
 const SUPERMAP={
   hashirama:{s:'titan',mode:'kannon',c:'#e8c25a',c2:'#fff4c8',n:'Sage Art Shinsu Senju: Thousand-Armed Kannon'},
   tobirama:{s:'flood',kind:'water',c:'#3a8ad5',c2:'#cfe8ff',n:'Water Release: Great Exploding Water Shockwave'},
@@ -3865,9 +3868,9 @@ const LINES={
   ultPre:['THE ULTIMATE GAUGE IS FULL! {a} goes all in: {move}!','This is it! {a} unleashes {move}!','Everything on the line! {move}!'],
   hitUlt:['ULTIMATE CONNECTS! {dmg} damage! {d} is at {hp} HP.','DEVASTATING! {dmg} off {d}, down to {hp} HP.','{d} takes the full force: {dmg} damage!'],
   ultReady:['{x} has a full ultimate gauge!','Careful. {x} can go for the ultimate!'],
-  supPre:['SUPER ULTIMATE! {a} reaches the very top: {move}!','This is everything {a} has: {move}!','The arena shakes. SUPER ULTIMATE: {move}!'],
-  hitSup:['THE SUPER ULTIMATE LANDS! {dmg} damage! {d} is at {hp} HP.','{d} takes the full {move}: {dmg} damage!'],
-  supReady:['{x} has a full SUPER gauge!','{x} can go for the Super Ultimate!'],
+  supPre:[`${KINU}! {a} breaks the seal on a forbidden technique: {move}!`,'This is everything {a} has, a forbidden art: {move}!',`The arena shakes. ${KINU}: {move}!`],
+  hitSup:[`THE ${KINU} LANDS! {dmg} damage! {d} is at {hp} HP.`,'{d} takes the full {move}: {dmg} damage!'],
+  supReady:[`{x} can unseal a ${KIN}!`,'{x} has the forbidden technique ready!'],
   guardUp:['{x} braces for impact.','{x} raises a guard.','{x} plays it safe and guards.'],
   focus:['{x} steps back to gather chakra.','{x} focuses: +{h} chakra.','{x} takes a breath and refills, +{h} chakra.']
 };
@@ -4264,7 +4267,7 @@ function storyFight(m,r,mi,pre){
   if(nw>=5&&nw%5===0) tell('streak','On fire',`${w.short} has won ${nw} tournament fights in a row.`,r,mi);
   if(sl>=5) tell('streak','Streak snapped',`${w.short} ends ${l.short}'s ${sl}-fight winning streak.`,r,mi);
   if(m.result.hpLeft>=100) tell('ko','Flawless',`${w.short} wins without losing a single HP.`,r,mi);
-  const fin=m.result.log.find(e=>e.ko&&e.sup); if(fin) tell('ko','Super Ultimate',`${w.short} ends it with ${fin.name}.`,r,mi);
+  const fin=m.result.log.find(e=>e.ko&&e.sup); if(fin) tell('ko',KIN,`${w.short} ends it with a forbidden technique, ${fin.name}.`,r,mi);
   if(inSquad(l.id)){
     const left=aliveSquad().length;
     if(!left) tell('squad','Your squad has fallen',`${l.short} was your last fighter standing.`,r,mi);
@@ -4354,9 +4357,9 @@ function renderDraft(){
     <details class="rules">
       <summary>How scoring works</summary>
       <p>A win scores more the later the round: 4 in the Round of 64, 6 in the Round of 32, 10 in the Round of 16, 20 in the quarterfinals, 35 in the semifinals and 60 in the final.</p>
-      <p>Bonuses: +5 for a knockout, +5 for winning with 80 or more HP left, +8 for an upset (winning against a fighter rated at least 6 points higher overall), +10 if your fighter lands an Ultimate in the win (+15 for a Super Ultimate), and +25 if your fighter wins the whole tournament.</p>
+      <p>Bonuses: +5 for a knockout, +5 for winning with 80 or more HP left, +8 for an upset (winning against a fighter rated at least 6 points higher overall), +10 if your fighter lands an Ultimate in the win (+15 for a ${KIN}), and +25 if your fighter wins the whole tournament.</p>
       <p>Your squad has a style, worked out from its stats. A win in that style earns +4: Ninjutsu squads when the final blow is ninjutsu, Taijutsu squads when it is taijutsu, Genjutsu squads when the winner traps the opponent in a genjutsu. Your captain's points are then multiplied by 1.5.</p>
-      <p>Every fighter has one big move per fight. The gauge fills as they hit (more) and get hit (less). At 100% the Ultimate is ready; keep holding and the gauge charges on to the Super Ultimate, the character's very top technique. A big move can only be used the turn after its gauge fills, so you always get a warning. An Ultimate does at most 35 damage and a Super at most 50, so neither can wipe out a healthy fighter in one hit. When you fight it yourself, Guard cuts all damage that turn to 40%.</p>
+      <p>Every fighter has one big move per fight. The gauge fills as they hit (more) and get hit (less). At 100% the Ultimate is ready; keep holding and the gauge charges on to the ${KIN}, a forbidden technique and the character's very top move. A big move can only be used the turn after its gauge fills, so you always get a warning. An Ultimate does at most 35 damage and a ${KIN} at most 50, so neither can wipe out a healthy fighter in one hit. When you fight it yourself, Guard cuts all damage that turn to 40%.</p>
       <p>Edo Tensei versions are reanimated: they regenerate, never tire, and crumble to ash when beaten.</p>
       <p>Your squad can hold only one version of each character, so picking Prime Madara locks the other Madara. Every character enters the bracket as a single version: yours keep the version you drafted (except in Random Chaos), and everyone else is set by the Opponent versions option.</p>
       <p>Stats are 0 to 130. Some fighters also regenerate, guard (a chance to halve incoming damage) or have a last stand (survive one lethal hit). Finished tournaments are saved in this browser: see History for champions and every fighter's record.</p>
@@ -4743,7 +4746,7 @@ function renderMatches(){
     if(done&&m.upset&&!evs.some(e=>e.k==='upset')) ribs=`<span class="rib k-upset">Upset</span>`+ribs;
     if(m.played) ribs=`<span class="rib k-squad">You fought</span>`+ribs;
     let foot='';
-    if(done) foot=`<span class="ft ${m.result.ko?'ko':''}">${m.result.ko?'KO':'Decision'}</span><span class="ft">${m.result.hpLeft} HP left</span>${m.result.supW?'<span class="ft ult sup">Super Ultimate</span>':m.result.ultW?'<span class="ft ult">Ultimate</span>':''}${m.award?`<span class="ft pts">+${m.award} pts${m.capB?', captain':''}${m.styleB?', style':''}</span>`:''}`;
+    if(done) foot=`<span class="ft ${m.result.ko?'ko':''}">${m.result.ko?'KO':'Decision'}</span><span class="ft">${m.result.hpLeft} HP left</span>${m.result.supW?`<span class="ft ult sup">${KIN}</span>`:m.result.ultW?'<span class="ft ult">Ultimate</span>':''}${m.award?`<span class="ft pts">+${m.award} pts${m.capB?', captain':''}${m.styleB?', style':''}</span>`:''}`;
     else if(now) foot='<span class="ft pts">Up next</span>';
     return `<button class="mc ${done?'done':''} ${now?'now':''} ${evs.some(e=>e.k==='squad')?'sq':''}" data-action="view" data-r="${state.tab}" data-m="${mi}" ${done?'':'disabled'} ${done?'aria-label="Replay this fight"':''}>${ribs?`<div class="ribs">${ribs}</div>`:''}${row(m.a)}${row(m.b)}<div class="mf">${foot}</div></button>`;
   }).join('');
@@ -4786,7 +4789,7 @@ function setHp(hp,ch,um,sm,uu){
     if(um){
       const ub=$('ub'+s), ul=$('ul'+s), ubar=$('ubar'+s), spent=uu&&uu[i]===2, u=spent?0:um[i], sp=spent||!sm?0:sm[i];
       if(ub){ ub.style.width=u+'%'; ub.style.setProperty('--sp',sp+'%'); }
-      if(ul) ul.textContent=spent?'Big move spent':sp>=100?'SUPER ULTIMATE READY':u>=100?(sp>0?`Ultimate READY, Super ${sp}%`:'Ultimate READY'):`Ultimate ${u}%`;
+      if(ul) ul.textContent=spent?'Big move spent':sp>=100?`${KINU} READY`:u>=100?(sp>0?`Ultimate READY, ${KIN} ${sp}%`:'Ultimate READY'):`Ultimate ${u}%`;
       if(ubar){ ubar.classList.toggle('ready',u>=100); ubar.classList.toggle('sup',sp>0); }
       if(ul){ ul.classList.toggle('ready',u>=100); ul.classList.toggle('sup',sp>=100); }
     }
@@ -4929,19 +4932,19 @@ function duelPanel(){
   const b=(k,i,cls,title,sub,ok)=>`<button class="cbtn ${cls}" data-action="move" data-val="${k}" ${w&&ok?'':'disabled'} aria-keyshortcuts="${i+1}"><kbd>${i+1}</kbd><b>${title}</b><small>${sub}</small></button>`;
   const head=S.done?'Fight over.':w?(S.auto?'The AI is fighting for you.':`Your move, turn ${D.turn}.<span class="kh"> Pick a technique or press 1 to 7.</span>`):o.stun?`${me.short} is trapped in a genjutsu and loses this turn...`:`Turn ${D.turn} is playing out...`;
   return `<div class="cmd ${w?'live':''}">
-    <div class="cmdh"><span class="you">You: <b>${me.short}</b></span><span>Chakra <b>${o.ch}</b>/${o.max}</span><span>${o.ult.used?'Big move <b>spent</b>':o.super.gauge>0?`Super <b>${o.super.gauge}%</b>`:`Ultimate <b>${o.ult.gauge}%</b>`}</span><span class="cmds">${head}</span></div>
+    <div class="cmdh"><span class="you">You: <b>${me.short}</b></span><span>Chakra <b>${o.ch}</b>/${o.max}</span><span>${o.ult.used?'Big move <b>spent</b>':o.super.gauge>0?`${KIN} <b>${o.super.gauge}%</b>`:`Ultimate <b>${o.ult.gauge}%</b>`}</span><span class="cmds">${head}</span></div>
     <div class="cmdg">
       ${b('tai',0,'tai','Taijutsu',`Hit ${o.tai.hit}%, +3 chakra`,o.tai.ok)}
       ${b('nin',1,'nin','Ninjutsu',o.nin.ok?`10 chakra, hit ${o.nin.hit}%`:'Needs 10 chakra',o.nin.ok)}
       ${b('gen',2,'gen','Genjutsu',o.gen.stunned?`${foe.short} is already trapped`:o.gen.ok?`8 chakra, trap ${o.gen.trap}%`:'Needs 8 chakra',o.gen.ok)}
       ${b('sig',3,'sig',me.sig,o.sig.cd>0?`Ready in ${o.sig.cd} turn${o.sig.cd>1?'s':''}`:o.sig.ok?`28 chakra, hit ${o.sig.hit}%`:'Needs 28 chakra',o.sig.ok)}
       ${o.ult.used?b('ult',4,'ult','Big move','Spent this fight',false)
-        :o.super.ok?b('super',4,'ult sup','SUPER ULTIMATE',`${supOf(me).n}. READY, hit ${o.super.hit}%`,true)
-        :b('ult',4,'ult','ULTIMATE',`${ultOf(me).n}. ${o.ult.ok?`READY, hit ${o.ult.hit}%. ${o.super.gauge>0?`Super charging ${o.super.gauge}%`:'Hold it to charge the Super'}`:o.ult.soon?'Ready next turn':`Gauge ${o.ult.gauge}%`}`,o.ult.ok)}
+        :o.super.ok?b('super',4,'ult sup',KINU,`${supOf(me).n}. READY, hit ${o.super.hit}%`,true)
+        :b('ult',4,'ult','ULTIMATE',`${ultOf(me).n}. ${o.ult.ok?`READY, hit ${o.ult.hit}%. ${o.super.gauge>0?`${KIN} charging ${o.super.gauge}%`:`Hold it to unseal the ${KIN}`}`:o.ult.soon?'Ready next turn':`Gauge ${o.ult.gauge}%`}`,o.ult.ok)}
       ${b('guard',5,'grd'+(o.threat&&w?' hot':''),'Guard',`All damage this turn x0.4${o.guard.gain?`, +${o.guard.gain} chakra`:''}`,o.guard.ok)}
       ${b('focus',6,'foc','Focus',o.focus.ok?`Skip the attack, +${o.focus.gain} chakra`:'Chakra is full',o.focus.ok)}
     </div>
-    ${o.threat&&w?`<div class="threat" role="alert">${foe.short}'s ${o.threat==='super'?'SUPER ULTIMATE':'Ultimate'} is READY. Guard (key 6) cuts it to 40%.</div>`:''}
+    ${o.threat&&w?`<div class="threat" role="alert">${foe.short}'s ${o.threat==='super'?KINU:'Ultimate'} is READY. Guard (key 6) cuts it to 40%.</div>`:''}
     <div class="row cmdr">
       ${speedSeg()}
       <button class="btn small" data-action="sound">Sound: ${Sfx.on?'on':'off'}</button>

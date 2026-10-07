@@ -28,10 +28,10 @@ npm run test:meta                 # tournament types (every size/seed/field), sq
 node tests/moves.js all           # every version x {sig,ult,super,tai,nin,gen,focus,guard} x {hit,dodge,ko,crit,skip}, checks for errors,
                                   #   hangs, leftover fx/props/mood/camera and fighters not reset (~2,300 runs, ~1 min;
                                   #   split with: node tests/moves.js ult 0 3 / 1 3 / 2 3, or name ids: node tests/moves.js sig itachi1)
-npm run test:balance              # Ultimate/Super rate, damage caps, KO rate, upsets, champion spread (exits 1 if a target is missed)
+npm run test:balance              # Ultimate/Kinjutsu rate, damage caps, KO rate, upsets, champion spread (exits 1 if a target is missed)
 node tests/frames.js kaguya ult   # contact sheet of stage frames in tests/out/ so you can LOOK at an animation
 node tests/frames.js all ult ko   #   one sheet per version; "styles" instead of "all" = first user of each style
-node tests/titles.js              # every Ultimate, Super Ultimate and signature cut-in title, frozen when fully revealed
+node tests/titles.js              # every Ultimate, Kinjutsu and signature cut-in title, frozen when fully revealed
 npm run portraits                 # contact sheet of every look to tests/out/portraits.png
 node tests/look.js itachi1,pain    # close-up of a look: big portrait, face icon, fighter in 6 poses at 2x
 npm run sounds                    # renders every effect + the busiest moments offline to tests/out/sfx.wav, reports peaks/clipping
@@ -54,7 +54,7 @@ Google Fonts through curl so the canvas text uses the real fonts.
 | `drawHead`, `hairFront/Back`, `drawMarks`, `drawEye`, `drawPortrait`, `faceURL`, `drawCloud` | Head-frame drawing (origin at head centre, +x forward, -y up). Used by in-fight fighters, both cut-ins and face icons. |
 | `RULES` | All big-move and Guard numbers in one place (gauge gains, thresholds, AI fire chances, damage bases and caps, Guard multiplier). Re-run `npm run test:balance` after touching it. |
 | `makeDuel(A,B)` / `simFight(A,B)` | `makeDuel` is the rules, one action at a time: `act(i,choice)` (no choice = the AI's weighted pick; `tai nin gen sig ult super guard focus` = the player's), `order()` (speed roll per turn), `endTurn()` (chakra, gauge, cooldown, regen), `over()`, `options(i)` (what is usable + hit/trap odds for the command bar), `result()`. `simFight` loops it with the AI on both sides and returns `{winner,loser,ko,hpLeft,log,turns,ultW,ultL,supW,supL}` (`ultW` = winner landed a big move, `supW` = it was the Super). `focus` (+30 chakra) and `guard` (all damage that turn x0.4, +10 chakra, always acts first) exist only for the player; log types `'focus'` / `'guard'`. Log entries also carry `sm` (Super charge 0-100) and `uu` (2 = big move spent); a Super is `mv:'ult'` with `sup:true`. |
-| `SUPERMAP` / `supOf` | Super Ultimates: each character's top technique (Hashirama: Sage Art Shinsu Senju, Thousand-Armed Kannon), same format and styles as `ULTMAP`; played with `big:true`, a gold "SUPER ULTIMATE" cut-in (`ultCut.sup`) and a gold impact (`stage.superOn` in `ultHit`). `titan` has a `kannon` mode (golden halo of 40 arms striking in three waves). |
+| `SUPERMAP` / `supOf` / `KIN` | Kinjutsu ("forbidden technique"; called "super" in code, e.g. `e.sup`, `supOf`): the tier above the Ultimate, each character's top technique. The player-facing name is the one constant `KIN`. Hashirama's is Sage Art Shinsu Senju, Thousand-Armed Kannon. Same format and styles as `ULTMAP`; played with `big:true`, a gold "KINJUTSU" cut-in (`ultCut.sup`) and a gold impact (`stage.superOn` in `ultHit`). `titan` has a `kannon` mode (golden halo of 40 arms striking in three waves). |
 | `Sfx` | Tiny WebAudio synth (no assets). `tone(...,at)` schedules on the audio clock. Measured worst case (stacked KO impacts) peaks at ~0.55 of full scale, so there is no limiter. |
 | `class Stage` | Canvas renderer + animation engine. Fighters are skeletons driven by pose angles (`POSES`). Plays log entries as animations. `titleLayout` breaks Ultimate titles into 1-4 lines. |
 | `SIGMAP` / `STYLES` | 32 staged signature moves, keyed by id or base. Unmapped characters fall back to a generic move by `sigType` (currently none). |
@@ -100,11 +100,11 @@ where `mv` is `tai|nin|gen|sig|ult`, `att/tgt` are 0/1, `st` is the attacker's s
 
 Damage = `base * (0.82+0.42*pow/100) * defenseFactor * rand(0.65..1.35) * formRoll`, crit chance from intellect, dodge from speed/intellect gaps.
 Big moves (numbers in `RULES`): one per fight. The gauge fills +0.7x damage dealt, +0.5x taken, +2.5 per turn. At 100 the Ultimate
-is ready, at 125 the Super Ultimate; each unlocks the turn AFTER its threshold is crossed (a warning turn the player can Guard on).
-The AI fires a ready Ultimate 45% of turns (otherwise it holds for the Super), a ready Super 90%. Ultimate base 36, capped at 35
-damage, dodge x0.2; Super base 58, capped at 50, dodge x0.15. This was retuned after players were one-shot by Ultimates: before,
+is ready, at 125 the Kinjutsu; each unlocks the turn AFTER its threshold is crossed (a warning turn the player can Guard on).
+The AI fires a ready Ultimate 45% of turns (otherwise it holds for the Kinjutsu), a ready Kinjutsu 90%. Ultimate base 36, capped at 35
+damage, dodge x0.2; Kinjutsu base 58, capped at 50, dodge x0.15. This was retuned after players were one-shot by Ultimates: before,
 an uncapped Ultimate (avg ~47, crits 60+) fired the moment a beaten-down opponent's gauge filled (the gauge filled mostly from
-damage taken). Measured now: Ultimate in ~64% of fights, Super in ~14%, nothing over the caps; a simple player strategy wins ~80%
+damage taken). Measured now: a big move in ~64% of fights, a Kinjutsu in ~14%, nothing over the caps; a simple player strategy wins ~80%
 against similarly rated AI and dies to a big move in ~13% of fights.
 Targets while tuning: about half of fights contain an Ultimate, 25+ distinct champions across 300 simulated 64-brackets, no fighter over ~20% of titles. Edo Tensei versions were nerfed once already for winning too often; re-check with `npm run test:balance` after changing stats.
 
@@ -122,9 +122,9 @@ Verified (Oct 2026):
   clipping. The effects have still never been HEARD by a person: listen to `tests/out/sfx.wav`.
 - Phone layout at 390 and 360 px: no horizontal overflow; squad tray is one scrolling row, the live ticker sits under
   the canvas instead of covering the fighters. Checked on Chromium's mobile emulation only, not a real device.
-- Balance targets pass: big move in ~64% of fights (Super ~14%), 28-29 distinct champions / 300 brackets, top fighter ~15-19%,
+- Balance targets pass: big move in ~64% of fights (Kinjutsu ~14%), 28-29 distinct champions / 300 brackets, top fighter ~15-19%,
   Edo champions ~39-46% across runs (was ~49%).
-- Every Super Ultimate title fits its cut-in (`tests/titles.js`); Super frames looked at for Hashirama (Kannon), Kurama
+- Every Kinjutsu title fits its cut-in (`tests/titles.js`); Kinjutsu frames looked at for Hashirama (Kannon), Kurama
   Naruto, Prime Madara, Pain, Night Guy.
 - Meta layer (tournament types, squad identity, story, history, spectator): `npm run test:meta` passes: every type builds
   valid fields at every allowed size/seed/field setting, records add up (wins = losses = fights, one title per

@@ -229,7 +229,7 @@ const path = require('path');
   await page.waitForFunction(() => state.duel && state.duel.waiting, null, { timeout: 15000 }).catch(() => fail.push('quick fight never asked for a move'));
   // force the opponent's Super to be ready: the bar must warn and offer Guard
   await page.evaluate(() => { const D = state.duel.D; D.f[1].um = RULES.supAt; D.f[1].readyT = D.f[1].superT = -1; D.f[0].um = RULES.ultAt; D.f[0].readyT = -1; renderDuel(); });
-  ok(await page.evaluate(() => /SUPER ULTIMATE is READY/.test(document.getElementById('cmdslot').textContent) && !!document.querySelector('.cbtn.grd.hot')), 'no warning when the opponent Super is ready');
+  ok(await page.evaluate(() => /KINJUTSU is READY/.test(document.getElementById('cmdslot').textContent) && !!document.querySelector('.cbtn.grd.hot')), 'no warning when the opponent Super is ready');
   await page.evaluate(() => document.getElementById('cmdslot').scrollIntoView({ block: 'end' })); await shot('12_quickfight');
   await playOut();
   await page.waitForFunction(() => !state.busy && state.vs.last, null, { timeout: 20000 }).catch(() => fail.push('quick fight did not finish'));

@@ -1,4 +1,4 @@
-// Contact sheets of every cut-in title (Ultimate, Super Ultimate and signature), frozen once the text is fully revealed.
+// Contact sheets of every cut-in title (Ultimate, Kinjutsu and signature), frozen once the text is fully revealed.
 //   node tests/titles.js           -> tests/out/titles_ult_1.png ..., titles_super_1.png ..., titles_sig_1.png ...
 // Also prints any title whose laid-out lines overflow the title box.
 const { open, writeDataURL } = require('./lib');
