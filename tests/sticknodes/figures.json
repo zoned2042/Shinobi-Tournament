@@ -79,5 +79,29 @@
  },
  "obito1": {
   "file": "The-Akatsuki-Pack/Tobi R.nodes"
+ },
+ "narutosage": {
+  "file": "Naruto-Pack-8/naruto mode sennin.nodes"
+ },
+ "naruto7": {
+  "file": "Naruto-Pack-8/naruto hokage avec cap.nodes"
+ },
+ "narutosix": {
+  "file": "Naruto-Pack-8/naruto rikudo.nodes"
+ },
+ "narutokcm": {
+  "file": "Naruto-Pack-8/naruto bijuu.nodes"
+ },
+ "narutoS": {
+  "file": "Naruto-Pack-8/naruto shippunden.nodes"
+ },
+ "narutoS_d1": {
+  "file": "Naruto-Pack-8/naruto damage-1.nodes"
+ },
+ "narutoS_d2": {
+  "file": "Naruto-Pack-8/naruto damage-2.nodes"
+ },
+ "narutoL": {
+  "file": "Naruto-Pack-8/naruto the last.nodes"
  }
 }
