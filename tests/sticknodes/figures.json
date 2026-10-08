@@ -320,5 +320,68 @@
    "backArm": "Zabuza-Pack/zabuza hand 1.nodes",
    "backLeg": "Zabuza-Pack/zabuza leg 1.nodes"
   }
+ },
+ "konohamaru": {
+  "file": "Konohamaru-Pack/Konohamaru Body.nodes",
+  "att": [
+   {
+    "file": "Konohamaru-Pack/Konohamaru hair.nodes",
+    "at": 138,
+    "a": 0,
+    "x": 0,
+    "y": 0,
+    "s": 1,
+    "back": false
+   }
+  ]
+ },
+ "susanoo_sasuke": {
+  "file": "Sasuke-Perfect-Susanoo-360-Pack/_Susanoo 2 by Bolt animation.nodes",
+  "att": [
+   {
+    "file": "Sasuke-Perfect-Susanoo-360-Pack/_Susanoo Wing.nodes",
+    "at": "sho",
+    "a": 150,
+    "x": -4,
+    "y": -4,
+    "s": 0.3
+   }
+  ]
+ },
+ "rasengan": {
+  "file": "Rasengans-Pack/Rasengan.nodes",
+  "prop": true
+ },
+ "rasenshuriken": {
+  "file": "Rasengans-Pack/RasenShuriken.nodes",
+  "prop": true
+ },
+ "eye_tomoe2": {
+  "file": "Sharingan-Pack-2/Sharingan 2 tomoe.nodes",
+  "prop": true
+ },
+ "eye_tomoe3": {
+  "file": "Sharingan-Pack-2/Sharingan Full Tomoe.nodes",
+  "prop": true
+ },
+ "eye_itachiMS": {
+  "file": "Sharingan-Pack-2/Itachi Mangekyou Sharingan.nodes",
+  "prop": true
+ },
+ "eye_sasukeMS": {
+  "file": "Sharingan-Pack-2/Sasuke Mangekyou Sharingan.nodes",
+  "prop": true
+ },
+ "eye_shisuiMS": {
+  "file": "Sharingan-Pack-2/Shisui Mangekyou Sharingan.nodes",
+  "prop": true
+ },
+ "eye_obitoMS": {
+  "file": "Sharingan-Pack-2/Obito Mangekyou Sharingan.nodes",
+  "prop": true
+ },
+ "eye_madaraEMS": {
+  "file": "Sharingan-Pack-2/Madara Eternal Mangekyou Sharingan.nodes",
+  "prop": true
  }
 }
