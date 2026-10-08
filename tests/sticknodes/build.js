@@ -31,13 +31,15 @@ function build(file, o) {
   // Temari's head, Pain Pack 2, Madara Pack 3)
   // partsAt { arm, head, headFrom, headBack } (node indices) overrides where they join; with it the grafted arms are
   // the skeleton's arms (the body's own coat flaps can look like arms to the detector: Madara Pack 3)
-  const PA = o.partsAt || {}, pb = {};
-  if (o.parts) { const P = o.parts, top = torsoTop(N), arm = PA.arm !== undefined ? PA.arm : top, hd = PA.head !== undefined ? PA.head : top;
+  const PA = o.partsAt || {}, pb = {}, top0 = torsoTop(N); // the body's own torso top, before a head is hung on it
+  if (o.parts) { const P = o.parts, top = top0, arm = PA.arm !== undefined ? PA.arm : top, hd = PA.head !== undefined ? PA.head : top;
     if (P.backArm) pb.backArm = graftFile(N, P.backArm, arm, false, F.polys);
     if (P.frontLeg) pb.frontLeg = graftFile(N, P.frontLeg, 0, false, F.polys); // legs go under the body (Pain's cloak covers the thighs)
     if (P.backLeg) pb.backLeg = graftFile(N, P.backLeg, 0, false, F.polys);
     if (P.head) graftFile(N, P.head, hd, !PA.headBack, F.polys, PA.headFrom);
     if (P.frontArm) pb.frontArm = graftFile(N, P.frontArm, arm, true, F.polys); }
+  // extra: more part files hung from the torso top (Hokage Naruto's cape behind him, its collar in front)
+  if (o.extra) for (const x of o.extra) graftFile(N, x.file, top0, !!x.front, F.polys);
   let D = o.prop ? null : detect(F);
   if (D && o.partsAt && pb.frontArm && pb.backArm) {
     const limb = i => { const n = N[i], a = Math.atan2(n.y, n.x); const k = n.kids.map(j => N[j]).sort((p, q) => Math.hypot(q.x, q.y) * (1 + Math.cos(Math.atan2(q.y, q.x) - a)) - Math.hypot(p.x, p.y) * (1 + Math.cos(Math.atan2(p.y, p.x) - a)))[0]; return { i, kid: k.i }; };

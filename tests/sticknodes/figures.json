@@ -15,14 +15,10 @@
   "file": "Obito-360-Pack-2/_Obito (War) 1.nodes"
  },
  "itachi1": {
-  "file": "The-Akatsuki-Pack/Itachi Uchiha.nodes"
- },
- "itachi2": {
-  "file": "The-Akatsuki-Pack/Itachi Uchiha (edo tensei).nodes"
+  "file": "Peck-Akatsuki-Pack/Itachi.nodes"
  },
  "kisame": {
-  "file": "The-Akatsuki-Pack/Kisame Hoshigaki.nodes",
-  "graft": "The-Akatsuki-Pack/Kisame Arm.nodes",
+  "file": "Peck-Akatsuki-Pack/kisame.nodes",
   "att": [
    {
     "file": "The-Akatsuki-Pack/Samehada (Kisame Sword).nodes",
@@ -30,30 +26,21 @@
     "a": 168,
     "x": -6,
     "y": -4,
-    "s": 0.42
+    "s": 0.3
    }
   ]
  },
  "deidara": {
-  "file": "The-Akatsuki-Pack/Deidara R.nodes"
- },
- "deidaraE": {
-  "file": "The-Akatsuki-Pack/Deidara R (edo tensei).nodes"
+  "file": "Deidra-Pack-2/deidara akatsuki.nodes"
  },
  "sasori": {
-  "file": "The-Akatsuki-Pack/Sasori.nodes"
- },
- "sasoriE": {
-  "file": "The-Akatsuki-Pack/Sasori (edo tensei).nodes"
+  "file": "Peck-Akatsuki-Pack/sasori.nodes"
  },
  "kakuzu": {
-  "file": "The-Akatsuki-Pack/Kakuzu.nodes"
- },
- "kakuzuE": {
-  "file": "The-Akatsuki-Pack/Kakuzu (Edo Tensei).nodes"
+  "file": "Peck-Akatsuki-Pack/kakuzu.nodes"
  },
  "konan": {
-  "file": "The-Akatsuki-Pack/Konan.nodes"
+  "file": "Peck-Akatsuki-Pack/konan.nodes"
  },
  "pain": {
   "file": "Pain-Pack-2/Pain (Torso).nodes",
@@ -72,7 +59,7 @@
   }
  },
  "zetsu": {
-  "file": "The-Akatsuki-Pack/Zetsu R.nodes"
+  "file": "Peck-Akatsuki-Pack/zetsu.nodes"
  },
  "orochimaru": {
   "file": "The-Akatsuki-Pack/Orochimaru (Classic).nodes"
@@ -99,13 +86,27 @@
   }
  },
  "obito1": {
-  "file": "The-Akatsuki-Pack/Tobi R.nodes"
+  "file": "Peck-Akatsuki-Pack/Tobi.nodes"
  },
  "narutosage": {
   "file": "Naruto-Pack-8/naruto mode sennin.nodes"
  },
  "naruto7": {
-  "file": "Naruto-Pack-8/naruto hokage avec cap.nodes"
+  "file": "Hokage-Pack/Naruto uzumaki-Body (Hokage).nodes",
+  "parts": {
+   "head": "Hokage-Pack/Naruto Uzumaki-Head (Hokage).nodes",
+   "frontArm": "Hokage-Pack/Naruto uzumaki-Arm (Hokage).nodes",
+   "backArm": "Hokage-Pack/Naruto uzumaki-Arm 2 (Hokage).nodes"
+  },
+  "extra": [
+   {
+    "file": "Hokage-Pack/Naruto uzumaki-Cape (Hokage).nodes"
+   },
+   {
+    "file": "Hokage-Pack/Naruto uzumaki-Cape neck (Hokage).nodes",
+    "front": true
+   }
+  ]
  },
  "narutosix": {
   "file": "Naruto-Pack-8/naruto rikudo.nodes"
@@ -278,5 +279,46 @@
     "s": 0.36
    }
   ]
+ },
+ "hidan": {
+  "file": "Peck-Akatsuki-Pack/hidan.nodes"
+ },
+ "deidara_d1": {
+  "file": "Deidra-Pack-2/deidara akatsuki1.nodes"
+ },
+ "deidara_d2": {
+  "file": "Deidra-Pack-2/deidara akatsuki Art suprem3.nodes"
+ },
+ "kakashi6": {
+  "file": "Hokage-Pack/Kakashi Hatake-Body (Hokage).nodes",
+  "parts": {
+   "head": "Hokage-Pack/Kakashi Hatake-Head (Hokage).nodes",
+   "frontArm": "Hokage-Pack/Kakashi Hatake-Arm (Hokage).nodes",
+   "backArm": "Hokage-Pack/Kakashi Hatake-Arm 2 (Hokage).nodes"
+  }
+ },
+ "tsunade": {
+  "file": "Hokage-Pack/Tsunade Senju-Body.nodes",
+  "parts": {
+   "head": "Hokage-Pack/Tsunade Senju-Head.nodes",
+   "frontArm": "Hokage-Pack/Tsunade Senju-Arm.nodes",
+   "backArm": "Hokage-Pack/Tsunade Senju-Arm 2.nodes"
+  }
+ },
+ "jugo": {
+  "file": "Jugo-Pack/Jugo FullBody.nodes"
+ },
+ "jugo_m1": {
+  "file": "Jugo-Pack/Jugo Mark 1 FullBody.nodes"
+ },
+ "jugo_m2": {
+  "file": "Jugo-Pack/Jugo Mark 2 FullBody.nodes"
+ },
+ "zabuza": {
+  "file": "Zabuza-Pack/zabuza body 1.nodes",
+  "parts": {
+   "backArm": "Zabuza-Pack/zabuza hand 1.nodes",
+   "backLeg": "Zabuza-Pack/zabuza leg 1.nodes"
+  }
  }
 }
