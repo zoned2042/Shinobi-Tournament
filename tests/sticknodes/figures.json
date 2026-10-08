@@ -56,7 +56,20 @@
   "file": "The-Akatsuki-Pack/Konan.nodes"
  },
  "pain": {
-  "file": "The-Akatsuki-Pack/Pain.nodes"
+  "file": "Pain-Pack-2/Pain (Torso).nodes",
+  "parts": {
+   "head": "Pain-Pack-2/Pain (Head).nodes",
+   "frontArm": "Pain-Pack-2/Pain (Arm).nodes",
+   "backArm": "Pain-Pack-2/Pain (Arm 2).nodes",
+   "frontLeg": "Pain-Pack-2/Pain (Leg).nodes",
+   "backLeg": "Pain-Pack-2/Pain (Leg).nodes"
+  },
+  "partsAt": {
+   "arm": 221,
+   "head": 222,
+   "headFrom": 0,
+   "headBack": true
+  }
  },
  "zetsu": {
   "file": "The-Akatsuki-Pack/Zetsu R.nodes"
@@ -65,17 +78,25 @@
   "file": "The-Akatsuki-Pack/Orochimaru (Classic).nodes"
  },
  "madara1": {
-  "file": "The-Akatsuki-Pack/Madara Uchiha L.nodes",
+  "file": "Madara-Uchiha-Pack-3/Madara (Body).nodes",
+  "parts": {
+   "head": "Madara-Uchiha-Pack-3/Madara (Head).nodes",
+   "frontArm": "Madara-Uchiha-Pack-3/Madara (Front Arm).nodes",
+   "backArm": "Madara-Uchiha-Pack-3/Madara (Back Arm).nodes"
+  },
   "att": [
    {
-    "file": "The-Akatsuki-Pack/Madara Gunbai.nodes",
+    "file": "Madara-Uchiha-Pack-3/Gunabi.nodes",
     "at": "sho",
     "a": -15,
     "x": -14,
     "y": 30,
     "s": 0.45
    }
-  ]
+  ],
+  "partsAt": {
+   "arm": 140
+  }
  },
  "obito1": {
   "file": "The-Akatsuki-Pack/Tobi R.nodes"
@@ -217,5 +238,45 @@
  },
  "guy_g8": {
   "file": "Updated-Might-Guy-Pack/Night Guy.nodes"
+ },
+ "madara2": {
+  "file": "Madara-Uchiha-Pack-3/Madara (Reanimated Body).nodes",
+  "parts": {
+   "head": "Madara-Uchiha-Pack-3/Madara (Reanimated Head).nodes",
+   "frontArm": "Madara-Uchiha-Pack-3/Madara (Reanimated Front Arm).nodes",
+   "backArm": "Madara-Uchiha-Pack-3/Madara (Reanimated Back Arm).nodes"
+  },
+  "partsAt": {
+   "arm": 161
+  },
+  "att": [
+   {
+    "file": "Madara-Uchiha-Pack-3/Gunabi (with Chain).nodes",
+    "at": "sho",
+    "a": -15,
+    "x": -14,
+    "y": 30,
+    "s": 0.45
+   }
+  ]
+ },
+ "boruto": {
+  "file": "Boruto-Pack-4/boruto.nodes"
+ },
+ "kurotsuchi": {
+  "file": "Tsuchikage-Pack/tsuchikage.nodes"
+ },
+ "chojuro": {
+  "file": "Mizukage-Pack/mizukage.nodes",
+  "att": [
+   {
+    "file": "Mizukage-Pack/samehada.nodes",
+    "at": "sho",
+    "a": 168,
+    "x": -2,
+    "y": -14,
+    "s": 0.36
+   }
+  ]
  }
 }

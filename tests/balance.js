@@ -22,7 +22,7 @@ const { open } = require('./lib');
     }
     const champs = {}, byBase = {}, edo = { n: 0 };
     for (let b = 0; b < nb; b++) {
-      let list = shuffle(BASES.map(base => pick(ROSTER.filter(f => f.base === base))));
+      let list = shuffle(BASES.slice()).slice(0, 64).map(base => pick(ROSTER.filter(f => f.base === base))); // 64 of the characters
       while (list.length > 1) { const nx = []; for (let i = 0; i < list.length; i += 2) nx.push(simFight(list[i], list[i + 1]).winner); list = nx; }
       const c = list[0]; champs[c.id] = (champs[c.id] || 0) + 1; byBase[c.base] = (byBase[c.base] || 0) + 1; if (c.tags.includes('Edo')) edo.n++;
     }

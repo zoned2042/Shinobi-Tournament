@@ -8,12 +8,14 @@ const { load } = require('./sn.js'); const { detect, subtree } = require('./dete
 let PACKS = '';
 const hex = c => c.slice(0, 3).map(v => v.toString(16).padStart(2, '0')).join('') + (c[3] < 255 ? c[3].toString(16).padStart(2, '0') : '');
 /* graft another .nodes file onto node `at` of N (its root merges into `at`); `front` draws it over everything,
-   otherwise under everything. Returns the index of the graft's first node. */
-function graftFile(N, file, at, front, polys) {
+   otherwise under everything. `from` (default `at`): the node where the part's root really sits, when the part hangs
+   from `at` but was drawn around another origin (Pain's head is drawn from the waist). Returns the graft's first node. */
+function graftFile(N, file, at, front, polys, from) {
   const GF = load(path.join(PACKS, file)), G = GF.nodes, base = N.length;
   const dis = N.map(m => m.di), lo = Math.min(...dis), hi = Math.max(...dis), gmax = Math.max(...G.map(g => g.di));
   const off = front ? hi + 1 : lo - gmax - 1, mapDi = d => d === G[0].di ? N[at].di : d + off;
-  G.slice(1).forEach(g => { const c = Object.assign({}, g, { kids: [], parent: g.parent === 0 ? at : base + g.parent - 1, di: g.di + off }); c.i = N.length; N.push(c); N[c.parent].kids.push(c.i); });
+  const fr = from === undefined ? at : from, dx = N[fr].X - N[at].X, dy = N[fr].Y - N[at].Y;
+  G.slice(1).forEach(g => { const c = Object.assign({}, g, { kids: [], parent: g.parent === 0 ? at : base + g.parent - 1, di: g.di + off }); if (g.parent === 0) { c.x += dx; c.y -= dy; } c.i = N.length; N.push(c); N[c.parent].kids.push(c.i); });
   if (polys) GF.polys.forEach(P => polys.push({ anchor: mapDi(P.anchor), c: P.c, use: P.use, idx: P.idx.map(mapDi) })); // the part's fills (hair etc.)
   N.forEach(m => { if (m.parent >= 0) { m.X = N[m.parent].X + m.x; m.Y = N[m.parent].Y - m.y; } });
   return base;
@@ -25,13 +27,23 @@ function torsoTop(N) {
 }
 function build(file, o) {
   const F = load(path.join(PACKS, file)), N = F.nodes;
-  // parts: assemble a figure shipped in pieces { head, front arm, back arm, back leg } (Hokage Pack 2, Temari's head)
-  if (o.parts) { const P = o.parts, top = torsoTop(N);
-    if (P.backArm) graftFile(N, P.backArm, top, false, F.polys);
-    if (P.backLeg) graftFile(N, P.backLeg, 0, false, F.polys);
-    if (P.head) graftFile(N, P.head, top, true, F.polys);
-    if (P.frontArm) graftFile(N, P.frontArm, top, true, F.polys); }
+  // parts: assemble a figure shipped in pieces { head, front arm, back arm, front leg, back leg } (Hokage Pack 2,
+  // Temari's head, Pain Pack 2, Madara Pack 3)
+  // partsAt { arm, head, headFrom, headBack } (node indices) overrides where they join; with it the grafted arms are
+  // the skeleton's arms (the body's own coat flaps can look like arms to the detector: Madara Pack 3)
+  const PA = o.partsAt || {}, pb = {};
+  if (o.parts) { const P = o.parts, top = torsoTop(N), arm = PA.arm !== undefined ? PA.arm : top, hd = PA.head !== undefined ? PA.head : top;
+    if (P.backArm) pb.backArm = graftFile(N, P.backArm, arm, false, F.polys);
+    if (P.frontLeg) pb.frontLeg = graftFile(N, P.frontLeg, 0, false, F.polys); // legs go under the body (Pain's cloak covers the thighs)
+    if (P.backLeg) pb.backLeg = graftFile(N, P.backLeg, 0, false, F.polys);
+    if (P.head) graftFile(N, P.head, hd, !PA.headBack, F.polys, PA.headFrom);
+    if (P.frontArm) pb.frontArm = graftFile(N, P.frontArm, arm, true, F.polys); }
   let D = o.prop ? null : detect(F);
+  if (D && o.partsAt && pb.frontArm && pb.backArm) {
+    const limb = i => { const n = N[i], a = Math.atan2(n.y, n.x); const k = n.kids.map(j => N[j]).sort((p, q) => Math.hypot(q.x, q.y) * (1 + Math.cos(Math.atan2(q.y, q.x) - a)) - Math.hypot(p.x, p.y) * (1 + Math.cos(Math.atan2(p.y, p.x) - a)))[0]; return { i, kid: k.i }; };
+    D.arms = [limb(pb.frontArm), limb(pb.backArm)]; D.sho = N[pb.frontArm].parent;
+    if (pb.frontLeg && pb.backLeg) D.legs = [limb(pb.frontLeg), limb(pb.backLeg)];
+  }
   // graft: a separate limb file (e.g. Kisame's arm) hung from the shoulders and used as the front arm
   if (D && o.graft) {
     const G = load(path.join(PACKS, o.graft)).nodes, base = N.length, maxDi = Math.max(...N.map(m => m.di));
