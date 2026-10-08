@@ -387,5 +387,9 @@
  },
  "sasoriE": {
   "file": "The-Akatsuki-Pack/Sasori (edo tensei).nodes"
+ },
+ "eye_rinneSh": {
+  "file": "Sharingan-Pack-2/Rinnegan Sharingan.nodes",
+  "prop": true
  }
 }
