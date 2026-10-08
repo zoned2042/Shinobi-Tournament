@@ -2,7 +2,7 @@
 //   node tests/sticknodes/build.js <packs dir>        (the unzipped packs from sticknodes.com, one folder per pack)
 // tests/sticknodes/figures.json maps a roster id to a figure: { file, mirror?, graft? (a separate limb file used as the
 // front arm), att? [{file, at:'sho', a (deg), x, y, s}] (a prop riding on the shoulders, e.g. Samehada) }.
-// The figure is scaled so thigh + shin = 74 (the game skeleton's leg) and mirrored to face +x.
+// The figure is scaled to a standard standing height (legs + hips-to-head = 138) and mirrored to face +x.
 const fs = require('fs'), path = require('path');
 const { load } = require('./sn.js'); const { detect, subtree } = require('./detect.js');
 let PACKS = '';
@@ -16,7 +16,7 @@ function graftFile(N, file, at, front, polys, from) {
   const off = front ? hi + 1 : lo - gmax - 1, mapDi = d => d === G[0].di ? N[at].di : d + off;
   const fr = from === undefined ? at : from, dx = N[fr].X - N[at].X, dy = N[fr].Y - N[at].Y;
   G.slice(1).forEach(g => { const c = Object.assign({}, g, { kids: [], parent: g.parent === 0 ? at : base + g.parent - 1, di: g.di + off }); if (g.parent === 0) { c.x += dx; c.y -= dy; } c.i = N.length; N.push(c); N[c.parent].kids.push(c.i); });
-  if (polys) GF.polys.forEach(P => polys.push({ anchor: mapDi(P.anchor), c: P.c, use: P.use, idx: P.idx.map(mapDi) })); // the part's fills (hair etc.)
+  if (polys) GF.polys.forEach(P => polys.push({ anchor: mapDi(P.anchor), c: P.c, dc: P.dc, use: P.use, idx: P.idx.map(mapDi) })); // the part's fills (hair etc.)
   N.forEach(m => { if (m.parent >= 0) { m.X = N[m.parent].X + m.x; m.Y = N[m.parent].Y - m.y; } });
   return base;
 }
@@ -69,19 +69,28 @@ function build(file, o) {
   const ang = N.map(n => n.parent < 0 ? 0 : Math.atan2(n.y, n.x) * 180 / Math.PI); // absolute, y-up
   const L = N.map(n => Math.hypot(n.x, n.y));
   let k = 1;
-  if (D) { const fl = D.legs[0]; k = 74 / (L[fl.i] + L[fl.kid]); }
+  // every figure stands the same height: legs (thigh + shin) plus the straight distance from the hips to the top of the
+  // head = 138 game units (the median of the figures when they were scaled by leg length alone; packs differ a lot in
+  // leg-to-body proportion, which made the long-legged Peck Akatsuki figures small and Zabuza a giant)
+  if (D) { const fl = D.legs[0], hd = N[D.head]; k = 138 / (L[fl.i] + L[fl.kid] + Math.hypot(hd.X - N[0].X, hd.Y - N[0].Y)); if (o.size) k *= o.size; if (o.legAs && LEGS[o.legAs]) k = LEGS[o.legAs] / (L[fl.i] + L[fl.kid]); LEGS[o.id] = k * (L[fl.i] + L[fl.kid]); }
   else k = o.scale || 1;
   const pal = [], pidx = c => { const h = hex(c); let j = pal.indexOf(h); if (j < 0) { j = pal.length; pal.push(h); } return j; };
   const loc = N.map((m, i) => { if (m.parent < 0) return 0; let a = ang[i] - (m.parent === 0 ? 0 : ang[m.parent]); if (mirror) a = -a; a = ((a + 540) % 360) - 180; return a; });
   const ord = N.map((m, i) => i).filter(i => N[i].parent >= 0).sort((a, b) => N[a].di - N[b].di);
   const di2ord = new Map(ord.map((i, j) => [N[i].di, j]));
   const byDi = new Map(N.map((m, i) => [m.di, i]));
-  const fills = F.polys.map(P => [pidx(P.c), di2ord.has(P.anchor) ? di2ord.get(P.anchor) : 0, P.idx.map(d => byDi.get(d)).filter(i => i !== undefined).join(',')]);
+  const fills = F.polys.map(P => [pidx(P.dc || P.c), di2ord.has(P.anchor) ? di2ord.get(P.anchor) : 0, P.idx.map(d => byDi.get(d)).filter(i => i !== undefined).join(',')]);
   const out = {
     n, P: N.map(m => m.parent).join(','), T: N.map(m => m.type + 1).join(''),
     L: L.map(v => Math.round(v * k * 10)).join(','), W: N.map(m => Math.round(m.th * .5 * k * 10)).join(','),
-    A: loc.map(a => Math.round(a * 2)).join(','), C: N.map(m => pidx(m.col)).join(','), O: ord.join(','), pal,
-    R: N.map((m, i) => m.type === 5 && m.trap && Math.abs(m.trap - 1) > .01 ? i + ':' + m.trap.toFixed(2) : '').filter(Boolean).join(','),
+    A: loc.map(a => Math.round(a * 2)).join(','), C: N.map(m => pidx(m.dcol || m.col)).join(','), O: ord.join(','), pal,
+    R: N.map((m, i) => m.type === 6 && m.trap > 0 && Math.abs(m.trap - 1) > .01 ? i + ':' + m.trap.toFixed(2) : '').filter(Boolean).join(','), // trapezoid end/start width
+    // curved segments (degrees of bend, sign flips with the mirror), half circles, gradients, circle outlines, polygon sides
+    K: N.map((m, i) => m.curve && m.type <= 1 ? i + ':' + (mirror ? -m.curve : m.curve) : '').filter(Boolean).join(',') || undefined,
+    H: N.map((m, i) => m.halfArc && [2, 4, 5].includes(m.type) ? i : '').filter(v => v !== '').join(',') || undefined,
+    G: N.map((m, i) => m.grad && m.gcol ? i + ':' + pidx(m.gcol) + ':' + (m.revGrad ? 1 : 0) : '').filter(Boolean).join(',') || undefined,
+    U: N.map((m, i) => m.circOut && m.ocol && [2, 4, 5, 7].includes(m.type) ? i + ':' + pidx(m.ocol) : '').filter(Boolean).join(',') || undefined,
+    V: N.map((m, i) => m.type === 7 ? i + ':' + Math.max(3, m.poly || 5) : '').filter(Boolean).join(',') || undefined,
     F: fills.length ? fills : undefined, ra: mirror ? 180 : 0
   };
   if (D) {
@@ -99,7 +108,9 @@ function build(file, o) {
 PACKS = process.argv[2];
 if (!PACKS) { console.log('usage: node tests/sticknodes/build.js <packs dir>'); process.exit(1); }
 const map = JSON.parse(fs.readFileSync(path.join(__dirname, 'figures.json'), 'utf8')), res = {};
-for (const [id, o] of Object.entries(map)) { res[id] = build(o.file, o); }
+// figures swapped in mid-fight (damage, gates, curse marks) keep their base figure's leg length: legAs
+const LEGS = {}, SWAPOF = { narutoS_d1: 'narutoS', narutoS_d2: 'narutoS', danzo_d1: 'danzo', deidara_d1: 'deidara', deidara_d2: 'deidara', jugo_m1: 'jugo', jugo_m2: 'jugo', guy_g3: 'guy1', guy_g7: 'guy1', guy_g8: 'guy1' };
+for (const [id, o] of Object.entries(map)) { res[id] = build(o.file, Object.assign({ id, legAs: SWAPOF[id] }, o)); }
 const html = path.join(__dirname, '..', '..', 'index.html'), src = fs.readFileSync(html, 'utf8');
 const A = '<script id="snfig">', B = '</script>', i = src.indexOf(A), j = src.indexOf(B, i);
 if (i < 0) throw new Error('no <script id="snfig"> in index.html');

@@ -20,8 +20,12 @@ function parse(buf) {
   node(-1);
   const polys = [];
   if (ver >= 230 && o < buf.length) { const np = i32(); for (let p = 0; p < np; p++) { const anchor = i32(), c = col(), use = u8(), cnt = i32(), idx = []; for (let k = 0; k < cnt; k++) idx.push(i32()); polys.push({ anchor, c, use, idx }); } }
+  // what Stick Nodes draws (as sticknodes-rs reads it): a node whose segment scale is on has its offset and thickness
+  // scaled; a node or polyfill that does not use its own colour takes the figure's colour
+  nodes.forEach(n => { if (n.useSegScale && n.scale !== 1) { n.x *= n.scale; n.y *= n.scale; n.th *= n.scale; } n.dcol = n.useSegCol ? n.col : fcol; });
+  polys.forEach(P => { P.dc = P.use ? P.c : fcol; });
   // world positions (Stick Nodes is y-up: flip to y-down)
   nodes.forEach(n => { if (n.parent < 0) { n.X = 0; n.Y = 0; } else { const p = nodes[n.parent]; n.X = p.X + n.x; n.Y = p.Y - n.y; } });
-  return { ver, scale, nodes, polys, rest: buf.length - o };
+  return { ver, scale, fcol, nodes, polys, rest: buf.length - o };
 }
 module.exports = { parse, load: f => parse(fs.readFileSync(f)) };

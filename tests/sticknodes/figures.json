@@ -15,10 +15,11 @@
   "file": "Obito-360-Pack-2/_Obito (War) 1.nodes"
  },
  "itachi1": {
-  "file": "Peck-Akatsuki-Pack/Itachi.nodes"
+  "file": "The-Akatsuki-Pack/Itachi Uchiha.nodes"
  },
  "kisame": {
-  "file": "Peck-Akatsuki-Pack/kisame.nodes",
+  "file": "The-Akatsuki-Pack/Kisame Hoshigaki.nodes",
+  "graft": "The-Akatsuki-Pack/Kisame Arm.nodes",
   "att": [
    {
     "file": "The-Akatsuki-Pack/Samehada (Kisame Sword).nodes",
@@ -26,7 +27,7 @@
     "a": 168,
     "x": -6,
     "y": -4,
-    "s": 0.3
+    "s": 0.42
    }
   ]
  },
@@ -34,13 +35,13 @@
   "file": "Deidra-Pack-2/deidara akatsuki.nodes"
  },
  "sasori": {
-  "file": "Peck-Akatsuki-Pack/sasori.nodes"
+  "file": "The-Akatsuki-Pack/Sasori.nodes"
  },
  "kakuzu": {
-  "file": "Peck-Akatsuki-Pack/kakuzu.nodes"
+  "file": "The-Akatsuki-Pack/Kakuzu.nodes"
  },
  "konan": {
-  "file": "Peck-Akatsuki-Pack/konan.nodes"
+  "file": "The-Akatsuki-Pack/Konan.nodes"
  },
  "pain": {
   "file": "Pain-Pack-2/Pain (Torso).nodes",
@@ -86,7 +87,7 @@
   }
  },
  "obito1": {
-  "file": "Peck-Akatsuki-Pack/Tobi.nodes"
+  "file": "The-Akatsuki-Pack/Tobi R.nodes"
  },
  "narutosage": {
   "file": "Naruto-Pack-8/naruto mode sennin.nodes"
@@ -222,7 +223,8 @@
   "file": "Updated-Might-Guy-Pack/Might Guy.nodes"
  },
  "narutobary": {
-  "file": "Baryon-Mode-Naruto-Pack/Naruto-Baryon-Mode right.nodes"
+  "file": "Baryon-Mode-Naruto-Pack/Naruto-Baryon-Mode right.nodes",
+  "size": 1.2
  },
  "kabuto": {
   "file": "Kabuto-Yakushi-Pack/Kabuto sage mode body.nodes",
@@ -314,13 +316,6 @@
  "jugo_m2": {
   "file": "Jugo-Pack/Jugo Mark 2 FullBody.nodes"
  },
- "zabuza": {
-  "file": "Zabuza-Pack/zabuza body 1.nodes",
-  "parts": {
-   "backArm": "Zabuza-Pack/zabuza hand 1.nodes",
-   "backLeg": "Zabuza-Pack/zabuza leg 1.nodes"
-  }
- },
  "konohamaru": {
   "file": "Konohamaru-Pack/Konohamaru Body.nodes",
   "att": [
@@ -383,5 +378,14 @@
  "eye_madaraEMS": {
   "file": "Sharingan-Pack-2/Madara Eternal Mangekyou Sharingan.nodes",
   "prop": true
+ },
+ "itachi2": {
+  "file": "The-Akatsuki-Pack/Itachi Uchiha (edo tensei).nodes"
+ },
+ "kakuzuE": {
+  "file": "The-Akatsuki-Pack/Kakuzu (Edo Tensei).nodes"
+ },
+ "sasoriE": {
+  "file": "The-Akatsuki-Pack/Sasori (edo tensei).nodes"
  }
 }

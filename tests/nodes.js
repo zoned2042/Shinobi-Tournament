@@ -42,10 +42,10 @@ const { open } = require('./lib');
       const T = (x, y) => [k * W + 30 + (x - minX) * s, 50 + (maxY - y) * s];
       const byDi = new Map(N.map(n => [n.di, n]));
       const items = N.filter(n => n.parent >= 0).map(n => ({ di: n.di, draw: () => {
-        const p = N[n.parent], [x0, y0] = T(p.X, p.Y), [x1, y1] = T(n.X, n.Y), th = Math.max(1, n.th * s * .5), c = n.col;
+        const p = N[n.parent], [x0, y0] = T(p.X, p.Y), [x1, y1] = T(n.X, n.Y), th = Math.max(1, n.th * (n.useSegScale ? n.scale : 1) * s * .5), c = n.useSegCol ? n.col : F.fcol; // figure colour unless the node has its own
         g.save(); g.strokeStyle = c; g.fillStyle = c; g.lineWidth = th;
         if (n.type === 0 || n.type === 1) { g.lineCap = n.type === 0 ? 'round' : 'butt'; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); }
-        else if (n.type === 2 || n.type === 4) { const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, r = Math.hypot(x1 - x0, y1 - y0) / 2; g.beginPath(); g.arc(cx, cy, Math.max(.5, n.type === 4 ? r : r), 0, 6.283); if (n.type === 4) g.fill(); else g.stroke(); }
+        else if (n.type === 2 || n.type === 4) { const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, r = Math.hypot(x1 - x0, y1 - y0) / 2; g.beginPath(); g.arc(cx, cy, Math.max(.5, r), 0, 6.283); g.fill(); } // Stick Nodes circles are filled
         else if (n.type === 5) { const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, r = Math.hypot(x1 - x0, y1 - y0) / 2; g.translate(cx, cy); g.rotate(Math.atan2(y1 - y0, x1 - x0)); g.beginPath(); g.ellipse(0, 0, Math.max(.5, r), Math.max(.5, th / 2), 0, 0, 6.283); g.fill(); }
         else if (n.type === 3) { const a = Math.atan2(y1 - y0, x1 - x0), nx = -Math.sin(a) * th / 2, ny = Math.cos(a) * th / 2; g.beginPath(); g.moveTo(x0 + nx, y0 + ny); g.lineTo(x0 - nx, y0 - ny); g.lineTo(x1, y1); g.closePath(); g.fill(); }
         else if (n.type === 6) { const a = Math.atan2(y1 - y0, x1 - x0), nx = -Math.sin(a) * th / 2, ny = Math.cos(a) * th / 2, r = n.trap || 1; g.beginPath(); g.moveTo(x0 + nx, y0 + ny); g.lineTo(x1 + nx * r, y1 + ny * r); g.lineTo(x1 - nx * r, y1 - ny * r); g.lineTo(x0 - nx, y0 - ny); g.closePath(); g.fill(); }
