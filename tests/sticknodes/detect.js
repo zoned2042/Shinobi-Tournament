@@ -13,16 +13,19 @@ function detect(F) {
   const chain = []; for (let i = head.i; i >= 0; i = N[i].parent) chain.unshift(i);
   const inChain = new Set(chain);
   // arms: children of chain nodes (not the head's own subtree), long, with a long child
-  const score = i => { const n = N[i]; const kid = n.kids.map(k => N[k]).sort((a, b) => b.L - a.L)[0]; return { i, len: n.L, kid: kid ? kid.i : -1, kl: kid ? kid.L : 0 }; };
+  // the limb's next bone: the longest child that carries on in roughly the same direction (helper bones that fold
+  // back over the limb, as in Temari's legs, lose to the real shin even when a unit longer)
+  const cont = (n, c) => { const d = Math.atan2(c.y, c.x) - Math.atan2(n.y, n.x); return c.L * (1 + Math.cos(d)) / 2; };
+  const score = (i, leg) => { const n = N[i]; const kid = n.kids.map(k => N[k]).sort((a, b) => leg ? cont(n, b) - cont(n, a) : b.L - a.L)[0]; return { i, len: n.L, kid: kid ? kid.i : -1, kl: kid ? kid.L : 0 }; };
   const armC = [];
   const tryArm = (k, c, ci) => { const s = score(k); if (s.kid >= 0 && s.len > 12 && s.kl > 8 && s.kl / s.len > .45 && s.kl / s.len < 2) armC.push(Object.assign(s, { at: c, ci })); };
   // arms hang from a chain node, directly or through a short connector node
-  chain.forEach((c, ci) => { if (c === head.i || ci === 0) return; for (const k of N[c].kids) if (!inChain.has(k)) { tryArm(k, c, ci); if (N[k].L < 12) for (const g of N[k].kids) tryArm(g, c, ci); } });
+  chain.forEach((c, ci) => { if (c === head.i || ci === 0) return; for (const k of N[c].kids) if (!inChain.has(k)) { tryArm(k, c, ci); if (N[k].L < 18) for (const g of N[k].kids) tryArm(g, c, ci); } });
   armC.sort((a, b) => (b.len + b.kl) - (a.len + a.kl));
   const arms = armC.slice(0, 2);
   // legs: below the hips, pointing down, long, with a long child
   const legC = [];
-  const scan = (i, d) => { for (const k of N[i].kids) { if (inChain.has(k) && N[k].L > 2) continue; const s = score(k); if (isDown(N[k].A) && s.len > 15 && s.kid >= 0) legC.push(s); else if (d < 1 && N[k].L < 3) scan(k, d + 1); } };
+  const scan = (i, d) => { for (const k of N[i].kids) { if (inChain.has(k) && N[k].L > 2) continue; const s = score(k, true); if (isDown(N[k].A) && s.len > 15 && s.kid >= 0 && s.len > s.kl * .35) legC.push(s); else if (d < 1 && N[k].L < 20) scan(k, d + 1); } }; // a short hip connector is not the thigh: look past it
   scan(0, 0);
   legC.sort((a, b) => (b.len + b.kl) - (a.len + a.kl));
   const legs = legC.slice(0, 2);

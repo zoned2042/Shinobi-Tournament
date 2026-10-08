@@ -103,5 +103,79 @@
  },
  "narutoL": {
   "file": "Naruto-Pack-8/naruto the last.nodes"
+ },
+ "hiruzen": {
+  "file": "Hokage-Pack-2/Hiruzen Sarutobi-Body.nodes",
+  "parts": {
+   "head": "Hokage-Pack-2/Hiruzen Sarutobi-Head.nodes",
+   "frontArm": "Hokage-Pack-2/Hiruzen Sarutobi-Arm.nodes",
+   "backArm": "Hokage-Pack-2/Hiruzen Sarutobi-Arm 2.nodes",
+   "backLeg": "Hokage-Pack-2/Hiruzen Sarutobi-Leg.nodes"
+  }
+ },
+ "minato": {
+  "file": "Hokage-Pack-2/Minato Namikaze-body.nodes",
+  "parts": {
+   "head": "Hokage-Pack-2/Minato Namikaze-Head.nodes",
+   "frontArm": "Hokage-Pack-2/Minato Namikaze-Arm.nodes",
+   "backArm": "Hokage-Pack-2/Minato Namikaze-Arm 2.nodes"
+  }
+ },
+ "gaara2": {
+  "file": "Bijuu-and-Gaara-Pack/gaara shippuden.nodes"
+ },
+ "danzo": {
+  "file": "Danzo-Pack/Danzo.nodes"
+ },
+ "danzo_d1": {
+  "file": "Danzo-Pack/Danzo no arm.nodes",
+  "oneArm": true
+ },
+ "temari": {
+  "file": "Temari-Pack/Temari (shippuden).nodes",
+  "parts": {
+   "head": "Temari-Pack/Temari head.nodes"
+  },
+  "att": [
+   {
+    "file": "Temari-Pack/Temari fan.nodes",
+    "at": "sho",
+    "a": 200,
+    "x": -6,
+    "y": -14,
+    "s": 0.6
+   }
+  ]
+ },
+ "sasuke2": {
+  "file": "Naruto-Shippuden-Pack-2/sasuke hebi.nodes",
+  "att": [
+   {
+    "file": "Naruto-Shippuden-Pack-2/kusangi new sword.nodes",
+    "at": 0,
+    "a": 160,
+    "x": -6,
+    "y": -34,
+    "s": 0.42
+   }
+  ]
+ },
+ "hinata2": {
+  "file": "Naruto-Shippuden-Pack-2/hinata shippuden.nodes"
+ },
+ "lee2": {
+  "file": "Naruto-Shippuden-Pack-2/rock lee teen.nodes"
+ },
+ "neji": {
+  "file": "Naruto-Shippuden-Pack-2/neji shippuden.nodes"
+ },
+ "shikamaru": {
+  "file": "Naruto-Shippuden-Pack-2/shikamaru shippuden.nodes"
+ },
+ "ino": {
+  "file": "Naruto-Shippuden-Pack-2/ino shippuden.nodes"
+ },
+ "sakura2": {
+  "file": "Naruto-Shippuden-Pack-2/sakura haruno.nodes"
  }
 }

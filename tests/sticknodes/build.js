@@ -7,8 +7,30 @@ const fs = require('fs'), path = require('path');
 const { load } = require('./sn.js'); const { detect, subtree } = require('./detect.js');
 let PACKS = '';
 const hex = c => c.slice(0, 3).map(v => v.toString(16).padStart(2, '0')).join('') + (c[3] < 255 ? c[3].toString(16).padStart(2, '0') : '');
+/* graft another .nodes file onto node `at` of N (its root merges into `at`); `front` draws it over everything,
+   otherwise under everything. Returns the index of the graft's first node. */
+function graftFile(N, file, at, front, polys) {
+  const GF = load(path.join(PACKS, file)), G = GF.nodes, base = N.length;
+  const dis = N.map(m => m.di), lo = Math.min(...dis), hi = Math.max(...dis), gmax = Math.max(...G.map(g => g.di));
+  const off = front ? hi + 1 : lo - gmax - 1, mapDi = d => d === G[0].di ? N[at].di : d + off;
+  G.slice(1).forEach(g => { const c = Object.assign({}, g, { kids: [], parent: g.parent === 0 ? at : base + g.parent - 1, di: g.di + off }); c.i = N.length; N.push(c); N[c.parent].kids.push(c.i); });
+  if (polys) GF.polys.forEach(P => polys.push({ anchor: mapDi(P.anchor), c: P.c, use: P.use, idx: P.idx.map(mapDi) })); // the part's fills (hair etc.)
+  N.forEach(m => { if (m.parent >= 0) { m.X = N[m.parent].X + m.x; m.Y = N[m.parent].Y - m.y; } });
+  return base;
+}
+/* top of a body part's torso: from the root, keep following the child that points most nearly straight up */
+function torsoTop(N) {
+  let i = 0;
+  for (;;) { const up = N[i].kids.map(k => N[k]).filter(c => Math.hypot(c.x, c.y) > 2 && c.y > 0 && Math.abs(Math.atan2(c.y, c.x) - Math.PI / 2) < 1).sort((a, b) => b.y - a.y)[0]; if (!up) return i; i = up.i; }
+}
 function build(file, o) {
   const F = load(path.join(PACKS, file)), N = F.nodes;
+  // parts: assemble a figure shipped in pieces { head, front arm, back arm, back leg } (Hokage Pack 2, Temari's head)
+  if (o.parts) { const P = o.parts, top = torsoTop(N);
+    if (P.backArm) graftFile(N, P.backArm, top, false, F.polys);
+    if (P.backLeg) graftFile(N, P.backLeg, 0, false, F.polys);
+    if (P.head) graftFile(N, P.head, top, true, F.polys);
+    if (P.frontArm) graftFile(N, P.frontArm, top, true, F.polys); }
   let D = o.prop ? null : detect(F);
   // graft: a separate limb file (e.g. Kisame's arm) hung from the shoulders and used as the front arm
   if (D && o.graft) {
@@ -18,6 +40,12 @@ function build(file, o) {
     N.forEach(m => { m.L = Math.hypot(m.x, m.y); });
     const keep = D.arms.slice().sort((a, b) => N[b.i].L - N[a.i].L)[0];
     D.arms = [{ i: base, kid: base + 1 }, keep]; D.ok = true;
+  }
+  // one-armed figure (a lost arm): an invisible stand-in arm at the shoulder keeps the skeleton complete
+  if (D && o.oneArm && D.arms.length === 1 && D.legs.length === 2) {
+    const mk = (parent, len) => { const c = { parent, kids: [], type: 0, di: -9999, x: 0, y: -len, th: 0, col: [0, 0, 0, 0], X: 0, Y: 0, L: len }; c.i = N.length; N.push(c); N[parent].kids.push(c.i); return c.i; };
+    const u = mk(D.sho, 1), f = mk(u, 1); N.forEach(m => { if (m.parent >= 0) { m.X = N[m.parent].X + m.x; m.Y = N[m.parent].Y - m.y; } });
+    D.arms = D.arms.concat([{ i: u, kid: f }]); D.ok = true;
   }
   if (D && !D.ok) throw new Error('skeleton not found in ' + file);
   const n = N.length;
