@@ -16,17 +16,22 @@ function detect(F) {
   // the limb's next bone: the longest child that carries on in roughly the same direction (helper bones that fold
   // back over the limb, as in Temari's legs, lose to the real shin even when a unit longer)
   const cont = (n, c) => { const d = Math.atan2(c.y, c.x) - Math.atan2(n.y, n.x); return c.L * (1 + Math.cos(d)) / 2; };
-  const score = (i, leg) => { const n = N[i]; const kid = n.kids.map(k => N[k]).sort((a, b) => leg ? cont(n, b) - cont(n, a) : b.L - a.L)[0]; return { i, len: n.L, kid: kid ? kid.i : -1, kl: kid ? kid.L : 0 }; };
-  const armC = [];
-  const tryArm = (k, c, ci) => { const s = score(k); if (s.kid >= 0 && s.len > 12 && s.kl > 8 && s.kl / s.len > .45 && s.kl / s.len < 2) armC.push(Object.assign(s, { at: c, ci })); };
-  // arms hang from a chain node, directly or through a short connector node
-  chain.forEach((c, ci) => { if (c === head.i || ci === 0) return; for (const k of N[c].kids) if (!inChain.has(k)) { tryArm(k, c, ci); if (N[k].L < 18) for (const g of N[k].kids) tryArm(g, c, ci); } });
+  // an arm's next bone: the longest drawn child; a hidden helper bone (Young Naruto's, carrying the sleeve cuff) counts half
+  const vis = c => c.L * (c.th > 0 || c.kids.length > 3 ? 1 : .5);
+  const score = (i, leg) => { const n = N[i]; const kid = n.kids.map(k => N[k]).sort((a, b) => leg ? cont(n, b) - cont(n, a) : vis(b) - vis(a))[0]; return { i, len: n.L, kid: kid ? kid.i : -1, kl: kid ? kid.L : 0 }; };
+  const armC = [], armC0 = Math.max(18, (maxY - minY) * .08); // connector length limit grows with big figures
+  const tryArm = (k, c, ci) => { const s = score(k); if (s.kid >= 0 && ![2, 4].includes(N[s.kid].type) && s.len > 12 && s.kl > 8 && s.kl / s.len > .45 && s.kl / s.len < 2) armC.push(Object.assign(s, { at: c, ci })); };
+  // arms hang from a chain node, directly or through a short connector node; a bone ending in a circle is a neck
+  // carrying a head (Might Guy), not an arm
+  chain.forEach((c, ci) => { if (c === head.i || ci === 0) return; for (const k of N[c].kids) if (!inChain.has(k)) { tryArm(k, c, ci); if (N[k].L < armC0) for (const g of N[k].kids) tryArm(g, c, ci); } });
   armC.sort((a, b) => (b.len + b.kl) - (a.len + a.kl));
   const arms = armC.slice(0, 2);
   // legs: below the hips, pointing down, long, with a long child
-  const legC = [];
-  const scan = (i, d) => { for (const k of N[i].kids) { if (inChain.has(k) && N[k].L > 2) continue; const s = score(k, true); if (isDown(N[k].A) && s.len > 15 && s.kid >= 0 && s.len > s.kl * .35) legC.push(s); else if (d < 1 && N[k].L < 20) scan(k, d + 1); } }; // a short hip connector is not the thigh: look past it
-  scan(0, 0);
+  const legC = [], hipC = Math.max(20, (maxY - minY) * .045); // big figures (Might Guy, ~1000 units tall) have longer connectors
+  const scan = (i, d, ok) => { for (const k of N[i].kids) { if (inChain.has(k) && N[k].L > 2) continue; const s = score(k, true); if (ok(N[k]) && s.len > 15 && s.kid >= 0 && s.len > s.kl * .35) legC.push(s); else if (d < 1 && N[k].L < hipC) scan(k, d + 1, ok); } }; // a short hip connector is not the thigh: look past it
+  scan(0, 0, n => isDown(n.A));
+  // one leg found: the other may be a knee raised forward (Might Guy's running poses); take a bone of the same length
+  if (legC.length === 1) { const L1 = legC[0]; scan(0, 0, n => n.i !== L1.i && !isUp(n.A) && Math.abs(n.L - L1.len) < L1.len * .2); }
   legC.sort((a, b) => (b.len + b.kl) - (a.len + a.kl));
   const legs = legC.slice(0, 2);
   // shoulder = chain node the arms hang from; torso base = first chain node with length

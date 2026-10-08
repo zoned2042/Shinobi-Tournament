@@ -177,5 +177,45 @@
  },
  "sakura2": {
   "file": "Naruto-Shippuden-Pack-2/sakura haruno.nodes"
+ },
+ "naruto1": {
+  "file": "Naruto-Genin-Pack/naruto kid remake.nodes"
+ },
+ "sasuke1": {
+  "file": "Naruto-Genin-Pack/sasuke kid remake.nodes"
+ },
+ "hinata1": {
+  "file": "Naruto-Genin-Pack/hinata kid.nodes"
+ },
+ "sakura1": {
+  "file": "Naruto-Genin-Pack/haruno sakura kid body.nodes",
+  "parts": {
+   "head": "Naruto-Genin-Pack/sakura haruno kid head.nodes"
+  }
+ },
+ "lee1": {
+  "file": "Naruto-Genin-Pack/rock lee kid.nodes"
+ },
+ "guy1": {
+  "file": "Updated-Might-Guy-Pack/Might Guy.nodes"
+ },
+ "narutobary": {
+  "file": "Baryon-Mode-Naruto-Pack/Naruto-Baryon-Mode right.nodes"
+ },
+ "kabuto": {
+  "file": "Kabuto-Yakushi-Pack/Kabuto sage mode body.nodes",
+  "parts": {
+   "head": "Kabuto-Yakushi-Pack/kabuto sage mode head.nodes",
+   "frontArm": "Kabuto-Yakushi-Pack/kabuto sage mode arm front.nodes"
+  }
+ },
+ "guy_g3": {
+  "file": "Updated-Might-Guy-Pack/Might Guy Lower Gates Open.nodes"
+ },
+ "guy_g7": {
+  "file": "Updated-Might-Guy-Pack/Might Guy 7th Gate Open.nodes"
+ },
+ "guy_g8": {
+  "file": "Updated-Might-Guy-Pack/Night Guy.nodes"
  }
 }
