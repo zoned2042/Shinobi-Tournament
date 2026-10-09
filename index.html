@@ -267,6 +267,40 @@ details.rules p{margin:8px 0}
 .mc.sq{border-color:var(--flame)}
 .mr .gone{font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ko);text-decoration:none;flex:none}
 .storyw{display:block}
+.leaguew{display:block}
+.board{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:12px 0;background:var(--panel)}
+.board .bh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:9px}
+.board .bk{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--flame);font-weight:800}
+.board .bs{font-size:12.5px;color:var(--muted)}
+.bcards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.bc{border:1px solid var(--line);border-radius:11px;padding:10px 11px;display:flex;flex-direction:column;gap:5px;background:var(--panel2);border-top:3px solid var(--muted)}
+.bc.cat-upset{border-top-color:var(--ko)} .bc.cat-style{border-top-color:var(--chakra)} .bc.cat-result{border-top-color:var(--flame)}
+.bc .bt{font-family:var(--serif);font-weight:700;font-size:15px}
+.bc .bd{font-size:13px;color:var(--muted);flex:1}
+.bc .br{display:flex;justify-content:space-between;gap:8px;font-size:12px;align-items:center}
+.bc .rw{font-weight:800;color:var(--flame)}
+.bc .pg{color:var(--muted)}
+.bc.done{border-color:var(--good);background:color-mix(in srgb,var(--good) 12%,var(--panel2))}
+.bc .tick{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--good);color:#06120a;font-size:11px;margin-right:6px;vertical-align:1px}
+.prof .ptl{font-size:11.5px;color:var(--flame);font-weight:700;letter-spacing:.02em}
+@media (max-width:760px){ .bcards{grid-template-columns:1fr} }
+.ltable-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.ltable{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.ltable th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;text-align:center;padding:9px 8px;border-bottom:1px solid var(--line)}
+.ltable td{text-align:center;padding:6px 8px;border-bottom:1px solid var(--line)}
+.ltable tr:last-child td{border-bottom:0}
+.ltable .ln{text-align:left}
+.ltable td.ln{display:flex;align-items:center;gap:9px;font-weight:600;white-space:nowrap}
+.ltable td.lp{width:34px;color:var(--muted);font-weight:700}
+.ltable td.lpts{font-weight:800;font-size:16px}
+.ltable tr.mine td{background:color-mix(in srgb,var(--flame) 12%,transparent)}
+.ltable tr.lead td.lpts{color:var(--flame)}
+.ltable .crown{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--flame);color:var(--flame-ink);font-size:12px}
+.ltable td.lf{white-space:nowrap}
+.fm{display:inline-block;width:9px;height:9px;border-radius:50%;margin:0 2px;vertical-align:middle}
+.fm.w{background:var(--good)} .fm.l{background:var(--ko)}
+.lnote{color:var(--muted);font-size:13px;margin:8px 2px 0}
+@media (max-width:560px){ .ltable{font-size:12.5px} .ltable th,.ltable td{padding:5px 4px} .ltable .crest.sm{width:26px;height:26px} .ltable td.lf{display:none} .ltable th.lf{display:none} }
 .story{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-width:760px}
 .story li{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--kc);border-radius:10px;padding:8px 12px}
 .story .sr{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
@@ -4884,7 +4918,7 @@ const app=document.getElementById('app');
 const reduced=typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 const state={
   screen:'draft',
-  settings:{mode:'classic',era:'1',draft:'pick',size:16,squadSize:3,field:'random',versions:'random',seed:'random'},
+  settings:{format:'knockout',mode:'classic',era:'1',draft:'pick',size:16,squadSize:3,field:'random',versions:'random',seed:'random'},
   squad:[],captain:null,squadName:'',filter:'All',q:'',sort:'ovr',
   rounds:[],r:0,m:0,N:16,pts:{},out:{},champion:null,mode:'classic',era:'1',story:[],favorite:null,defending:null,saved:false,
   spectate:false,specAll:false,paused:false,toFinal:false,keep:null,duel:null,vs:null,
@@ -4916,7 +4950,7 @@ function grantXP(){
 }
 function profChip(){
   const L=levelOf(PROF.xp), a=xpAt(L), b=xpAt(L+1);
-  return `<div class="prof" title="${PROF.xp} XP, ${b-PROF.xp} to the next level"><div class="pr"><b>Lv ${L}</b> ${rankOf(L)}</div><div class="xpb" aria-hidden="true"><b style="width:${Math.round((PROF.xp-a)/(b-a)*100)}%"></b></div><div class="ps"><b>${PROF.spins}</b> spins</div></div>`;
+  return `<div class="prof" title="${PROF.xp} XP, ${b-PROF.xp} to the next level"><div class="pr"><b>Lv ${L}</b> ${rankOf(L)}</div>${PROF.title?`<div class="ptl">${esc(PROF.title)}</div>`:''}<div class="xpb" aria-hidden="true"><b style="width:${Math.round((PROF.xp-a)/(b-a)*100)}%"></b></div><div class="ps"><b>${PROF.spins}</b> spins</div></div>`;
 }
 // rarity = tier, with spin odds
 const RARITY={C:{n:'Common',c:'#9aa7ad',w:50},B:{n:'Rare',c:'#4aa3ff',w:30},A:{n:'Legendary',c:'#f2a33a',w:15},S:{n:'Mythic',c:'#ff4fd8',w:5}};
@@ -4935,9 +4969,10 @@ const cname=f=>ROSTER.filter(x=>x.base===f.base).length>1?f.name:f.short;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ord=n=>n+((n%100>=11&&n%100<=13)?'th':(['th','st','nd','rd'][n%10]||'th'));
 const total=()=>state.squad.reduce((s,id)=>s+(state.pts[id]||0),0);
-const nRounds=()=>Math.log2(state.N);
+const isLeague=()=>state.format==='league';
+const nRounds=()=>isLeague()?state.rounds.length:Math.log2(state.N);
 const remain=i=>state.N/Math.pow(2,i);
-const roundName=i=>{ const n=remain(i); return n===2?'Final':n===4?'Semifinals':n===8?'Quarterfinals':`Round of ${n}`; };
+const roundName=i=>{ if(isLeague()) return `Matchday ${i+1}`; const n=remain(i); return n===2?'Final':n===4?'Semifinals':n===8?'Quarterfinals':`Round of ${n}`; };
 const themeFor=r=>[3,2,1,0][Math.min(3,nRounds()-1-r)];
 const curMatch=()=>state.rounds[state.r][state.m];
 const hasSquad=m=>inSquad(m.a.id)||inSquad(m.b.id);
@@ -5003,7 +5038,8 @@ const modeLabel=(mid,era)=>{ const M=modeById(mid); return M.id==='canon'?`Canon
 // keep size, squad size and picks valid after the tournament type changes
 function fitSettings(){
   const s=state.settings, mx=maxSize();
-  if(s.size>mx) s.size=mx;
+  if(s.format==='league'){ const ok=LEAGUE_SIZES.filter(n=>n<=leagueMax()); if(!ok.includes(s.size)) s.size=ok.includes(8)?8:ok[ok.length-1]; }
+  else if(s.size>mx||![8,16,32,64].includes(s.size)) s.size=Math.min(16,mx);
   const ok=[3,5,8].filter(x=>x<=s.size/2); if(!ok.includes(s.squadSize)) s.squadSize=ok[ok.length-1];
   state.squad=state.squad.filter(id=>draftable(byId(id))).slice(0,s.squadSize);
   if(!state.squad.includes(state.captain)) state.captain=state.squad[0]||null;
@@ -5174,21 +5210,22 @@ const h2hKey=(a,b)=>a<b?a+'|'+b:b+'|'+a;
 function h2h(a,b){ const v=HIST.h2h[h2hKey(a.base,b.base)]; if(!v) return null; return a.base<b.base?{a:v[0],b:v[1]}:{a:v[1],b:v[0]}; }
 function finishOf(id){
   if(state.champion&&state.champion.id===id) return 1;
+  if(isLeague()){ const p=posOf(id); return p===2?2:p<=4?4:0; }
   for(let r=0;r<state.rounds.length;r++) for(const m of state.rounds[r]) if(m.result&&m.result.loser.id===id) return remain(r);
   return 0;
 }
 const finishName=n=>n===1?'Champion':n===2?'Final':n===4?'Semifinal':n===8?'Quarterfinal':n?`Round of ${n}`:'None';
 function recordTournament(){
   if(state.saved) return;
-  const fights=doneFights(), field=fieldOf(), last=nRounds()-1, fm=state.rounds[last][0];
+  const fights=doneFights(), field=fieldOf(), last=nRounds()-1, fm=state.rounds[last][0], tb=isLeague()?standings():null;
   const ups=fights.filter(m=>m.upset).map(m=>({w:m.winner.id,l:m.result.loser.id,d:m.result.loser.ovr-m.winner.ovr})).sort((a,b)=>b.d-a.d);
   const kos={}, wins={}; fights.forEach(m=>{ wins[m.winner.id]=(wins[m.winner.id]||0)+1; if(m.result.ko) kos[m.winner.id]=(kos[m.winner.id]||0)+1; });
   const topKo=Object.keys(kos).sort((a,b)=>kos[b]-kos[a])[0];
   const runs=field.filter(f=>(wins[f.id]||0)>=2).sort((a,b)=>a.ovr-b.ovr);
   const prio={squad:0,upset:1,streak:2,war:3,ko:4,round:5,champ:9};
   const heads=state.story.filter(e=>e.k!=='champ'&&e.k!=='round').sort((a,b)=>prio[a.k]-prio[b.k]).slice(0,3).map(e=>[e.t,e.x]);
-  const sum={n:HIST.n+1,at:Date.now(),N:state.N,mode:state.mode,era:state.era,champ:state.champion.id,runner:fm.result.loser.id,
-    semis:state.N>=4?state.rounds[last-1].map(m=>m.result.loser.id):[],
+  const sum={n:HIST.n+1,at:Date.now(),N:state.N,mode:state.mode,era:state.era,champ:state.champion.id,runner:tb?tb[1].f.id:fm.result.loser.id,
+    semis:tb?tb.slice(2,4).map(x=>x.f.id):state.N>=4?state.rounds[last-1].map(m=>m.result.loser.id):[],fmt:tb?'league':'ko',table:tb?tb.slice(0,4).map(x=>[x.f.id,x.pts]):null,
     upset:ups[0]||null,ko:topKo?{id:topKo,n:kos[topKo]}:null,run:runs[0]?{id:runs[0].id,n:wins[runs[0].id]}:null,
     ults:fights.reduce((s,m)=>s+(m.result.ultW?1:0)+(m.result.ultL?1:0),0),ups:ups.length,
     spec:state.spectate,squad:state.squad.slice(),cap:state.captain,name:state.spectate?'':squadName(),score:state.spectate?0:total(),heads};
@@ -5200,6 +5237,150 @@ function recordTournament(){
   if(!state.spectate){ HIST.my.p++; if(inSquad(state.champion.id)) HIST.my.t++; }
   HIST.n++; HIST.list.unshift(sum); if(HIST.list.length>60) HIST.list.length=60;
   saveHist(); state.saved=true;
+}
+
+
+/* ---------- league: a double round robin (every fighter meets every other twice, home and away) ---------- */
+const LEAGUE_SIZES=[6,8,10,12];
+const leagueMax=()=>{ const n=modeBases(); return n-(n%2); };
+// circle method: one fighter stays put, the rest rotate; the second half replays every pairing with the sides swapped
+function leagueSchedule(list){
+  const n=list.length, arr=list.slice(), first=[];
+  for(let r=0;r<n-1;r++){
+    const ps=[];
+    for(let i=0;i<n/2;i++){ const x=arr[i], y=arr[n-1-i]; ps.push((i===0&&r%2)?[y,x]:[x,y]); }
+    first.push(ps);
+    arr.splice(1,0,arr.pop());
+  }
+  const mk=ps=>ps.map(([a,b])=>({a,b,result:null,winner:null,upset:false,award:0}));
+  return first.map(mk).concat(first.map(ps=>mk(ps.map(([a,b])=>[b,a]))));
+}
+// the table: 3 points a win; ties broken by HP difference (HP left in wins minus HP left by opponents who beat you), then wins
+function standings(){
+  const T={}; fieldOf().forEach(f=>{ T[f.id]={f,p:0,w:0,l:0,ko:0,pts:0,hd:0,form:[]}; });
+  state.rounds.forEach(rd=>rd.forEach(m=>{ if(!m.result) return; const W=T[m.winner.id], L=T[m.result.loser.id]; if(!W||!L) return;
+    W.p++; L.p++; W.w++; L.l++; W.pts+=3; if(m.result.ko) W.ko++; W.hd+=m.result.hpLeft; L.hd-=m.result.hpLeft; W.form.push('W'); L.form.push('L'); }));
+  return Object.values(T).sort((a,b)=>b.pts-a.pts||b.hd-a.hd||b.w-a.w||a.f.ovr-b.f.ovr);
+}
+const posOf=id=>standings().findIndex(x=>x.f.id===id)+1;
+function leagueFinalize(m,sim,r,mi,pre){
+  if(inSquad(sim.winner.id)){
+    let p=6;
+    if(sim.ko) p+=2;
+    if(sim.hpLeft>=80) p+=3;
+    if(m.upset) p+=6;
+    if(sim.supW) p+=10; else if(sim.ultW) p+=6;
+    const I=squadIdent(state.squad);
+    if(I&&styleHit(I.prim,m,sim)){ p+=3; m.styleB=true; }
+    if(sim.winner.id===state.captain){ p=Math.ceil(p*1.5); m.capB=true; }
+    m.award=p; state.pts[sim.winner.id]=(state.pts[sim.winner.id]||0)+p;
+  }
+  storyFight(m,r,mi,pre);
+  state.m++;
+  if(state.m<state.rounds[r].length) return;
+  storyLeagueDay(r);
+  if(r===state.rounds.length-1){
+    const tb=standings(); state.champion=tb[0].f;
+    // final table bonus for the squad: 1st +40, 2nd +20, 3rd +10
+    const bonus={}; tb.slice(0,3).forEach((x,i)=>{ if(inSquad(x.f.id)){ const b=[40,20,10][i]; bonus[x.f.id]=b; state.pts[x.f.id]=(state.pts[x.f.id]||0)+b; } });
+    state.leagueBonus=bonus;
+    storyChampion(); chalEnd();
+    if(!state.spectate){ const t=total(), k=bestKey(); if(t>(state.best[k]||0)){ state.best[k]=t; try{ localStorage.setItem('fst_best2',JSON.stringify(state.best)); }catch(e){} } }
+    recordTournament(); grantXP();
+  } else { state.r++; state.m=0; if(state.tab!=='story'&&state.tab!=='table') state.tab=state.r; }
+}
+function storyLeagueDay(r){
+  const tb=standings(), lead=tb[0], second=tb[1], left=state.rounds.length-1-r, half=state.rounds.length/2;
+  if(state.leader&&state.leader!==lead.f.id&&r>0) tell('streak','New leader',`${lead.f.short} goes top of the table on ${lead.pts} points.`,r);
+  state.leader=lead.f.id;
+  if(r===half-1) tell('round','Halfway point',`${lead.f.short} leads on ${lead.pts} points${second?`, ${lead.pts-second.pts} clear of ${second.f.short}`:''}. Every pairing now meets again with the sides swapped.`,r);
+  if(left>0&&left<=3&&second){
+    const gap=lead.pts-second.pts;
+    if(gap>3*left){ if(!state.clinched){ state.clinched=true; tell('champ','Title clinched',`${lead.f.short} can no longer be caught: champions with ${left} matchday${left>1?'s':''} to spare.`,r); } }
+    else tell('round','Title race',`${lead.f.short} leads ${second.f.short} by ${gap} point${gap===1?'':'s'} with ${left} matchday${left>1?'s':''} left.`,r);
+  }
+  tb.forEach(x=>{ const fm=x.form; if(fm.length>=5&&fm.slice(-5).every(v=>v==='W')&&fm[fm.length-6]!=='W') tell('streak','Five straight',`${x.f.short} has won five league fights in a row.`,r); });
+  if(r===state.rounds.length-2) tb.slice(0,3).filter(x=>inSquad(x.f.id)).forEach((x,i)=>tell('squad','In the hunt',`${x.f.short} sits ${ord(tb.indexOf(x)+1)} going into the last matchday.`,r));
+}
+function leagueTableHTML(){
+  const tb=standings(), done=state.champion, maxW=Math.max(1,...tb.map(x=>x.form.length));
+  return `<div class="ltable-wrap"><table class="ltable">
+    <thead><tr><th class="lp">#</th><th class="ln">Fighter</th><th title="Played">P</th><th title="Won">W</th><th title="Lost">L</th><th title="HP difference">HP +/-</th><th class="lf">Form</th><th class="lpts">Pts</th></tr></thead>
+    <tbody>${tb.map((x,i)=>`<tr class="${inSquad(x.f.id)?'mine':''} ${i===0?'lead':''}">
+      <td class="lp">${done&&i===0?'<span class="crown" title="Champion">1</span>':i+1}</td>
+      <td class="ln">${crest(x.f,'sm')}<span>${x.f.short}</span>${x.f.id===state.captain?'<span class="capt" title="Your captain">C</span>':''}</td>
+      <td>${x.p}</td><td>${x.w}</td><td>${x.l}</td><td>${x.hd>0?'+':''}${x.hd}</td>
+      <td class="lf">${x.form.slice(-5).map(v=>`<i class="fm ${v==='W'?'w':'l'}" title="${v==='W'?'Win':'Loss'}"></i>`).join('')}</td>
+      <td class="lpts">${x.pts}</td></tr>`).join('')}</tbody></table></div>
+    <p class="lnote">Every fighter meets every other fighter twice. A win is worth 3 points; ties are broken by HP difference, then wins. ${done?'':`Matchday ${state.r+1} of ${state.rounds.length}.`}</p>`;
+}
+
+
+/* ---------- challenge board: three rotating objectives per tournament, one from each kind ---------- */
+// d(lg): description for a knockout (lg false) or league (lg true); check runs after every fight (fight) or at the end (end)
+const CHAL=[
+  // win challenges: n[knockout,league] squad wins that pass test(m,sim,wi) (wi = the winner's side in the log)
+  {id:'giant',cat:'upset',t:'The Giant Slayer',n:[1,2],test:(m,s)=>s.loser.ovr-s.winner.ovr>=15,d:k=>`Beat ${k>1?`${k} opponents`:'an opponent'} rated 15 or more points higher.`,rw:{xp:80}},
+  {id:'upsets',cat:'upset',t:'Upset Night',n:[2,5],test:m=>m.upset,d:k=>`Pull off ${k} upsets (wins against fighters rated 6+ higher).`,rw:{xp:90}},
+  {id:'underdog',cat:'upset',t:'Underdog Story',n:[2,6],one:true,test:(m,s)=>s.winner.tier==='C'||s.winner.tier==='B',d:k=>`One Common or Rare squad fighter wins ${k} fights.`,rw:{spins:3}},
+  {id:'untouch',cat:'style',t:'Untouchable',n:[1,2],test:(m,s)=>s.hpLeft>80,d:k=>`Win ${k>1?`${k} fights`:'a fight'} losing less than 20 HP.`,rw:{spins:3}},
+  {id:'forbidden',cat:'style',t:'Forbidden Victory',n:[1,2],test:(m,s)=>s.supW,d:k=>`Win ${k>1?`${k} fights`:'a fight'} after landing a ${KIN}.`,rw:{title:'Kinjutsu Master'}},
+  {id:'finisher',cat:'style',t:'Ultimate Finisher',n:[2,7],test:(m,s,wi)=>{ const k=s.log.find(e=>e.ko); return !!k&&k.att===wi&&k.mv==='ult'; },d:k=>`Knock out ${k} opponents with an Ultimate or ${KIN}.`,rw:{xp:60}},
+  {id:'brink',cat:'style',t:'Back From the Brink',n:[1,5],test:(m,s,wi)=>s.log.some(e=>e.hp&&e.hp[wi]<=20),d:k=>`Win ${k>1?`${k} fights`:'a fight'} after dropping to 20 HP or less.`,rw:{title:'Comeback Kid'}},
+  {id:'mind',cat:'style',t:'Mind Games',n:[1,3],test:(m,s,wi)=>s.log.some(e=>e.att===wi&&e.mv==='gen'&&e.stun),d:k=>`Trap an opponent in a genjutsu and win, ${k>1?`${k} times`:'once'}.`,rw:{xp:60}},
+  {id:'hands',cat:'style',t:'Hands On',n:[1,2],test:m=>!!m.played,d:k=>`Win ${k>1?`${k} fights`:'a fight'} you control yourself (Fight it yourself).`,rw:{spins:4}},
+  {id:'captain',cat:'result',t:"Captain's Honor",d:(k,lg)=>lg?'Your captain finishes in the top 3.':'Your captain reaches the semifinals.',rw:{xp:100}},
+  {id:'everyone',cat:'result',t:'Everybody Eats',n:[1,5],each:true,test:()=>true,d:k=>k>1?`Every squad fighter wins at least ${k} fights.`:'Every squad fighter wins at least one fight.',rw:{spins:3}},
+  {id:'home',cat:'result',t:'Bring It Home',d:(k,lg)=>`A squad fighter wins the ${lg?'league':'tournament'}.`,rw:{title:'Arena Champion'}}
+];
+const chalById=id=>CHAL.find(c=>c.id===id);
+const chalNeed=(C,lg)=>C.n?C.n[lg?1:0]:1;
+const chalText=(C,lg)=>C.d(chalNeed(C,lg),lg);
+const rwText=r=>r.xp?`+${r.xp} XP`:r.spins?`+${r.spins} spins`:`Title: ${r.title}`;
+function rollBoard(){ return ['upset','style','result'].map(cat=>({id:pick(CHAL.filter(c=>c.cat===cat)).id,done:false,prog:''})); }
+function giveXP(n){ const L0=levelOf(PROF.xp); PROF.xp+=n; const L1=levelOf(PROF.xp); if(L1>L0) PROF.spins+=(L1-L0)*5; saveProf(); return L1-L0; }
+function giveReward(r){
+  if(r.xp) giveXP(r.xp);
+  if(r.spins){ PROF.spins+=r.spins; saveProf(); }
+  if(r.title){ PROF.titles=PROF.titles||[]; if(!PROF.titles.includes(r.title)) PROF.titles.push(r.title); PROF.title=r.title; saveProf(); }
+}
+function chalDone(c,mi){
+  c.done=true; const C=chalById(c.id); giveReward(C.rw);
+  tell('squad',`Challenge complete: ${C.t}`,`${chalText(C,isLeague())} ${rwText(C.rw)}.`,state.r,mi===undefined?null:mi);
+}
+// recount every win challenge from the fights so far (cheap, and replays or sims can never double count)
+function chalFight(m,sim){
+  if(!state.board||state.spectate) return;
+  const lg=isLeague(), wins=doneFights().filter(x=>inSquad(x.winner.id));
+  state.board.forEach(c=>{
+    const C=chalById(c.id); if(c.done) return;
+    if(c.id==='captain'){ if(!lg&&sim.winner.id===state.captain&&remain(state.r)<=8) chalDone(c,state.m); return; }
+    if(!C.test) return;
+    const need=chalNeed(C,lg), pass=wins.filter(x=>C.test(x,x.result,x.winner.id===x.a.id?0:1));
+    let have;
+    if(C.one){ const per={}; pass.forEach(x=>per[x.winner.id]=(per[x.winner.id]||0)+1); have=Math.max(0,...Object.values(per)); }
+    else if(C.each) have=Math.min(...state.squad.map(id=>pass.filter(x=>x.winner.id===id).length));
+    else have=pass.length;
+    if(need>1) c.prog=`${Math.min(have,need)} of ${need}`;
+    if(have>=need) chalDone(c,state.m);
+  });
+}
+function chalEnd(){
+  if(!state.board||state.spectate) return;
+  state.board.forEach(c=>{
+    if(c.done) return;
+    if(c.id==='captain'&&isLeague()&&state.captain&&posOf(state.captain)<=3) chalDone(c);
+    if(c.id==='home'&&inSquad(state.champion.id)) chalDone(c);
+  });
+}
+function boardHTML(list,lg,live){
+  return `<div class="board"><div class="bh"><span class="bk">Challenge Board</span><span class="bs">${live?`${list.filter(c=>c.done).length} of ${list.length} done`:'Three new challenges every tournament'}</span></div>
+    <div class="bcards">${list.map(c=>{ const C=chalById(c.id); return `<div class="bc ${c.done?'done':''} cat-${C.cat}"><div class="bt">${c.done?'<span class="tick" aria-label="done">&#10003;</span>':''}${C.t}</div><div class="bd">${chalText(C,lg)}</div><div class="br"><span class="rw">${rwText(C.rw)}</span>${c.prog&&!c.done?`<span class="pg">${c.prog}</span>`:''}</div></div>`; }).join('')}</div></div>`;
+}
+function renderBoard(){
+  const el=$('board'); if(!el) return;
+  if(state.screen==='draft'){ if(!state.nextBoard) state.nextBoard=rollBoard(); el.innerHTML=boardHTML(state.nextBoard,state.settings.format==='league',false); return; }
+  el.innerHTML=state.board&&!state.spectate?boardHTML(state.board,isLeague(),true):'';
 }
 
 /* ---------- the tournament story ---------- */
@@ -5214,13 +5395,14 @@ function storyFight(m,r,mi,pre){
     else if(wUp>=2) tell('upset',wUp===2?'The run continues':'Giant killer',`${w.short} has now beaten ${wUp} higher-rated opponents.`,r,mi);
     else if(d>=20) tell('upset','Shock result',`${w.short} beats ${l.short}, who is rated ${d} points higher.`,r,mi);
   }
-  if(l.id===state.favorite) tell('upset','The favorite falls',`${l.short}, the top-rated fighter in the bracket, is out in the ${roundName(r)}.`,r,mi);
-  if(l.id===state.defending) tell('upset','The champion is dethroned',`${w.short} knocks out defending champion ${l.short}.`,r,mi);
+  if(isLeague()){ if(l.id===state.favorite&&!doneFights().some(x=>x!==m&&x.result.loser.id===l.id)) tell('upset','The favorite stumbles',`${l.short}, the top-rated fighter in the league, loses for the first time.`,r,mi); }
+  else if(l.id===state.favorite) tell('upset','The favorite falls',`${l.short}, the top-rated fighter in the bracket, is out in the ${roundName(r)}.`,r,mi);
+  if(l.id===state.defending&&!isLeague()) tell('upset','The champion is dethroned',`${w.short} knocks out defending champion ${l.short}.`,r,mi);
   if(nw>=5&&nw%5===0) tell('streak','On fire',`${w.short} has won ${nw} tournament fights in a row.`,r,mi);
   if(sl>=5) tell('streak','Streak snapped',`${w.short} ends ${l.short}'s ${sl}-fight winning streak.`,r,mi);
   if(m.result.hpLeft>=100) tell('ko','Flawless',`${w.short} wins without losing a single HP.`,r,mi);
   const fin=m.result.log.find(e=>e.ko&&e.sup); if(fin) tell('ko',KIN,`${w.short} ends it with a forbidden technique, ${fin.name}.`,r,mi);
-  if(inSquad(l.id)){
+  if(inSquad(l.id)&&!isLeague()){
     const left=aliveSquad().length;
     if(!left) tell('squad','Your squad has fallen',`${l.short} was your last fighter standing.`,r,mi);
     else if(l.id===state.captain) tell('squad','Your captain falls',`${l.short} is out in the ${roundName(r)}. ${left} of your fighters ${left===1?'is':'are'} still in.`,r,mi);
@@ -5254,7 +5436,9 @@ function storyRound(r){
 function storyChampion(){
   const c=state.champion, r=nRounds()-1, prevT=(HIST.f[c.id]||{}).t||0, field=fieldOf();
   const rank=field.filter(f=>f.ovr>c.ovr).length+1;
-  let x=`${c.short} wins the ${state.mode==='classic'?'':modeLabel(state.mode,state.era)+' '}tournament${prevT?`, title number ${prevT+1}`:''}.`;
+  const tb=isLeague()?standings()[0]:null;
+  let x=isLeague()?`${c.short} wins the ${state.mode==='classic'?'':modeLabel(state.mode,state.era)+' '}league with ${tb.pts} points (${tb.w}-${tb.l})${prevT?`, title number ${prevT+1}`:''}.`
+    :`${c.short} wins the ${state.mode==='classic'?'':modeLabel(state.mode,state.era)+' '}tournament${prevT?`, title number ${prevT+1}`:''}.`;
   if(rank>state.N/2) x+=` ${c.short} went in rated ${ord(rank)} of ${state.N}.`;
   if(state.mode==='akatsuki') x+=akaSide(c)?' The Akatsuki wins the war.':' The Alliance wins the war.';
   if(inSquad(c.id)) x+=' A title for your squad.';
@@ -5288,6 +5472,7 @@ function renderDraft(){
     </div>
     ${state.toast?`<div class="toast" role="status">${esc(state.toast)}</div>`:''}
     <section class="panel modes" id="modes"></section>
+    <section id="board"></section>
     <section class="panel settings" id="settings"></section>
     <div class="tray" id="tray"></div>
     <section class="ident" id="ident"></section>
@@ -5312,6 +5497,7 @@ function renderDraft(){
       <p>Bonuses: +5 for a knockout, +5 for winning with 80 or more HP left, +8 for an upset (winning against a fighter rated at least 6 points higher overall), +10 if your fighter lands an Ultimate in the win (+15 for a ${KIN}), and +25 if your fighter wins the whole tournament.</p>
       <p>Your squad has a style, worked out from its stats. A win in that style earns +4: Ninjutsu squads when the final blow is ninjutsu, Taijutsu squads when it is taijutsu, Genjutsu squads when the winner traps the opponent in a genjutsu. Your captain's points are then multiplied by 1.5.</p>
       <p>Every fighter has one big move per fight. The gauge fills as they hit (more) and get hit (less). At 100% the Ultimate is ready; keep holding and the gauge charges on to the ${KIN}, a forbidden technique and the character's very top move. A big move can only be used the turn after its gauge fills, so you always get a warning. An Ultimate does at most 35 damage and a ${KIN} at most 50, so neither can wipe out a healthy fighter in one hit. When you fight it yourself, Guard cuts all damage that turn to 40%.</p>
+      <p>League format: a double round robin, so every fighter meets every other fighter twice. A win is worth 3 table points, and the table decides the champion (ties go to HP difference, then wins). Your squad scores 6 for every win (+2 KO, +3 with 80+ HP left, +6 upset, +6 Ultimate or +10 ${KIN}, +3 style, captain x1.5), and +40 / +20 / +10 for finishing 1st / 2nd / 3rd.</p>
       <p>Edo Tensei versions are reanimated: they regenerate, never tire, and crumble to ash when beaten.</p>
       <p>Your squad can hold only one version of each character, so picking Prime Madara locks the other Madara. Every character enters the bracket as a single version: yours keep the version you drafted (except in Random Chaos), and everyone else is set by the Opponent versions option.</p>
       <p>Stats are 0 to 130. Some fighters also regenerate, guard (a chance to halve incoming damage) or have a last stand (survive one lethal hit). Finished tournaments are saved in this browser: see History for champions and every fighter's record.</p>
@@ -5321,10 +5507,10 @@ function renderDraft(){
     <div class="startbar" id="startbar"></div>`;
   state.toast=null;
   $('sort').value=state.sort;
-  renderModes(); renderSettings(); renderTray(); renderIdent(); renderChips(); renderGrid(); renderStart();
+  renderModes(); renderSettings(); renderBoard(); renderTray(); renderIdent(); renderChips(); renderGrid(); renderStart();
 }
 
-const credit=()=>`<footer class="credit">Made by the creator of <a href="https://github.com/zoned2042/shinobi-life" target="_blank" rel="noopener">Shinobi Life</a>. A fan-made, non-commercial tribute to Naruto; not affiliated with or endorsed by the rights holders. Several fighters are drawn from community figure packs shared on <a href="https://sticknodes.com" target="_blank" rel="noopener">Stick Nodes</a> (Naruto Pack 8, Naruto Shippuden Pack 2, Naruto Genin, Baryon Mode Naruto, Boruto Pack 4, Updated Might Guy, Kabuto Yakushi, Madara Uchiha Pack 3, Pain Pack 2, Tsuchikage, Mizukage, Peck Akatsuki, Deidara Pack 2, Hokage, Jugo, Zabuza, Konohamaru, Sasuke Perfect Susanoo 360, Rasengans, Sharingan Pack 2, The Akatsuki, Hokage Pack 2, Senju Brothers, Bijuu and Gaara, Temari, Danzo, Kakashi Hatake, Kimimaro Kaguya and Obito 360 packs); thanks to their creators.</footer>`;
+const credit=()=>`<footer class="credit">Made by the creator of <a href="https://github.com/zoned2042/shinobi-life" target="_blank" rel="noopener">Shinobi Life</a>. A fan-made, non-commercial tribute to Naruto; not affiliated with or endorsed by the rights holders. Several fighters are drawn from community figure packs shared on <a href="https://sticknodes.com" target="_blank" rel="noopener">Stick Nodes</a> (Naruto Pack 8, Naruto Shippuden Pack 2, Naruto Genin, Baryon Mode Naruto, Boruto Pack 4, Updated Might Guy, Kabuto Yakushi, Madara Uchiha Pack 3, Pain Pack 2, Tsuchikage, Mizukage, Peck Akatsuki, Deidara Pack 2, Hokage, Jugo, Konohamaru, Sasuke Perfect Susanoo 360, Rasengans, Sharingan Pack 2, The Akatsuki, Hokage Pack 2, Senju Brothers, Bijuu and Gaara, Temari, Danzo, Kakashi Hatake, Kimimaro Kaguya and Obito 360 packs); thanks to their creators.</footer>`;
 function seg(key,label,opts,hint){
   const s=state.settings;
   return `<div><div class="sl">${label}</div><div class="seg" role="radiogroup" aria-label="${label}">${opts.map(o=>`<button role="radio" aria-checked="${String(s[key]===o.v)}" data-action="set" data-key="${key}" data-val="${o.v}" ${o.dis?'disabled':''}>${o.t}</button>`).join('')}</div>${hint?`<div class="sh">${hint}</div>`:''}</div>`;
@@ -5338,13 +5524,16 @@ function renderModes(){
 }
 function renderSettings(){
   const s=state.settings, nb=modeBases(), full=s.size>=nb, mx=maxSize(), chaos=s.mode==='chaos';
+  const lg=s.format==='league', lmx=leagueMax();
   $('settings').innerHTML=
+    seg('format','Format',[{v:'knockout',t:'Knockout'},{v:'league',t:'League'}],lg?'Double round robin: everyone meets everyone twice.':'Single elimination bracket.')+
     seg('draft','How you draft',[{v:'pick',t:'Pick'},{v:'spin',t:'Spin'}],s.draft==='spin'?'Spin for each slot. Double XP.':'Choose any fighter.')+
-    seg('size','Bracket size',[8,16,32,64].map(v=>({v,t:v,dis:v>mx})),`${s.size} characters, ${Math.log2(s.size)} rounds`)+
+    (lg?seg('size','League size',LEAGUE_SIZES.map(v=>({v,t:v,dis:v>lmx})),`${s.size} fighters, ${2*(s.size-1)} matchdays, ${s.size*(s.size-1)} fights`)
+       :seg('size','Bracket size',[8,16,32,64].map(v=>({v,t:v,dis:v>mx})),`${s.size} characters, ${Math.log2(s.size)} rounds`))+
     seg('squadSize','Squad size',[3,5,8].map(v=>({v,t:v,dis:v>s.size/2})))+
     seg('field','Who enters',[{v:'random',t:'Random',dis:full||chaos},{v:'strong',t:'Strongest',dis:full||chaos}],full?`All ${nb} characters enter.`:chaos?'Chaos picks the field.':s.mode==='edo'?'Edo Tensei versions enter first.':'Your squad always enters.')+
     seg('versions','Opponent versions',[{v:'random',t:'Random',dis:chaos},{v:'strongest',t:'Strongest',dis:chaos}],chaos?'Every version is rolled, yours too.':'One version per character. Your picks keep theirs.')+
-    seg('seed','Seeding',[{v:'random',t:'Random',dis:chaos},{v:'rating',t:'By rating',dis:chaos}],chaos?'Matchups are shuffled.':s.seed==='rating'?'Top seeds meet late.':'Matchups are shuffled.');
+    seg('seed','Seeding',[{v:'random',t:'Random',dis:chaos||lg},{v:'rating',t:'By rating',dis:chaos||lg}],lg?'Everyone meets everyone, so there is no seeding.':chaos?'Matchups are shuffled.':s.seed==='rating'?'Top seeds meet late.':'Matchups are shuffled.');
 }
 
 function renderTray(){
@@ -5466,7 +5655,7 @@ function doSpin(i){
 }
 function renderStart(){
   const need=state.settings.squadSize-state.squad.length;
-  $('startbar').innerHTML=`<div class="sbrow"><button class="btn primary" data-action="start" ${need===0&&state.spinning===null?'':'disabled'}>${need===0?`Start ${state.settings.size}-fighter tournament`:`Draft ${need} more to start`}</button><button class="btn spect" data-action="spectate" title="No squad, no scoring: watch the tournament run by itself">Spectate</button></div>`;
+  $('startbar').innerHTML=`<div class="sbrow"><button class="btn primary" data-action="start" ${need===0&&state.spinning===null?'':'disabled'}>${need===0?(state.settings.format==='league'?`Start ${state.settings.size}-fighter league`:`Start ${state.settings.size}-fighter tournament`):`Draft ${need} more to start`}</button><button class="btn spect" data-action="spectate" title="No squad, no scoring: watch the tournament run by itself">Spectate</button></div>`;
 }
 function draftChanged(){ if(!state.squad.includes(state.captain)) state.captain=state.squad[0]||null; renderTray(); renderIdent(); renderGrid(); renderStart(); }
 
@@ -5493,7 +5682,7 @@ function buildField(){
     const A=squadObjs.filter(aka).concat(take(chosen.filter(aka),half-squadObjs.filter(aka).length));
     const L=squadObjs.filter(f=>!aka(f)).concat(take(chosen.filter(f=>!aka(f)),half-squadObjs.filter(f=>!aka(f)).length));
     let pairs;
-    if(s.seed==='rating'){ const As=A.slice().sort(byOvr), Ls=L.slice().sort(byOvr), ps=As.map((f,i)=>[f,Ls[half-1-i]]); pairs=seedOrder(half).map(n=>ps[n-1]); }
+    if(s.seed==='rating'&&state.format!=='league'){ const As=A.slice().sort(byOvr), Ls=L.slice().sort(byOvr), ps=As.map((f,i)=>[f,Ls[half-1-i]]); pairs=seedOrder(half).map(n=>ps[n-1]); }
     else { const As=shuffle(A), Ls=shuffle(L); pairs=As.map((f,i)=>[f,Ls[i]]); }
     return pairs.flatMap(p=>Math.random()<.5?p:[p[1],p[0]]);
   }
@@ -5502,7 +5691,7 @@ function buildField(){
   if(M.id==='edo'){ const e=take(chosen.filter(isEdo),need); others=e.concat(take(chosen.filter(f=>!isEdo(f)),need-e.length)); }
   else others=take(chosen,need);
   let list=squadObjs.concat(others);
-  if(s.seed==='rating'&&M.id!=='chaos'){ const sorted=list.slice().sort(byOvr); list=seedOrder(list.length).map(n=>sorted[n-1]); }
+  if(s.seed==='rating'&&M.id!=='chaos'&&state.format!=='league'){ const sorted=list.slice().sort(byOvr); list=seedOrder(list.length).map(n=>sorted[n-1]); }
   else list=shuffle(list);
   return list;
 }
@@ -5513,7 +5702,7 @@ function startTournament(spec){
   }
   if(state.spectate){ state.squad=[]; state.captain=null; }
   const s=state.settings;
-  state.mode=s.mode; state.era=s.era; state.N=s.size; state.draftType=state.spectate?'none':s.draft; state.reward=null;
+  state.format=s.format||'knockout'; state.mode=s.mode; state.era=s.era; state.N=s.size; state.draftType=state.spectate?'none':s.draft; state.reward=null;
   if(state.mode==='chaos'){
     // your characters stay, their versions are rolled
     const re={}; state.squad=state.squad.map(id=>{ const n=pick(ROSTER.filter(f=>f.base===byId(id).base)).id; re[id]=n; return n; });
@@ -5521,7 +5710,9 @@ function startTournament(spec){
   }
   state.run++; state.r=0; state.m=0; state.tab=0; state.champion=null; state.busy=false; state.copied=false; state.paused=false; state.toFinal=false; state.saved=false;
   state.pts={}; state.out={}; state.story=[];
-  state.rounds=[makeRound(buildField())];
+  state.board=state.spectate?null:(state.nextBoard||rollBoard()).map(c=>({id:c.id,done:false,prog:''})); state.nextBoard=null;
+  state.rounds=isLeague()?leagueSchedule(buildField()):[makeRound(buildField())];
+  state.tab=isLeague()?'table':0; state.leagueBonus=null; state.leader=null; state.clinched=false;
   state.squad.forEach(id=>state.pts[id]=0);
   const field=fieldOf();
   state.favorite=field.slice().sort((a,b)=>b.ovr-a.ovr)[0].id;
@@ -5538,10 +5729,11 @@ function renderTournament(){
   state.screen='tournament';
   app.innerHTML=`
     <div class="spread">
-      <div><div class="kicker">From the creator of Shinobi Life</div><h2>Fantasy Shinobi Tournament</h2><div class="mtag">${modeLabel(state.mode,state.era)}, ${state.N} fighters${state.spectate?', spectator mode':''}</div></div>
+      <div><div class="kicker">From the creator of Shinobi Life</div><h2>Fantasy Shinobi Tournament</h2><div class="mtag">${modeLabel(state.mode,state.era)}, ${isLeague()?`${state.N}-fighter league`:`${state.N} fighters`}${state.spectate?', spectator mode':''}</div></div>
       <div class="row" id="topbtns"></div>
     </div>
     <div id="squadbar"></div>
+    <div id="board"></div>
     <div class="score" id="score"></div>
     <div id="champ"></div>
     <div id="headline"></div>
@@ -5555,7 +5747,7 @@ function renderTournament(){
   refreshAll();
   if(!state.champion) showUpcoming(); else showFinal(state.rounds[nRounds()-1][0],nRounds()-1);
 }
-function refreshAll(){ renderTop(); renderSquadBar(); renderScore(); renderChamp(); renderHeadline(); renderPhase(); renderControls(); renderTabs(); renderMatches(); }
+function refreshAll(){ renderTop(); renderSquadBar(); renderBoard(); renderScore(); renderChamp(); renderHeadline(); renderPhase(); renderControls(); renderTabs(); renderMatches(); }
 function renderTop(){
   const el=$('topbtns'); if(!el) return;
   const hist=!state.busy&&(!state.spectate||state.champion);
@@ -5567,7 +5759,7 @@ function renderSquadBar(){
   const I=squadIdent(state.squad); if(!I){ el.innerHTML=''; return; }
   el.innerHTML=`<div class="squadbar">${emblem(I)}<div class="sbt"><div class="sn">${esc(squadName())}</div><div class="sm">${state.squad.map(id=>shortOf(id)).join(', ')}</div><div class="sm">Style <b>${I.style}</b>, rating <b>${I.rating.toFixed(1)}</b>${state.captain?`, captain <b>${shortOf(state.captain)}</b>`:''}</div></div></div>`;
 }
-const bestKey=()=>state.mode==='classic'?String(state.N):`${state.mode==='canon'?'canon'+state.era:state.mode}-${state.N}`;
+const bestKey=()=>(isLeague()?'L':'')+(state.mode==='classic'?String(state.N):`${state.mode==='canon'?'canon'+state.era:state.mode}-${state.N}`);
 function renderScore(){
   const el=$('score'); if(!el) return;
   if(state.spectate){ el.innerHTML=''; el.style.display='none'; return; }
@@ -5575,17 +5767,19 @@ function renderScore(){
   el.innerHTML=state.squad.map(id=>{
     const f=byId(id);
     let status='Still in';
-    if(state.champion&&state.champion.id===id) status='Champion';
+    if(isLeague()){ const tb=standings(), i=tb.findIndex(x=>x.f.id===id), x=tb[i]; status=state.champion&&state.champion.id===id?'League champion':`${ord(i+1)}, ${x.pts} pts (${x.w}-${x.l})${state.leagueBonus&&state.leagueBonus[id]?`, +${state.leagueBonus[id]} table bonus`:''}`; }
+    else if(state.champion&&state.champion.id===id) status='Champion';
     else if(state.out[id]) status=`Out in the ${state.out[id]}`;
     return `<div class="sc ${state.out[id]?'out':''}"><div class="n">${f.short}${id===state.captain?'<span class="capt" title="Captain, 1.5x points">C</span>':''}</div><div class="s">${status}</div><div class="p">${state.pts[id]||0}</div></div>`;
   }).join('')+`<div class="sc total"><div class="n">Squad total</div><div class="s">Best here: ${state.best[bestKey()]||0}</div><div class="p">${total()}</div></div>`;
 }
 function recapText(){
-  const lines=[`Fantasy Shinobi Tournament recap: ${modeLabel(state.mode,state.era)}, ${state.N} fighters`,''];
+  const lines=[`Fantasy Shinobi Tournament recap: ${modeLabel(state.mode,state.era)}, ${isLeague()?`${state.N}-fighter league`:`${state.N} fighters`}`,''];
   state.rounds.forEach((rd,i)=>{
     lines.push(roundName(i)+':');
     rd.forEach(m=>{ if(m.result) lines.push(`  ${m.winner.short} beat ${m.result.loser.short} (${m.result.ko?'KO':'decision'}, ${m.result.hpLeft} HP left${m.upset?', upset':''})`); });
   });
+  if(isLeague()){ lines.push('','Table:'); standings().forEach((x,i)=>lines.push(`  ${i+1}. ${x.f.short} ${x.pts} pts (${x.w}-${x.l}, HP ${x.hd>0?'+':''}${x.hd})`)); }
   const tales=state.story.filter(e=>e.k!=='round');
   if(tales.length){ lines.push('','The story:'); tales.forEach(e=>lines.push(`  ${e.t}: ${e.x}`)); }
   lines.push('');
@@ -5605,14 +5799,16 @@ function renderChamp(){
     if(T.upset) facts.push(`Biggest upset: ${shortOf(T.upset.w)} over ${shortOf(T.upset.l)} (+${T.upset.d})`);
     if(T.run&&T.run.id!==c.id) facts.push(`Underdog run: ${shortOf(T.run.id)}, ${T.run.n} wins`);
     if(T.ko) facts.push(`Most KOs: ${shortOf(T.ko.id)}, ${T.ko.n}`);
+    if(T.table) facts.unshift(`Final table: ${T.table.map(([id,p],i)=>`${i+1}. ${shortOf(id)} ${p}`).join(', ')}`);
     facts.push(`Ultimates landed: ${T.ults}`, `Upsets: ${T.ups}`);
   }
   el.innerHTML=`<div class="champ">
     ${crest(c,'lg')}
     <div class="txt">
-      <h2>${c.short} wins the tournament</h2>
+      <h2>${c.short} wins the ${isLeague()?'league':'tournament'}</h2>
       <p>${state.spectate?`Tournament #${T?T.n:HIST.n} is in the books.`:`${mine?'Your fighter took the title. ':''}${esc(squadName())} finished with ${t} points${t>0&&t>=best?', a new best for this bracket.':'.'}`}</p>
       ${facts.length?`<p class="facts">${facts.join(' · ')}</p>`:''}
+      ${state.board?`<p class="facts">Challenges: ${state.board.filter(c=>c.done).length} of ${state.board.length} done${state.board.some(c=>c.done)?` (${state.board.filter(c=>c.done).map(c=>rwText(chalById(c.id).rw)).join(', ')})`:''}.</p>`:''}
       ${state.reward?`<p class="reward">+${state.reward.xp} XP${state.reward.spun?' (double for a spun squad)':''}${state.reward.L1>state.reward.L0?`. <b>Level up: Lv ${state.reward.L1} ${rankOf(state.reward.L1)}!</b>`:''}${state.reward.spins?` +${state.reward.spins} spins.`:'.'}</p>`:''}
       <div class="row">
         <button class="btn primary" data-action="again">${state.spectate?'Run another tournament':'Play again with the same squad'}</button>
@@ -5630,9 +5826,9 @@ function renderHeadline(){
 }
 function renderPhase(){
   const el=$('phase'); if(!el) return;
-  if(state.champion){ el.innerHTML=`<span class="pn">Tournament complete</span>`; return; }
+  if(state.champion){ el.innerHTML=`<span class="pn">${isLeague()?'League':'Tournament'} complete</span>`; return; }
   const rd=state.rounds[state.r], done=state.m;
-  el.innerHTML=`<span class="pn">${roundName(state.r)}</span><span class="pc">${done} of ${rd.length} fights done</span><div class="prog" aria-hidden="true"><b style="width:${done/rd.length*100}%"></b></div>`;
+  el.innerHTML=`<span class="pn">${roundName(state.r)}${isLeague()?` of ${state.rounds.length}`:''}</span><span class="pc">${done} of ${rd.length} fights done</span><div class="prog" aria-hidden="true"><b style="width:${done/rd.length*100}%"></b></div>`;
 }
 const speedSeg=()=>`<div class="seg" role="radiogroup" aria-label="Playback speed">
       <button role="radio" aria-checked="${String(state.speed==='normal')}" data-action="speed" data-val="normal">Normal</button>
@@ -5655,7 +5851,7 @@ function renderControls(){
       </div>
       ${speedSeg()}
       <button class="btn small" data-action="sound">Sound: ${Sfx.on?'on':'off'}</button>
-      ${state.r<nRounds()-1&&!state.toFinal?'<button class="btn" data-action="tofinal">Skip to the final</button>':''}
+      ${state.r<nRounds()-1&&!state.toFinal?`<button class="btn" data-action="tofinal">${isLeague()?'Skip to the last matchday':'Skip to the final'}</button>`:''}
     </div><div class="hint">${state.paused?'Paused.':state.toFinal?'Deciding everything up to the final off camera.':state.specAll?'Every fight plays out on camera.':'The camera shows the close fights, the upsets, the story fights and everything from the quarterfinals on. The rest are decided off camera.'}</div>`;
     return;
   }
@@ -5665,7 +5861,7 @@ function renderControls(){
     ${mineNow?`<button class="btn primary" data-action="playme" ${state.busy?'disabled':''} title="Choose every move yourself">Fight it yourself</button>`:''}
     <button class="btn ${mineNow?'':'primary'}" data-action="watch" ${state.busy?'disabled':''}>Watch next fight</button>
     ${skipSquad?`<button class="btn" data-action="simsquad" ${state.busy?'disabled':''}>Skip to my next fight</button>`:''}
-    <button class="btn" data-action="simround" ${state.busy?'disabled':''}>Sim this round</button>
+    <button class="btn" data-action="simround" ${state.busy?'disabled':''}>${isLeague()?'Sim this matchday':'Sim this round'}</button>
     <button class="btn" data-action="simall" ${state.busy?'disabled':''}>Sim to the end</button>
     ${speedSeg()}
     <button class="btn small" data-action="sound">Sound: ${Sfx.on?'on':'off'}</button>
@@ -5674,9 +5870,9 @@ function renderControls(){
 }
 function renderTabs(){
   const el=$('tabs'); if(!el) return;
-  el.innerHTML=Array.from({length:nRounds()},(_,i)=>{
+  el.innerHTML=(isLeague()?`<button class="tab" role="tab" data-action="tab" data-val="table" aria-selected="${String(state.tab==='table')}">Table<small>${state.champion?'final':'live'}</small></button>`:'')+Array.from({length:nRounds()},(_,i)=>{
     const rd=state.rounds[i], exists=!!rd, done=exists?rd.filter(m=>m.result).length:0;
-    return `<button class="tab" role="tab" data-action="tab" data-val="${i}" aria-selected="${String(state.tab===i)}" ${exists?'':'disabled'}>${roundName(i)}<small>${exists?`${done}/${rd.length}`:''}</small></button>`;
+    return `<button class="tab" role="tab" data-action="tab" data-val="${i}" aria-selected="${String(state.tab===i)}" ${exists?'':'disabled'}>${isLeague()?`MD ${i+1}`:roundName(i)}<small>${exists?`${done}/${rd.length}`:''}</small></button>`;
   }).join('')+`<button class="tab" role="tab" data-action="tab" data-val="story" aria-selected="${String(state.tab==='story')}">Story<small>${state.story.length}</small></button>`;
 }
 function renderMatches(){
@@ -5687,12 +5883,13 @@ function renderMatches(){
     el.innerHTML=state.story.length?`<ol class="story">${state.story.map(e=>`<li class="k-${e.k}"><div class="sr">${e.r<state.rounds.length?roundName(e.r):''}</div><div class="stt">${esc(e.t)}</div><div>${esc(e.x)}</div></li>`).join('')}</ol>`:'<p class="lede">Nothing has happened yet. Upsets, streaks, your squad\'s fate and the final four will show up here.</p>';
     return;
   }
+  if(state.tab==='table'){ if(rh) rh.innerHTML=''; el.className='leaguew'; el.innerHTML=leagueTableHTML(); return; }
   el.className='mgrid';
   const rd=state.rounds[state.tab]; if(!rd){ el.innerHTML=''; if(rh) rh.innerHTML=''; return; }
   if(rh) rh.innerHTML=state.story.filter(e=>e.r===state.tab&&e.mi===null).map(e=>`<div class="rnote k-${e.k}"><span class="ht">${esc(e.t)}</span> ${esc(e.x)}</div>`).join('');
   el.innerHTML=rd.map((m,mi)=>{
     const done=!!m.result, now=!state.champion&&state.tab===state.r&&mi===state.m;
-    const row=f=>{ const w=done&&m.winner.id===f.id, l=done&&!w; return `<span class="mr ${w?'w':''} ${l?'l':''} ${inSquad(f.id)?'mine':''}"><i class="dot" style="background:${gcol(f)}"></i><span class="mn">${f.short}</span>${l&&inSquad(f.id)?'<span class="gone">Out</span>':''}<span class="mo">${f.ovr}</span></span>`; };
+    const row=f=>{ const w=done&&m.winner.id===f.id, l=done&&!w; return `<span class="mr ${w?'w':''} ${l?'l':''} ${inSquad(f.id)?'mine':''}"><i class="dot" style="background:${gcol(f)}"></i><span class="mn">${f.short}</span>${l&&inSquad(f.id)&&!isLeague()?'<span class="gone">Out</span>':''}<span class="mo">${f.ovr}</span></span>`; };
     const evs=state.story.filter(e=>e.r===state.tab&&e.mi===mi);
     let ribs=evs.map(e=>`<span class="rib k-${e.k}">${esc(e.t)}</span>`).join('');
     if(done&&m.upset&&!evs.some(e=>e.k==='upset')) ribs=`<span class="rib k-upset">Upset</span>`+ribs;
@@ -5835,6 +6032,8 @@ function finalize(m,sim){
   const r=state.r, mi=state.m, pre=[liveRec(m.a.id).st,liveRec(m.b.id).st];
   m.result=sim; m.winner=sim.winner;
   m.upset=sim.winner.ovr+6<=sim.loser.ovr;
+  chalFight(m,sim);
+  if(isLeague()){ leagueFinalize(m,sim,r,mi,pre); return; }
   state.out[sim.loser.id]=roundName(r);
   delete state.out[sim.winner.id];
   if(inSquad(sim.winner.id)){
@@ -5855,7 +6054,7 @@ function finalize(m,sim){
   if(state.m>=state.rounds[r].length){
     if(r===nRounds()-1){
       state.champion=sim.winner;
-      storyRound(r); storyChampion();
+      storyRound(r); storyChampion(); chalEnd();
       if(!state.spectate){ const t=total(), k=bestKey(); if(t>(state.best[k]||0)){ state.best[k]=t; try{ localStorage.setItem('fst_best2',JSON.stringify(state.best)); }catch(e){} } }
       recordTournament(); grantXP();
     } else {
@@ -6132,15 +6331,15 @@ function histRecent(){
   return `<div class="hcards">${HIST.list.map(T=>{
     const d=new Date(T.at), when=isNaN(d)?'':d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
     const rows=[];
-    rows.push(['Runner-up',shortOf(T.runner)]);
-    if(T.semis&&T.semis.length) rows.push(['Semifinals',T.semis.map(shortOf).join(', ')]);
+    if(T.fmt==='league'&&T.table) rows.push(['Final table',T.table.map(([id,p],i)=>`${i+1}. ${shortOf(id)} ${p}`).join(', ')]);
+    else { rows.push(['Runner-up',shortOf(T.runner)]); if(T.semis&&T.semis.length) rows.push(['Semifinals',T.semis.map(shortOf).join(', ')]); }
     if(T.upset) rows.push(['Biggest upset',`${shortOf(T.upset.w)} over ${shortOf(T.upset.l)} (+${T.upset.d})`]);
     if(T.ko) rows.push(['Most KOs',`${shortOf(T.ko.id)}, ${T.ko.n}`]);
     if(T.run) rows.push(['Underdog run',`${shortOf(T.run.id)} (${(byId(T.run.id)||{}).ovr||'?'}), ${T.run.n} wins`]);
     rows.push(['Ultimates',`${T.ults} landed, ${T.ups} upset${T.ups===1?'':'s'}`]);
     rows.push(['Your squad',T.spec?'Spectated':`${esc(T.name||'Squad')}: ${T.score} pts${T.squad.includes(T.champ)?', champions':''}`]);
     return `<article class="hcard">
-      <div class="hh"><span>#${T.n} · ${modeLabel(T.mode,T.era)} · ${T.N} fighters</span><span>${when}</span></div>
+      <div class="hh"><span>#${T.n} · ${modeLabel(T.mode,T.era)} · ${T.fmt==='league'?`${T.N}-fighter league`:`${T.N} fighters`}</span><span>${when}</span></div>
       <div class="hc">${crestId(T.champ)}<div><div class="hk">Champion</div><div class="hn">${shortOf(T.champ)}</div></div></div>
       <dl>${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
       ${T.heads&&T.heads.length?`<ul class="hstory">${T.heads.map(([t,x])=>`<li><b>${esc(t)}</b> ${esc(x)}</li>`).join('')}</ul>`:''}
@@ -6207,9 +6406,10 @@ app.addEventListener('click',e=>{
     if(state.spinning!==null) return;
     if(k==='draft'&&v==='spin'&&s.draft!=='spin'){ state.squad=[]; state.captain=null; state.lastSpin=null; } // a spun squad has to be spun
     s[k]=(k==='size'||k==='squadSize')?+v:v;
-    if(k==='size'){ const ok=[3,5,8].filter(x=>x<=s.size/2); if(!ok.includes(s.squadSize)) s.squadSize=ok[ok.length-1]; }
+    if(k==='format') s.size=v==='league'?8:16;
+    if(k==='size'||k==='format'){ const ok=[3,5,8].filter(x=>x<=s.size/2); if(!ok.includes(s.squadSize)) s.squadSize=ok[ok.length-1]; }
     fitSettings();
-    renderModes(); renderSettings(); draftChanged();
+    renderModes(); renderSettings(); renderBoard(); draftChanged();
   }
   else if(a==='start'){ if(state.squad.length===state.settings.squadSize&&state.spinning===null){ Sfx.init(); startTournament(false); } }
   else if(a==='spectate'){ if(state.spinning===null){ Sfx.init(); startTournament(true); } }
@@ -6229,7 +6429,7 @@ app.addEventListener('click',e=>{
   else if(a==='tofinal'){ state.toFinal=true; if(state.stage&&state.busy) state.stage.skip(); renderControls(); }
   else if(a==='speed'){ state.speed=v; if(state.stage) state.stage.mul=v==='fast'?.55:1; renderControls(); }
   else if(a==='sound'){ Sfx.on=!Sfx.on; Sfx.init(); try{ localStorage.setItem('fst_sound',Sfx.on?'on':'off'); }catch(err){} renderControls(); }
-  else if(a==='tab'){ state.tab=v==='story'?'story':+v; renderTabs(); renderMatches(); if(v==='story'&&t.classList.contains('headline')){ const tb=$('tabs'); if(tb) tb.scrollIntoView({block:'start',behavior:reduced?'auto':'smooth'}); } }
+  else if(a==='tab'){ state.tab=v==='story'||v==='table'?v:+v; renderTabs(); renderMatches(); if(v==='story'&&t.classList.contains('headline')){ const tb=$('tabs'); if(tb) tb.scrollIntoView({block:'start',behavior:reduced?'auto':'smooth'}); } }
   else if(a==='view') viewMatch(+t.dataset.r,+t.dataset.m);
   else if(a==='copy') copyRecap();
   else if(a==='again'){ Sfx.init(); startTournament(); }

@@ -214,8 +214,9 @@ const path = require('path');
   await page.evaluate(() => window.scrollTo(0, 300)); await shot('10_spun');
   await page.click('[data-action="start"]');
   await page.click('[data-action="simall"]');
-  const xp = await page.evaluate(() => ({ r: state.reward, pts: total(), xp: PROF.xp, txt: (document.querySelector('.reward') || {}).textContent || '' }));
-  ok(xp.r && xp.r.spun && xp.xp === (25 + xp.pts) * 2 && /XP/.test(xp.txt), 'spin XP ' + JSON.stringify(xp));
+  // challenge board rewards also pay XP when completed
+  const xp = await page.evaluate(() => ({ r: state.reward, pts: total(), xp: PROF.xp, cx: state.board.filter(c => c.done).reduce((t, c) => t + (chalById(c.id).rw.xp || 0), 0), txt: (document.querySelector('.reward') || {}).textContent || '' }));
+  ok(xp.r && xp.r.spun && xp.xp === (25 + xp.pts) * 2 + xp.cx && /XP/.test(xp.txt), 'spin XP ' + JSON.stringify(xp));
   await page.evaluate(() => window.scrollTo(0, 0)); await shot('11_reward');
   await page.click('[data-action="newdraft"]');
   // a new day gives 10 spins once
