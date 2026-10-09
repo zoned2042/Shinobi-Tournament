@@ -69,6 +69,14 @@ const path = require('path');
   await shot('13_quickfight'); await overflow('quick fight');
   await page.evaluate(() => document.getElementById('cmdslot').scrollIntoView({ block: 'end' })); await page.waitForTimeout(150);
   await shot('14_commands');
+  // the Shinobi Circuit: hopefuls pick, then the reward choice
+  await page.evaluate(() => { abandonDuel(); state.run++; state.busy = false; CIRC = null; saveCirc(); renderDraft(); document.querySelector('[data-action="circuit"]').click(); document.querySelector('[data-action="cnew"]').click(); CIRC.hope.slice(0, 2).forEach(id => document.querySelector(`[data-action="chope"][data-val="${id}"]`).click()); window.scrollTo(0, 0); });
+  await page.waitForTimeout(150); await shot('15_circuit_pick'); await overflow('circuit pick');
+  await page.evaluate(() => { CIRC.squad = CIRC.hope.slice(0, 3); CIRC.captain = CIRC.squad[0]; CIRC.stage = 1; CIRC.phase = 'reward'; CIRC.msg = 'Goal reached: a squad fighter reaches the semifinals. On to the Chunin Championship. Choose a reward first.'; rollOffer(); renderCircuit(); window.scrollTo(0, 0); });
+  await page.waitForTimeout(150); await shot('16_circuit_reward'); await overflow('circuit reward');
+  await page.evaluate(() => { CIRC.phase = 'ready'; renderCircuit(); window.scrollTo(0, 300); });
+  await page.waitForTimeout(150); await shot('17_circuit_ready'); await overflow('circuit ready');
+  await page.evaluate(() => { CIRC = null; saveCirc(); });
   const tapTargets = await page.evaluate(() => [...document.querySelectorAll('button')].filter(b => { const r = b.getBoundingClientRect(); return r.width && (r.height < 36 || r.width < 36); }).map(b => b.textContent.trim().slice(0, 20) + ` ${Math.round(b.getBoundingClientRect().width)}x${Math.round(b.getBoundingClientRect().height)}`).slice(0, 10));
   if (tapTargets.length) console.log('small tap targets: ' + tapTargets.join(' | '));
   if (errors.length) problems.push(...errors);

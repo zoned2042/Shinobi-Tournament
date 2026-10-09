@@ -79,6 +79,62 @@ const path = require('path');
   });
   ok(rv.ok && rv.story && rv.chip && rv.inField, 'rival ' + JSON.stringify(rv));
 
+  // 5. Shinobi Circuit: pick three hopefuls, stages carry the squad, rewards apply, misses and forfeits cost a life, the run ends
+  const cr = await page.evaluate(() => {
+    const click = (a, v) => { const el = document.querySelector(`[data-action="${a}"]` + (v !== undefined ? `[data-val="${v}"]` : '')); if (!el) throw new Error('no ' + a + ' ' + v); el.click(); };
+    const out = {};
+    CIRC = null; saveCirc(); renderDraft(); click('circuit'); click('cnew', '0');
+    out.hope = CIRC.hope.length === 8 && new Set(CIRC.hope.map(id => byId(id).base)).size === 8 && CIRC.hope.every(id => byId(id).ovr < 80);
+    CIRC.hope.slice(0, 4).forEach(id => click('chope', id)); out.capped = CIRC.squad.length === 3;
+    click('cgo'); out.ready = CIRC.phase === 'ready' && CIRC.lives === 3;
+    out.marked = document.querySelectorAll('.fcard.on').length === 3;
+    // stage 1 runs with the stage's own rules and only the squad's chosen fighters
+    const ent = circEntrants(); click('cstage');
+    out.stage = state.circuitRun && state.format === 'knockout' && state.mode === 'c_genin' && fieldOf().length === 8 && fieldOf().every(f => modeById('c_genin').ok(f)) && state.squad.join() === ent.join();
+    out.noHidden = !document.querySelector('[data-mode="c_genin"]');
+    simAll();
+    const r1 = CIRC.results[0];
+    out.end1 = CIRC.results.length === 1 && !CIRC.playing && (r1.met ? CIRC.phase === 'reward' && CIRC.stage === 1 && CIRC.offer.recruits.length >= 1 : CIRC.phase === 'ready' && CIRC.lives === 2);
+    out.msg = !!document.querySelector('[data-action="cback2"]') && /Goal (reached|missed)/.test(CIRC.msg);
+    click('cback2'); out.back = state.screen === 'circuit' && !state.circuitRun && state.settings.mode !== 'c_genin';
+    // rewards (forced into the reward phase so every branch runs)
+    const reward = () => { CIRC.phase = 'reward'; rollOffer(); renderCircuit(); };
+    reward(); const sp = PROF.spins; click('creward', 'spins'); out.spins = PROF.spins === sp + 6 && CIRC.phase === 'ready';
+    reward(); const rid = CIRC.offer.recruits[0], n0 = CIRC.squad.length, sameBase = CIRC.squad.some(id => byId(id).base === byId(rid).base);
+    click('crecruit', rid); out.recruit = CIRC.squad.includes(rid) && CIRC.squad.length === (sameBase ? n0 : n0 + 1);
+    reward(); click('creward', 'risk'); out.risk = CIRC.risk === true;
+    reward(); CIRC.offer.bonus = 'training'; click('creward', 'bonus'); out.bonus = CIRC.bonusNow === 'training';
+    // the bonus helps only your fighters, only in that stage
+    click('cstage');
+    const mine = state.rounds[0].find(m => inSquad(m.a.id) !== inSquad(m.b.id)), o = mine && fightOpt(mine);
+    out.side = !!o && !!o.side && (inSquad(mine.a.id) ? o.side[0] && !o.side[1] : o.side[1] && !o.side[0]) && o.side[inSquad(mine.a.id) ? 0 : 1].dmg === 1.1;
+    // leaving mid-stage is a forfeit: a life gone, bonus and gamble spent
+    const lv = CIRC.lives; click('newdraft'); out.forfeit = CIRC.lives === lv - 1 && CIRC.bonusNow === null && !CIRC.risk && !state.circuitRun;
+    // persists across a reload (checked after this block); the last life lost ends the run
+    out.saved = JSON.parse(localStorage.getItem('fst_circ')).lives === CIRC.lives;
+    CIRC.lives = 1; CIRC.phase = 'ready'; renderCircuit(); click('cstage'); click('newdraft'); out.over = CIRC.phase === 'over' && !!document.querySelector('[data-action="cend"]');
+    click('cend'); out.cleared = CIRC === null && localStorage.getItem('fst_circ') === null;
+    // the final stage: a won run gives the title and unlocks the Legend Circuit
+    const wins0 = (PROF.circ || {}).wins || 0;
+    for (let k = 0; k < 12 && (!CIRC || CIRC.phase !== 'won'); k++) {
+      if (!CIRC) { click('cnew', '0'); CIRC.hope.slice(0, 3).forEach(id => click('chope', id)); click('cgo'); }
+      CIRC.stage = CIRCUIT.length - 1; CIRC.lives = 3; CIRC.phase = 'ready';
+      CIRC.squad = ROSTER.filter(f => modeById('c_final').ok(f)).sort((a, b) => b.ovr - a.ovr).filter((f, i, l) => l.findIndex(x => x.base === f.base) === i).slice(0, 4).map(f => f.id);
+      CIRC.enter = null; renderCircuit(); click('cstage');
+      out.final = state.mode === 'c_final' && fieldOf().length === 8 && state.squad.length === 4;
+      simAll(); click('cback2');
+    }
+    out.won = CIRC.phase === 'won' && PROF.circ.wins === wins0 + 1 && PROF.titles.includes('Circuit Champion');
+    click('cend'); renderCircuit(); out.legend = !!document.querySelector('[data-action="cnew"][data-val="1"]');
+    click('cnew', '1'); out.hard = CIRC.hard && CIRC.lives === 2;
+    CIRC.hope.slice(0, 3).forEach(id => click('chope', id)); click('cgo');
+    return out;
+  });
+  ok(Object.values(cr).every(v => v === true), 'circuit ' + JSON.stringify(cr));
+  await page.evaluate(() => window.scrollTo(0, 0)); await shot('5_circuit');
+  await page.reload(); await page.addScriptTag({ path: path.join(__dirname, 'harness.js') });
+  ok(await page.evaluate(() => !!CIRC && CIRC.hard && CIRC.phase === 'ready' && CIRC.squad.length === 3), 'circuit lost on reload');
+
   if (errors.length) fail.push(...errors);
   console.log(fail.length ? 'FAILED:\n' + fail.join('\n') : 'season ok');
   await browser.close();

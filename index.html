@@ -282,6 +282,33 @@ details.rules p{margin:8px 0}
 .bc .pg{color:var(--muted)}
 .bc.done{border-color:var(--good);background:color-mix(in srgb,var(--good) 12%,var(--panel2))}
 .bc .tick{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--good);color:#06120a;font-size:11px;margin-right:6px;vertical-align:1px}
+.panel h3{font-family:var(--serif);font-size:21px;margin:0 0 6px}
+.btn.circ{border-color:var(--flame);color:var(--flame);font-weight:800}
+.cpath{list-style:none;display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:14px 0;padding:0;counter-reset:none}
+.cpath li{border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:var(--panel);display:flex;flex-direction:column;gap:2px;opacity:.6}
+.cpath li .cn{font-family:var(--serif);font-weight:800;color:var(--muted)}
+.cpath li .ct{font-weight:700;font-size:13.5px}
+.cpath li small{color:var(--muted);font-size:11.5px}
+.cpath li.done{opacity:1;border-color:var(--good)} .cpath li.done .cn{color:var(--good)}
+.cpath li.now{opacity:1;border-color:var(--flame);box-shadow:0 0 0 2px color-mix(in srgb,var(--flame) 35%,transparent)} .cpath li.now .cn{color:var(--flame)}
+.heart{color:var(--ko);font-size:15px;margin:0 1px} .heart.gone{color:var(--line)}
+.cmsg{border:1px solid var(--flame);border-left-width:4px;border-radius:10px;padding:10px 13px;margin:10px 0;background:var(--panel);font-weight:600}
+.cmsg.won{border-color:var(--good)} .cmsg.inl{margin:6px 0}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;margin:10px 0}
+.fgrid.sm{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+.fcard{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 8px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--ink);cursor:pointer;font:inherit;text-align:center}
+.fcard:hover{border-color:var(--flame)} .fcard.on{border-color:var(--flame);box-shadow:0 0 0 2px var(--flame) inset;background:color-mix(in srgb,var(--flame) 16%,var(--panel2))}
+.fcard{position:relative} .fcard.on::after{content:'\2713';position:absolute;top:6px;right:9px;color:var(--flame);font-weight:700;font-size:15px}
+.fcard .fn{font-weight:700;font-size:14px} .fcard .ff{font-size:11.5px;color:var(--muted)} .fcard .fo{font-size:12px}
+.rgrid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px}
+.rcard{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel2);color:var(--ink);font:inherit;text-align:left;display:flex;flex-direction:column;gap:6px}
+button.rcard{cursor:pointer} button.rcard:hover{border-color:var(--flame)}
+.rcard .rt{font-family:var(--serif);font-weight:800;font-size:16px} .rcard .rd{font-size:13px;color:var(--muted)}
+.rcard.risk{border-color:var(--ko)}
+.cbon{color:var(--good);font-weight:600} .cbon.risk{color:var(--ko)}
+.cintro .lede{max-width:none}
+#ccap{margin-left:8px}
+@media (max-width:760px){ .cpath{display:flex;overflow-x:auto;gap:6px;scrollbar-width:thin} .cpath li{flex:0 0 auto;min-width:104px;padding:7px 9px} .cpath li .ct{font-size:12.5px} .cpath li small{font-size:11px} .rgrid{grid-template-columns:1fr} .cmsg{font-size:14px} }
 .rivalchip{font-size:12px;color:var(--muted);margin-top:6px;text-align:right}
 .rivalchip b{color:var(--ko)}
 .rep.rv{color:var(--ko);font-weight:700} .rep.ff{color:var(--flame);font-weight:700}
@@ -5033,7 +5060,14 @@ const MODES=[
   {id:'chaos',t:'Random Chaos',d:'Versions are rolled for everyone when the bracket is drawn, your squad included. Random field, random seeds.'},
   {id:'canon',t:'Canon',d:'Only the versions that fit one era of the story.',ok:(f,era)=>(ERA[f.id]||'').includes(era)},
   {id:'villains',t:'Villains',d:'Antagonists and rogue ninja only.',ok:f=>VILLAINS.includes(f.id)},
-  {id:'tai',t:'Taijutsu Masters',d:'The fighters known for settling it hand to hand: the Gates, the Gentle Fist, super strength, the Lariat, the Swordsmen.',ok:f=>TAI_MASTERS.includes(f.id)}
+  {id:'tai',t:'Taijutsu Masters',d:'The fighters known for settling it hand to hand: the Gates, the Gentle Fist, super strength, the Lariat, the Swordsmen.',ok:f=>TAI_MASTERS.includes(f.id)},
+  // Shinobi Circuit stages (hidden from the tournament chips): the field filter of each stage
+  {id:'c_genin',t:'Genin Trials',hidden:true,d:'Common and Rare fighters.',ok:f=>f.ovr<85},
+  {id:'c_chunin',t:'Chunin Championship',hidden:true,d:'Everyone below the top of the Legendary tier.',ok:f=>f.ovr<92},
+  {id:'c_jonin',t:'Jonin Gauntlet',hidden:true,d:'Seasoned fighters only.',ok:f=>f.ovr>=78},
+  {id:'c_kage',t:'Kage Summit',hidden:true,d:'Kage and legends.',ok:f=>f.tags.includes('Hokage')||f.tags.includes('Kage')||f.tags.includes('Legends')||LEADERS.includes(f.id)},
+  {id:'c_forbidden',t:'Forbidden Era',hidden:true,d:'Villains, the reanimated and forbidden forms.',ok:f=>VILLAINS.includes(f.id)||isEdo(f)||f.ovr>=100},
+  {id:'c_final',t:'Grand Championship',hidden:true,d:'The circuit champions and the very best.',ok:f=>f.ovr>=95||!!(CIRC&&CIRC.champs.includes(f.id))}
 ];
 const modeById=id=>MODES.find(x=>x.id===id)||MODES[0];
 const dmode=()=>modeById(state.settings.mode);
@@ -5299,7 +5333,7 @@ function leagueFinalize(m,sim,r,mi,pre){
     state.leagueBonus=bonus;
     storyChampion(); chalEnd();
     if(!state.spectate){ const t=total(), k=bestKey(); if(t>(state.best[k]||0)){ state.best[k]=t; try{ localStorage.setItem('fst_best2',JSON.stringify(state.best)); }catch(e){} } }
-    recordTournament(); grantXP();
+    recordTournament(); grantXP(); circuitStageEnd();
   } else { state.r++; state.m=0; if(state.tab!=='story'&&state.tab!=='table') state.tab=state.r; if(state.upsetNight===state.r) tell('upset','Upset Night',`${roundName(state.r)} is Upset Night: every upset is worth double to your squad.`,state.r); }
 }
 function storyLeagueDay(r){
@@ -5477,6 +5511,153 @@ function ensureRival(list){
   const i=pick(free), out=list.slice(); out[i]=vs.find(f=>f.id===R.id)||pick(vs); return out;
 }
 
+
+/* ---------- the Shinobi Circuit: a campaign of six themed stages with a squad that carries over ---------- */
+// goal: knockout = the best squad finish must be this deep (4 = semifinals, 1 = title); league = a top-`goal` finish
+const CIRCUIT=[
+  {n:'Genin Trials',mode:'c_genin',format:'knockout',size:8,slots:3,goal:4,events:'off',strong:false,d:'Common and Rare fighters only. Learn the ropes.'},
+  {n:'Chunin Championship',mode:'c_chunin',format:'knockout',size:16,slots:3,goal:4,events:'on',strong:false,d:'A bigger bracket with stronger opponents, and world events in play.'},
+  {n:'Jonin Gauntlet',mode:'c_jonin',format:'league',size:8,slots:3,goal:4,events:'on',strong:true,d:'A double round robin against seasoned fighters: no easy wins, every point counts.'},
+  {n:'Kage Summit',mode:'c_kage',format:'knockout',size:16,slots:4,goal:4,events:'on',strong:true,d:'The Kage and the legends, in their strongest versions.'},
+  {n:'Forbidden Era',mode:'c_forbidden',format:'knockout',size:16,slots:4,goal:4,events:'on',strong:true,d:'Villains, the reanimated and forbidden forms.'},
+  {n:'Grand Championship',mode:'c_final',format:'knockout',size:8,slots:4,goal:1,events:'off',strong:true,d:'The champions of the earlier stages and the very best fighters. Win it all.'}
+];
+const goalText=S=>S.format==='league'?`a squad fighter finishes in the top ${S.goal}`:S.goal===1?'a squad fighter wins the title':S.goal===2?'a squad fighter reaches the final':'a squad fighter reaches the semifinals';
+const BONUSES={
+  focus:{t:'Battle Focus',d:'Your fighters start every fight with 35% of the Ultimate gauge.',side:{um:35}},
+  training:{t:'Hard Training',d:'Your fighters deal 10% more damage.',side:{dmg:1.1}}
+};
+let CIRC=null;
+try{ const c=JSON.parse(localStorage.getItem('fst_circ')||'null'); if(c&&c.v===1) CIRC=c; }catch(e){}
+function saveCirc(){ try{ if(CIRC) localStorage.setItem('fst_circ',JSON.stringify(CIRC)); else localStorage.removeItem('fst_circ'); }catch(e){} }
+const circOn=()=>!!(CIRC&&state.circuitRun);
+// the circuit bonus of the next stage only helps your own fighters (shown on the hub; never hidden)
+function circuitSide(m){ if(!circOn()||!CIRC.bonusNow) return null; const b=BONUSES[CIRC.bonusNow].side; const sd=[inSquad(m.a.id)?b:null,inSquad(m.b.id)?b:null]; return sd[0]||sd[1]?sd:null; }
+const baseIn=(ids,f)=>ids.some(id=>byId(id).base===f.base);
+function newCircuit(hard){
+  const pool=shuffle(ROSTER.filter(f=>f.ovr<80&&!isEdo(f))), seen=new Set(), hope=[];
+  for(const f of pool){ if(hope.length>=8) break; if(!seen.has(f.base)){ seen.add(f.base); hope.push(f.id); } }
+  CIRC={v:1,phase:'start',stage:0,lives:hard?2:3,hard:!!hard,squad:[],captain:null,score:0,results:[],champs:[],hope,bonusNow:null,risk:false,offer:null,msg:'',playing:false};
+  PROF.circ=PROF.circ||{runs:0,wins:0,best:0}; PROF.circ.runs++; saveProf(); saveCirc();
+}
+// recruits: new characters a tier up as the circuit goes on, plus upgrades (a stronger version of a squad character)
+function rollOffer(){
+  const st=CIRC.stage, lo=[70,80,85,90,95][Math.min(4,st)], hi=[90,98,110,130,130][Math.min(4,st)];
+  const fresh=shuffle(ROSTER.filter(f=>f.ovr>=lo&&f.ovr<=hi&&!baseIn(CIRC.squad,f)));
+  const up=shuffle(ROSTER.filter(f=>CIRC.squad.some(id=>byId(id).base===f.base&&f.ovr>byId(id).ovr+3)));
+  const out=[], bases=new Set();
+  if(up.length){ out.push(up[0].id); bases.add(up[0].base); }
+  for(const f of fresh){ if(out.length>=3) break; if(!bases.has(f.base)){ bases.add(f.base); out.push(f.id); } }
+  CIRC.offer={recruits:out,bonus:pick(Object.keys(BONUSES))};
+}
+function addRecruit(id){
+  const f=byId(id), same=CIRC.squad.find(x=>byId(x).base===f.base);
+  if(same){ CIRC.squad=CIRC.squad.map(x=>x===same?id:x); if(CIRC.captain===same) CIRC.captain=id; return `${shortOf(same)} becomes ${f.short}.`; }
+  if(CIRC.squad.length<5){ CIRC.squad.push(id); return `${f.short} joins the squad.`; }
+  const weak=CIRC.squad.slice().sort((a,b)=>byId(a).ovr-byId(b).ovr)[0];
+  CIRC.squad=CIRC.squad.map(x=>x===weak?id:x); if(CIRC.captain===weak) CIRC.captain=id;
+  return `${f.short} joins the squad and replaces ${shortOf(weak)}.`;
+}
+const circStage=()=>CIRCUIT[CIRC.stage];
+// who enters the next stage: the player's pick, else the strongest squad members
+const circEntrants=()=>{ const S=circStage(), byOvr=CIRC.squad.slice().sort((a,b)=>byId(b).ovr-byId(a).ovr); return (CIRC.enter||byOvr).filter(id=>CIRC.squad.includes(id)).slice(0,S.slots); };
+function startCircuitStage(){
+  const S=circStage(), ent=circEntrants();
+  if(!ent.length) return;
+  state.prevSettings=state.prevSettings||Object.assign({},state.settings);
+  state.settings=Object.assign({},state.settings,{format:S.format,events:CIRC.hard?'on':S.events,mode:S.mode,size:S.size,squadSize:ent.length,field:S.strong||CIRC.hard?'strong':'random',versions:S.strong||CIRC.hard?'strongest':'random',seed:'random',draft:'pick'});
+  state.squad=ent.slice(); state.captain=ent.includes(CIRC.captain)?CIRC.captain:ent[0]; state.squadName=CIRC.name||'';
+  state.circuitRun=true; CIRC.playing=true; saveCirc();
+  Sfx.init(); startTournament(false);
+}
+// when a circuit stage ends: check the goal, settle the gamble, move on, retry or end the run
+function circuitStageEnd(){
+  if(!circOn()||!CIRC.playing) return;
+  const S=circStage(), squad=state.squad;
+  let met, best;
+  if(isLeague()){ best=Math.min(...squad.map(posOf)); met=best<=S.goal; }
+  else { best=Math.min(...squad.map(id=>finishOf(id)||99)); met=best<=S.goal; }
+  const champ=inSquad(state.champion.id);
+  CIRC.playing=false; CIRC.score+=total();
+  CIRC.results.push({stage:CIRC.stage,met,best,champ:state.champion.id,league:isLeague(),score:total()});
+  if(!inSquad(state.champion.id)&&!CIRC.champs.includes(state.champion.id)) CIRC.champs.push(state.champion.id);
+  const lines=[];
+  lines.push(met?`Goal reached: ${goalText(S)}.`:`Goal missed: ${goalText(S)}.`);
+  let lives=CIRC.lives;
+  if(!met) lives--;
+  if(CIRC.risk){
+    if(champ){ const S2=shuffle(ROSTER.filter(f=>f.tier==='S'&&!baseIn(CIRC.squad,f)))[0]; if(S2) lines.push('Gamble won: '+addRecruit(S2.id)); giveXP(200); lines.push('+200 XP.'); }
+    else if(met){ lives--; lines.push('Gamble lost: your squad did not win the title. One Will of Fire lost.'); }
+  }
+  CIRC.risk=false; CIRC.bonusNow=null; CIRC.lives=Math.max(0,lives);
+  if(met&&CIRC.stage===CIRCUIT.length-1){
+    CIRC.phase='won'; PROF.circ.wins++; PROF.circ.best=CIRCUIT.length; giveXP(CIRC.hard?800:500); PROF.spins+=CIRC.hard?30:20; saveProf();
+    giveReward({title:CIRC.hard?'Legend of the Circuit':'Circuit Champion'});
+    lines.push(`The Shinobi Circuit is yours! +${CIRC.hard?800:500} XP, +${CIRC.hard?30:20} spins.`);
+  } else if(met){ CIRC.stage++; PROF.circ.best=Math.max(PROF.circ.best||0,CIRC.stage); saveProf(); CIRC.phase='reward'; rollOffer(); lines.push(`On to the ${circStage().n}. Choose a reward first.`); }
+  else if(CIRC.lives>0){ CIRC.phase='ready'; lines.push(`${CIRC.lives} Will of Fire left: try the ${S.n} again.`); }
+  else { CIRC.phase='over'; lines.push('No Will of Fire left. The run is over.'); }
+  CIRC.msg=lines.join(' '); saveCirc();
+}
+// leaving a stage before it ends counts as a loss (no rerolling a bad bracket)
+function circuitForfeit(){
+  if(!CIRC||!CIRC.playing) return;
+  CIRC.playing=false; CIRC.lives--; CIRC.bonusNow=null; CIRC.risk=false;
+  CIRC.phase=CIRC.lives>0?'ready':'over';
+  CIRC.msg=`You left the ${circStage().n} before it ended: one Will of Fire lost.${CIRC.lives>0?'':' The run is over.'}`; saveCirc();
+}
+function leaveCircuitTournament(){
+  if(!state.circuitRun) return;
+  if(!state.champion) circuitForfeit();
+  state.circuitRun=false; if(state.prevSettings){ state.settings=state.prevSettings; state.prevSettings=null; }
+  state.squad=[]; state.captain=null; state.squadName='';
+}
+function renderCircuit(){
+  destroyStage(); state.screen='circuit';
+  if(CIRC&&CIRC.playing&&!state.circuitRun) circuitForfeit();
+  const C=CIRC, hearts=n=>Array.from({length:C.hard?2:3},(_,i)=>`<span class="heart ${i<n?'':'gone'}" aria-hidden="true">&#9829;</span>`).join('');
+  const path=C?`<ol class="cpath">${CIRCUIT.map((S,i)=>{ const r=C.results.filter(x=>x.stage===i&&x.met).length; return `<li class="${i<C.stage||C.phase==='won'?'done':i===C.stage?'now':''}"><span class="cn">${i+1}</span><span class="ct">${S.n}</span><small>${S.format==='league'?`${S.size}-fighter league`:`${S.size} fighters`}</small></li>`; }).join('')}</ol>`:'';
+  const fcard=(id,act,on)=>{ const f=byId(id); return `<button class="fcard ${on?'on':''}" data-action="${act}" data-val="${id}" ${on===undefined?'':`aria-pressed="${!!on}"`}>${crest(f,'')}<span class="fn">${f.short}</span><span class="ff">${f.form}</span><span class="fo">${rarTag(f)} ${f.ovr}</span></button>`; };
+  let body='';
+  if(!C){
+    const P=PROF.circ||{runs:0,wins:0,best:0};
+    body=`<section class="panel cintro"><p class="lede">Six themed tournaments in a row with one squad that carries over: <b>${CIRCUIT.map(S=>S.n).join(', ')}</b>. Start with three hopefuls, reach each stage's goal to move on, and pick a reward between stages: a new recruit or a stronger version, spins, a squad bonus, or a risky gamble. You have three Will of Fire: missing a goal costs one, and the run ends when they are gone.</p>
+      <p class="sh">${P.runs?`Runs: ${P.runs}, circuits won: ${P.wins}, furthest stage: ${Math.min(P.best+1,CIRCUIT.length)}.`:'Your first run.'}</p>
+      <div class="row"><button class="btn primary" data-action="cnew" data-val="0">Start the Shinobi Circuit</button>${P.wins?'<button class="btn" data-action="cnew" data-val="1" title="Two Will of Fire, world events everywhere, strongest fields">Legend Circuit (unlocked)</button>':'<span class="sh">Win a circuit to unlock the Legend Circuit.</span>'}</div></section>`;
+  } else if(C.phase==='start'){
+    body=`<section class="panel"><h3>Choose three hopefuls</h3><p class="sh">Your squad for the Genin Trials. You can recruit more and upgrade them between stages (up to five).</p>
+      <div class="fgrid">${C.hope.map(id=>fcard(id,'chope',C.squad.includes(id))).join('')}</div>
+      <div class="row"><button class="btn primary" data-action="cgo" ${C.squad.length===3?'':'disabled'}>${C.squad.length===3?'Lock in the squad':`Pick ${3-C.squad.length} more`}</button></div></section>`;
+  } else if(C.phase==='reward'){
+    const O=C.offer, rb=BONUSES[O.bonus];
+    body=`${C.msg?`<div class="cmsg">${esc(C.msg)}</div>`:''}<section class="panel"><h3>Choose one reward</h3>
+      <div class="rgrid">
+        <div class="rcard"><div class="rt">Recruit</div><div class="rd">Add a fighter, or upgrade a squad member to a stronger version.${C.squad.length>=5?' Your squad is full: a new character replaces your weakest fighter.':''}</div><div class="fgrid sm">${O.recruits.map(id=>fcard(id,'crecruit')).join('')}</div></div>
+        <button class="rcard" data-action="creward" data-val="spins"><div class="rt">Spins and XP</div><div class="rd">+6 spins and +80 XP.</div></button>
+        <button class="rcard" data-action="creward" data-val="bonus"><div class="rt">Squad bonus: ${rb.t}</div><div class="rd">${rb.d} For the next stage only.</div></button>
+        <button class="rcard risk" data-action="creward" data-val="risk"><div class="rt">Risky gamble</div><div class="rd">Win the next stage outright for a Mythic recruit and +200 XP. Reach the goal without the title and you lose a Will of Fire.</div></button>
+      </div></section>`;
+  } else if(C.phase==='ready'){
+    const S=circStage(), ent=circEntrants();
+    body=`${C.msg?`<div class="cmsg">${esc(C.msg)}</div>`:''}<section class="panel"><div class="kicker">Stage ${C.stage+1} of ${CIRCUIT.length}</div><h3>${S.n}</h3><p>${S.d}</p>
+      <p><b>Goal:</b> ${goalText(S)}. <b>Format:</b> ${S.format==='league'?`${S.size}-fighter double round robin`:`${S.size}-fighter knockout`}${(C.hard?'on':S.events)==='on'?', world events on':''}. ${S.slots} of your fighters can enter.</p>
+      ${C.bonusNow?`<p class="cbon">Squad bonus: <b>${BONUSES[C.bonusNow].t}</b>. ${BONUSES[C.bonusNow].d}</p>`:''}${C.risk?'<p class="cbon risk">Gamble on: win this stage outright.</p>':''}
+      <div class="sl">Who enters (${ent.length}/${S.slots})</div>
+      <div class="fgrid">${C.squad.map(id=>fcard(id,'center',ent.includes(id))).join('')}</div>
+      <div class="row"><label class="sl" for="ccap">Captain (x1.5 points)</label><select id="ccap">${ent.map(id=>`<option value="${id}" ${id===(ent.includes(C.captain)?C.captain:ent[0])?'selected':''}>${shortOf(id)}</option>`).join('')}</select></div>
+      <div class="row"><button class="btn primary" data-action="cstage" ${ent.length?'':'disabled'}>Enter the ${S.n}</button></div></section>`;
+  } else if(C.phase==='won'||C.phase==='over'){
+    body=`<div class="cmsg ${C.phase==='won'?'won':''}">${esc(C.msg||'')}</div><section class="panel"><h3>${C.phase==='won'?'Circuit champion!':'Run over'}</h3>
+      <p>Circuit score: <b>${C.score}</b>. Stages cleared: <b>${C.results.filter(r=>r.met).length}</b> of ${CIRCUIT.length}.</p>
+      <p class="sh">${C.results.map(r=>`${CIRCUIT[r.stage].n}: ${r.met?'cleared':'missed'}${r.league?` (best ${ord(r.best)})`:r.best===1?' (title)':r.best<99?` (best: ${finishName(r.best).toLowerCase()})`:''}, champion ${shortOf(r.champ)}`).join(' · ')}</p>
+      <div class="row"><button class="btn primary" data-action="cend">Finish and start fresh</button></div></section>`;
+  }
+  app.innerHTML=`<div class="spread"><div><div class="kicker">From the creator of Shinobi Life</div><h2>The Shinobi Circuit${C&&C.hard?': Legend':''}</h2>${C?`<div class="mtag">Will of Fire ${hearts(C.lives)} · Circuit score ${C.score}${C.squad.length?` · Squad: ${C.squad.map(shortOf).join(', ')}`:''}</div>`:''}</div>
+    <div class="row" id="topbtns"><button class="btn small" data-action="theme">Light / dark</button><button class="btn small" data-action="cback">Back to the draft</button>${C&&C.phase!=='won'&&C.phase!=='over'?'<button class="btn small" data-action="cquit">Abandon run</button>':''}</div></div>
+    ${path}${body}${credit()}`;
+  const now=app.querySelector('.cpath li.now'); if(now){ const P=now.parentElement; if(P.scrollWidth>P.clientWidth) P.scrollLeft=now.offsetLeft-P.offsetLeft-12; }
+}
+
 /* ---------- the tournament story ---------- */
 function tell(k,t,x,r,mi){ state.story.push({k,t,x,r,mi:mi===undefined?null:mi}); }
 function storyFight(m,r,mi,pre){
@@ -5562,7 +5743,7 @@ function renderDraft(){
         <h1 class="title">Fantasy Shinobi<br><em>Tournament</em></h1>
         <p class="lede">Pick a squad from ${BASES.length} characters across ${ROSTER.length} versions, or spin for it, then watch the tournament play out live. Win to earn XP, rank up and get more spins.</p>
       </div>
-      <div class="hside">${profChip()}${rivalChip()}<div class="row hbtn"><button class="btn small qf" data-action="quick">Quick fight</button><button class="btn small" data-action="history">History${HIST.n?` (${HIST.n})`:''}</button><button class="btn small" data-action="theme">Light / dark</button></div></div>
+      <div class="hside">${profChip()}${rivalChip()}<div class="row hbtn"><button class="btn small circ" data-action="circuit">${CIRC&&CIRC.phase!=='won'&&CIRC.phase!=='over'?`Circuit: stage ${CIRC.stage+1}`:'Shinobi Circuit'}</button><button class="btn small qf" data-action="quick">Quick fight</button><button class="btn small" data-action="history">History${HIST.n?` (${HIST.n})`:''}</button><button class="btn small" data-action="theme">Light / dark</button></div></div>
     </div>
     ${state.toast?`<div class="toast" role="status">${esc(state.toast)}</div>`:''}
     <section class="panel modes" id="modes"></section>
@@ -5612,7 +5793,7 @@ function seg(key,label,opts,hint){
 function renderModes(){
   const s=state.settings, M=dmode(), vs=ROSTER.filter(f=>eligible(f)).length;
   $('modes').innerHTML=`<div class="sl">Tournament</div>
-    <div class="mchips" role="radiogroup" aria-label="Tournament type">${MODES.map(x=>`<button class="chip" role="radio" aria-checked="${String(x.id===s.mode)}" data-action="mode" data-val="${x.id}">${x.t}</button>`).join('')}</div>
+    <div class="mchips" role="radiogroup" aria-label="Tournament type">${MODES.filter(x=>!x.hidden).map(x=>`<button class="chip" role="radio" aria-checked="${String(x.id===s.mode)}" data-action="mode" data-val="${x.id}">${x.t}</button>`).join('')}</div>
     <p class="md"><b>${modeLabel(s.mode,s.era)}.</b> ${M.d}${M.ok?` ${vs} versions of ${modeBases()} characters can enter, so the biggest bracket is ${maxSize()}.`:M.pick?` ${ROSTER.filter(draftable).length} versions can be drafted; the biggest bracket is ${maxSize()}.`:''}</p>
     ${M.id==='canon'?`<div class="era"><div class="sl">Era</div><div class="mchips" role="radiogroup" aria-label="Era">${ERAS.map(e=>`<button class="chip" role="radio" aria-checked="${String(s.era===e.v)}" data-action="set" data-key="era" data-val="${e.v}">${e.t}</button>`).join('')}</div></div>`:''}`;
 }
@@ -5853,7 +6034,7 @@ function refreshAll(){ renderTop(); renderSquadBar(); renderBoard(); renderScore
 function renderTop(){
   const el=$('topbtns'); if(!el) return;
   const hist=!state.busy&&(!state.spectate||state.champion);
-  el.innerHTML=`<button class="btn small" data-action="theme">Light / dark</button>${hist?'<button class="btn small" data-action="history">History</button>':''}<button class="btn small" data-action="newdraft">${state.spectate?'Back to draft':'New draft'}</button>`;
+  el.innerHTML=`<button class="btn small" data-action="theme">Light / dark</button>${hist?'<button class="btn small" data-action="history">History</button>':''}${state.circuitRun?`<button class="btn small" data-action="newdraft" title="${state.champion?'':'Leaving before the end costs a Will of Fire'}">${state.champion?'Back to the circuit':'Forfeit stage'}</button>`:`<button class="btn small" data-action="newdraft">${state.spectate?'Back to draft':'New draft'}</button>`}`;
 }
 function renderSquadBar(){
   const el=$('squadbar'); if(!el) return;
@@ -5908,12 +6089,13 @@ function renderChamp(){
     ${crest(c,'lg')}
     <div class="txt">
       <h2>${c.short} wins the ${isLeague()?'league':'tournament'}</h2>
+      ${state.circuitRun&&CIRC&&CIRC.msg?`<p class="cmsg inl">${esc(CIRC.msg)}</p>`:''}
       <p>${state.spectate?`Tournament #${T?T.n:HIST.n} is in the books.`:`${mine?'Your fighter took the title. ':''}${esc(squadName())} finished with ${t} points${t>0&&t>=best?', a new best for this bracket.':'.'}`}</p>
       ${facts.length?`<p class="facts">${facts.join(' · ')}</p>`:''}
       ${state.board?`<p class="facts">Challenges: ${state.board.filter(c=>c.done).length} of ${state.board.length} done${state.board.some(c=>c.done)?` (${state.board.filter(c=>c.done).map(c=>rwText(chalById(c.id).rw)).join(', ')})`:''}.</p>`:''}
       ${state.reward?`<p class="reward">+${state.reward.xp} XP${state.reward.spun?' (double for a spun squad)':''}${state.reward.L1>state.reward.L0?`. <b>Level up: Lv ${state.reward.L1} ${rankOf(state.reward.L1)}!</b>`:''}${state.reward.spins?` +${state.reward.spins} spins.`:'.'}</p>`:''}
       <div class="row">
-        <button class="btn primary" data-action="again">${state.spectate?'Run another tournament':'Play again with the same squad'}</button>
+        ${state.circuitRun?`<button class="btn primary" data-action="cback2">Back to the circuit</button>`:`<button class="btn primary" data-action="again">${state.spectate?'Run another tournament':'Play again with the same squad'}</button>`}
         <button class="btn" data-action="copy">${state.copied?'Copied':'Copy recap'}</button>
         <button class="btn" data-action="history">History</button>
       </div>
@@ -6162,7 +6344,7 @@ function finalize(m,sim){
       state.champion=sim.winner;
       storyRound(r); storyChampion(); chalEnd();
       if(!state.spectate){ const t=total(), k=bestKey(); if(t>(state.best[k]||0)){ state.best[k]=t; try{ localStorage.setItem('fst_best2',JSON.stringify(state.best)); }catch(e){} } }
-      recordTournament(); grantXP();
+      recordTournament(); grantXP(); circuitStageEnd();
     } else {
       state.rounds.push(makeRound(state.rounds[r].map(x=>x.winner)));
       assignEvents(state.rounds[r+1]);
@@ -6525,6 +6707,23 @@ app.addEventListener('click',e=>{
   else if(a==='playme') fightYourself();
   else if(a==='move') chooseMove(v);
   else if(a==='autofight'){ const S=state.duel; if(S){ S.auto=!S.auto; if(S.auto&&S.waiting) chooseMove(undefined); renderDuel(); } }
+  else if(a==='circuit'){ if(state.spinning===null){ renderCircuit(); window.scrollTo(0,0); } }
+  else if(a==='cnew'){ newCircuit(v==='1'); renderCircuit(); }
+  else if(a==='chope'){ const C=CIRC; if(C.squad.includes(v)) C.squad=C.squad.filter(x=>x!==v); else if(C.squad.length<3) C.squad.push(v); saveCirc(); renderCircuit(); }
+  else if(a==='cgo'){ const C=CIRC; if(C.squad.length===3){ C.captain=C.squad[0]; C.phase='ready'; C.msg=''; saveCirc(); renderCircuit(); } }
+  else if(a==='crecruit'){ const C=CIRC; C.msg=addRecruit(v); C.phase='ready'; C.enter=null; C.offer=null; saveCirc(); renderCircuit(); }
+  else if(a==='creward'){ const C=CIRC;
+    if(v==='spins'){ PROF.spins+=6; giveXP(80); C.msg='+6 spins and +80 XP.'; }
+    else if(v==='bonus'){ C.bonusNow=C.offer.bonus; C.msg=`${BONUSES[C.bonusNow].t} for the next stage.`; }
+    else if(v==='risk'){ C.risk=true; C.msg='Gamble on: win the next stage outright.'; }
+    C.phase='ready'; C.offer=null; saveCirc(); renderCircuit(); }
+  else if(a==='center'){ const C=CIRC, S=circStage(); let e=circEntrants();
+    if(e.includes(v)) e=e.filter(x=>x!==v); else if(e.length<S.slots) e.push(v); C.enter=e; if(!e.includes(C.captain)) C.captain=e[0]||null; saveCirc(); renderCircuit(); }
+  else if(a==='cstage'){ startCircuitStage(); }
+  else if(a==='cback'){ renderDraft(); window.scrollTo(0,0); }
+  else if(a==='cback2'){ leaveCircuitTournament(); renderCircuit(); window.scrollTo(0,0); }
+  else if(a==='cquit'){ if(!state.cq){ state.cq=true; t.textContent='Click again to abandon the run'; return; } state.cq=false; CIRC=null; saveCirc(); renderCircuit(); }
+  else if(a==='cend'){ CIRC=null; saveCirc(); renderCircuit(); }
   else if(a==='quick'){ if(state.spinning===null){ Sfx.init(); startVersus(); } }
   else if(a==='vsfight') vsFight();
   else if(a==='vsrand'){ if(!state.busy){ const other=v==='me'?state.vs.foe:state.vs.me; state.vs[v]=pick(ROSTER.filter(f=>f.base!==byId(other).base)).id; state.vs.last=null; renderVersus(); } }
@@ -6547,6 +6746,7 @@ app.addEventListener('click',e=>{
   else if(a==='clearhist'){ state.confirmClear=true; renderHistory(); }
   else if(a==='clearno'){ state.confirmClear=false; renderHistory(); }
   else if(a==='clearyes'){ HIST=emptyHist(); saveHist(); state.confirmClear=false; renderHistory(); }
+  else if(a==='newdraft'&&state.circuitRun){ abandonDuel(); state.run++; state.busy=false; state.paused=false; leaveCircuitTournament(); renderCircuit(); window.scrollTo(0,0); }
   else if(a==='newdraft'){
     abandonDuel(); state.run++; state.busy=false; state.paused=false; state.toFinal=false;
     if(state.spectate){ const k=state.keep||{squad:[],captain:null}; state.squad=k.squad; state.captain=k.captain; state.keep=null; state.spectate=false; }
@@ -6567,6 +6767,7 @@ app.addEventListener('change',e=>{
     renderVersus(); return;
   }
   if(e.target.id==='sort'){ state.sort=e.target.value; renderGrid(); }
+  else if(e.target.id==='ccap'){ CIRC.captain=e.target.value; saveCirc(); }
   else if(e.target.id==='cap'){ state.captain=e.target.value; renderTray(); renderIdent(); }
   else if(e.target.id==='hsort'){ state.hsort=e.target.value; renderHistory(); }
   else if(e.target.id==='sqname'){ if(!e.target.value.trim()){ state.squadName=''; renderIdent(); } }
