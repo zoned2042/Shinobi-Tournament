@@ -9,6 +9,14 @@ window.T = {
     const v = variant || 'hit';
     if (mv === 'guard') return { text: '', type: 'guard', hp: [70, 70], ch: [50, 50], um: [0, 0], att, tgt: null, mv: null, name: '', dmg: 0,
       dodge: false, crit: false, guard: false, stun: false, surv: false, ko: false, skip: false, resist: false, who: att, st: A.sigType, heal: 10, win: null };
+    // tactics (controlled fights): Read and Counter are stances; Pressure, Conserve and the Counter's answer are taijutsu; a parried signature
+    if (mv === 'read' || mv === 'counter') return Object.assign(T.entry(A, D, att, 'guard', variant), { type: mv, heal: 0, plan: mv === 'read' ? 'tai' : null });
+    if (mv === 'pressure' || mv === 'conserve' || mv === 'ctr') {
+      const e = T.entry(A, D, att, 'tai', variant), n = e.name.replace(/^an? /, '');
+      if (mv === 'pressure') Object.assign(e, { pr: true, name: 'All-out ' + n }); else if (mv === 'conserve') e.cons = true; else Object.assign(e, { ctr: true, name: n });
+      return e;
+    }
+    if (mv === 'parry') return Object.assign(T.entry(A, D, att, 'sig', variant), { parry: true, guard: true });
     if (mv === 'super') { const e = T.entry(A, D, att, 'ult', variant); e.sup = true; const u = supOf(A); e.name = u.n; T.gates(e, A, att, u.gate); return e; }
     if (mv === 'gate') { const e = T.entry(A, D, att, 'tai', variant); T.gates(e, A, att, 3); e.heal = 8; return e; } // opens gates 1-3, then strikes
     if (mv === 'drain') { const e = T.entry(A, D, att, 'focus', variant); Object.assign(e, { type: 'drain', att: null, who: att, dmg: 4, heal: 0, gt: att ? [0, 6] : [6, 0] }); return e; }

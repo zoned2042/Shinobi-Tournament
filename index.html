@@ -404,7 +404,11 @@ button.rcard{cursor:pointer} button.rcard:hover{border-color:var(--flame)}
 .cmdh b{color:var(--ink)}
 .cmdh .you b{color:var(--flame)}
 .cmdh .cmds{flex-basis:100%;color:var(--ink);font-weight:700;font-size:14px}
-.cmdg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.cmdg{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px} .cmdg.tac{grid-template-columns:repeat(6,minmax(0,1fr))}
+.cbtn small .st{display:none}
+.cmdl{font:700 10.5px/1 var(--sans,inherit);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:8px 0 5px}
+.intel{margin-top:8px;padding:8px 11px;border-radius:10px;border:1px solid #9b7fe0;background:color-mix(in srgb,#9b7fe0 12%,var(--panel2));font-size:13px}
+.intel.warn{border-color:var(--ready);background:color-mix(in srgb,var(--ready) 10%,var(--panel2))}
 .cbtn{--mc:var(--line);position:relative;text-align:left;display:flex;flex-direction:column;gap:2px;padding:10px 12px 10px 40px;min-height:62px;border-radius:12px;border:1px solid var(--edge);border-left:4px solid var(--mc);background:var(--panel2);color:var(--ink);min-width:0}
 .cbtn b{font-size:14px;line-height:1.2;overflow-wrap:anywhere}
 .cbtn small{font-size:12px;color:var(--muted);line-height:1.25}
@@ -413,7 +417,7 @@ button.rcard{cursor:pointer} button.rcard:hover{border-color:var(--flame)}
 .cbtn:disabled{opacity:.42;cursor:not-allowed}
 .cbtn.tai{--mc:var(--flame)} .cbtn.gate{--mc:#5fc46e} .cbtn.nin{--mc:var(--chakra)} .cbtn.gen{--mc:var(--gen)} .cbtn.sig{--mc:var(--ko)} .cbtn.foc{--mc:var(--good)}
 .cbtn.ult{--mc:var(--ready)}
-.cbtn.grd{--mc:#7fb8ff}
+.cbtn.grd{--mc:#7fb8ff} .cbtn.rd{--mc:#9b7fe0} .cbtn.ctr{--mc:#e0963c} .cbtn.prs{--mc:#e0603c} .cbtn.cns{--mc:#4fb0c0}
 .cbtn.grd.hot:not(:disabled){box-shadow:0 0 0 2px #7fb8ff,0 0 18px rgba(127,184,255,.45);animation:pulse 1.2s ease-in-out infinite}
 .cbtn.sup:not(:disabled){background:linear-gradient(135deg,rgba(226,178,74,.28),rgba(255,79,216,.16) 60%,var(--panel2));box-shadow:0 0 22px rgba(255,79,216,.3)}
 .cbtn.sup:not(:disabled) b{color:#ff8ae6}
@@ -461,7 +465,9 @@ button.rcard{cursor:pointer} button.rcard:hover{border-color:var(--flame)}
   .cmd{padding:10px}
   .cmdh{gap:2px 12px;margin-bottom:8px}
   .cmdh .kh{display:none}
-  .cmdg{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .cmdg{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px} .cmdg.tac{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .cbtn small .lg{display:none} .cbtn small .st{display:inline}
+  .cmdg.tac .cbtn small{white-space:normal}
   .cbtn{padding:7px 9px;min-height:50px}
   .cbtn kbd{display:none}
   .cbtn b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1453,8 +1459,17 @@ const RULES={
   ultAt:100,supAt:125,aiUlt:.45,aiSup:.9,                  // the AI fires a ready Ultimate 45% of turns, else holds for the Super
   ultBase:36,ultCap:35,ultDodge:.2,                       // damage is capped: an Ultimate cannot KO a fighter above 35 HP
   supBase:58,supCap:50,supDodge:.15,bigCrit:1.25,
-  guardMul:.4,guardChakra:10                              // Guard (player move): all damage that turn x0.4
+  guardMul:.4,guardChakra:10,                             // Guard (player move): all damage that turn x0.4
+  // tactics (controlled fights). Each one has an answer, and the AI answers a move you repeat (2 of your last 3 turns)
+  readDodge:.4,readGen:.25,                               // Read: no attack; +40 points of dodge against the foe this turn and next, genjutsu 25 points less likely, and you see their next move
+  counterTake:.25,counterPow:1.7,                         // Counter: a close-range hit (taijutsu, Pressure, Conserve, a non-genjutsu signature, a gate strike) is parried to 25% and answered by an undodgeable x1.7 taijutsu; ranged moves ignore it
+  pressPow:1.6,pressDodge:.5,pressOpen:1.4,               // Pressure: x1.6 taijutsu, half the dodge chance; you take x1.4 damage until your next move (big moves stay capped)
+  consPow:.6,consCh:12,consGauge:10,                      // Conserve: a light taijutsu at 60% that gathers 12 chakra and 10 gauge
+  recGauge:8,                                             // Recover (Focus): no attack, +30 chakra and 8 gauge
+  aiAnswer:.6,adaptDodge:.3,adaptGen:.25                  // how often the AI answers a repeated move; a repeated ninjutsu/genjutsu is expected (dodge +30, trap -25) for two turns
 };
+const STANCES=['guard','read','counter'];                 // these go up before anyone moves
+const CLOSE=['tai','pressure','conserve','sig','gate'];   // what Counter catches
 /* Eight Gates (Lee, Guy: d.gates = how many they can open). They are taijutsu only: no ninjutsu, no genjutsu.
    The 'gate' move opens the next gate and strikes in the same turn, and open gates stack: GATES[g] is the state with
    g gates open. pw = damage multiplier (taijutsu, signature, big moves), sp = speed bonus (dodging and turn order),
@@ -1478,7 +1493,7 @@ function makeDuel(A,B,opt){
   opt=opt||{};
   const R=RULES, D={turn:0,opt}, maxCh=d=>40+Math.min(d.sta,130)*0.6, SD=i=>(opt.side&&opt.side[i])||{};
   const CM=opt.cost||1, C={nin:Math.round(10*CM),gen:Math.round(8*CM),sig:Math.round(28*CM)};
-  const f=[A,B].map((d,i)=>({d,i,hp:opt.hp||100,ch:Math.min(maxCh(d),maxCh(d)*(SD(i).ch||1)*(opt.ch0||1)),stun:0,cd:0,used:false,um:SD(i).um||0,usedUlt:false,ultLanded:false,supLanded:false,readyT:0,superT:0,guarding:false,gates:0,healed:false,form:0.82+Math.random()*0.36}));
+  const f=[A,B].map((d,i)=>({d,i,hp:opt.hp||100,ch:Math.min(maxCh(d),maxCh(d)*(SD(i).ch||1)*(opt.ch0||1)),stun:0,cd:0,used:false,um:SD(i).um||0,usedUlt:false,ultLanded:false,supLanded:false,readyT:0,superT:0,guarding:false,stance:null,readT:-1,open:1,plan:null,answered:-9,adapt:-1,gates:0,healed:false,form:0.82+Math.random()*0.36}));
   const log=[];
   const snap=()=>[Math.max(0,Math.round(f[0].hp)),Math.max(0,Math.round(f[1].hp))];
   const chs=()=>f.map(x=>Math.round(clamp(x.ch,0,maxCh(x.d))/maxCh(x.d)*100));
@@ -1496,50 +1511,101 @@ function makeDuel(A,B,opt){
   const gain=(att,def,dmg)=>{ fill(att,dmg*R.gainDealt); fill(def,dmg*R.gainTaken); };
   const say=(text,type,x)=>log.push(Object.assign({text,type,hp:snap(),ch:chs(),um:ums(),sm:sms(),uu:uus(),gt:gts(),gate:0,sup:false,tgt:null,dmg:0,win:null,att:null,mv:null,name:'',dodge:false,crit:false,guard:false,stun:false,surv:false,ko:false,skip:false,resist:false,who:null,st:null,heal:0},x||{}));
 
-  const dodgeOf=(att,def)=>clamp(0.1+(spdOf(def)-spdOf(att))/300+(def.d.int-att.d.int)/700,0.04,0.38);
+  const reading=x=>x.readT>=D.turn;
+  const dodgeOf=(att,def)=>clamp(0.1+(spdOf(def)-spdOf(att))/300+(def.d.int-att.d.int)/700,0.04,0.38)+(reading(def)?R.readDodge:0);
+  const trapOf=(att,def)=>clamp(0.3+(att.d.gen-def.d.int)/150-(reading(def)?R.readGen:0)-(def.adapt>=D.turn?R.adaptGen:0),0.05,0.8);
+  const adapted=(def,m)=>m==='nin'&&def.adapt>=D.turn?R.adaptDodge:0;
+  // the player's recent choices; the AI answers a move used in 2 of the last 3 turns
+  D.hist=[];
+  const habit=()=>{ const h=D.hist.slice(-3), c={}; h.forEach(k=>c[k]=(c[k]||0)+1); return Object.keys(c).find(k=>c[k]>=2)||null; };
+  function answer(k,att,def){
+    if(CLOSE.includes(k)) return 'counter';                                  // close-range habits run into a counter
+    if(k==='counter') return canUse(att,def,'nin')?'nin':canUse(att,def,'gen')?'gen':'focus'; // a waiting counter is hit from range, or ignored
+    if(k==='guard') return canUse(att,def,'gen')?'gen':'focus';               // a genjutsu goes through a guard; or just build up
+    if(k==='read') return canUse(att,def,'nin')?'nin':canUse(att,def,'gen')?'gen':'focus'; // a fighter who keeps reading is hit from range, or ignored
+    if(k==='focus') return 'pressure';                                       // a fighter who keeps resting gets rushed
+    return null;
+  }
+  // the AI's choice: a move it revealed to a Read, an answer to a habit, else the usual weighted pick
+  function aiPick(att,def){
+    if(att.plan&&att.plan.t===D.turn){ const k=att.plan.k; att.plan=null; if(canUse(att,def,k)) return k; }
+    if(D.player===def.i&&att.answered<D.turn-1){ const k=habit(); if(k&&Math.random()<R.aiAnswer){
+      if(k==='nin'||k==='gen'){ att.adapt=D.turn+1; att.answered=D.turn; } // a ranged habit is expected: easier to slip, and the AI still attacks
+      else { const an=answer(k,att,def); if(an&&canUse(att,def,an)&&!(an==='read'&&reading(att))){ att.answered=D.turn; return an; } } } } // at most every other turn
+    if(canUse(att,def,'super')&&Math.random()<R.aiSup) return 'super';
+    if(canUse(att,def,'ult')&&Math.random()<R.aiUlt) return 'ult';
+    // the AI opens gates early and keeps climbing while it can afford the drain; the Gate of Death is a last resort
+    const gateW=!canUse(att,def,'gate')?0:att.gates<3?70:att.gates<6?(att.hp>35?45:15):att.gates<7?(att.hp>45?30:8):(att.hp<=50||def.hp<=45?60:0);
+    return weighted([
+      {k:'tai',w:att.d.tai*0.9+10},
+      {k:'nin',w:canUse(att,def,'nin')?att.d.nin*0.9:0},
+      {k:'gen',w:canUse(att,def,'gen')?att.d.gen*0.7:0},
+      {k:'sig',w:canUse(att,def,'sig')?55:0},
+      {k:'gate',w:gateW}
+    ]).k;
+  }
+  // one taijutsu-style hit from att to def (Counter's answer): no dodge, def's guard and exposure apply
+  const strike=(att,def,mul)=>{
+    let dmg=9*(0.82+0.42*att.d.tai/100)*Math.max(0.62,1.12-(def.d.tai+def.d.sta)/650)*(0.65+Math.random()*0.7)*att.form*pwOf(att)*mul;
+    const crit=Math.random()<att.d.int/600+0.04; if(crit) dmg*=1.4;
+    dmg=Math.max(1,Math.round(dmg*(opt.dmg||1)*(SD(att.i).dmg||1)*def.open)); return {dmg,crit};
+  };
   function act(att,def,choice){
     const a=att.d.short, d=def.d.short, st=att.d.sigType;
+    att.open=1;
     if(att.stun>0){ att.stun--; say(`${a} is caught in an illusion and loses the turn.`,'gen',{att:att.i,skip:true}); return; }
+    if(choice&&D.player===att.i) D.hist.push(choice);
     if(choice&&!canUse(att,def,choice)) choice='tai';
+    if(!choice) choice=aiPick(att,def);
+    if(choice==='read'){
+      att.readT=D.turn+1;
+      const plan=D.player===att.i?{t:D.turn+1,k:aiPick(def,att)}:null; if(plan) def.plan=plan;
+      say(`${a} watches ${d} closely, ready to slip the next attack.`,'read',{att:att.i,who:att.i,plan:plan?plan.k:null});
+      return;
+    }
+    if(choice==='counter'){
+      att.stance='counter';
+      say(`${a} settles into a counter stance.`,'counter',{att:att.i,who:att.i});
+      return;
+    }
     if(choice==='guard'){
       const g=Math.round(Math.min(R.guardChakra,maxCh(att.d)-att.ch)); att.ch+=g; att.guarding=true;
       say(`${a} braces and guards for the turn.`,'guard',{att:att.i,who:att.i,heal:g});
       return;
     }
     if(choice==='focus'){
-      const g=Math.round(Math.min(30,maxCh(att.d)-att.ch)); att.ch+=g;
-      say(`${a} steps back and focuses, gathering ${g} chakra.`,'focus',{att:att.i,who:att.i,heal:g});
+      const g=Math.round(Math.min(30,maxCh(att.d)-att.ch)); att.ch+=g; fill(att,R.recGauge);
+      say(`${a} steps back and recovers, gathering ${g} chakra.`,'focus',{att:att.i,who:att.i,heal:g});
       return;
     }
-    if(choice?choice==='super':(canUse(att,def,'super')&&Math.random()<R.aiSup)){ bigMove(att,def,true); return; }
-    if(choice?choice==='ult':(canUse(att,def,'ult')&&Math.random()<R.aiUlt)){ bigMove(att,def,false); return; }
-    // the AI opens gates early and keeps climbing while it can afford the drain; the Gate of Death is a last resort
-    const gateW=!canUse(att,def,'gate')?0:att.gates<3?70:att.gates<6?(att.hp>35?45:15):att.gates<7?(att.hp>45?30:8):(att.hp<=50||def.hp<=45?60:0);
-    const opts=[
-      {k:'tai',w:att.d.tai*0.9+10},
-      {k:'nin',w:canUse(att,def,'nin')?att.d.nin*0.9:0},
-      {k:'gen',w:canUse(att,def,'gen')?att.d.gen*0.7:0},
-      {k:'sig',w:canUse(att,def,'sig')?55:0},
-      {k:'gate',w:gateW}
-    ];
-    let m=choice||weighted(opts).k, gate=0;
+    if(choice==='super'){ bigMove(att,def,true); return; }
+    if(choice==='ult'){ bigMove(att,def,false); return; }
+    let m=choice, gate=0;
+    const press=m==='pressure', cons=m==='conserve', close=CLOSE.includes(m)&&!(m==='sig'&&st==='gen'); // an illusion signature is not close range
+    if(press||cons) m='tai';
     if(m==='gate'){ gate=openTo(att,att.gates+1); m='tai'; }
     if(m==='sig'&&att.d.sg) gate=openTo(att,att.d.sg);
     const gn=gateNote(att,gate);
     let base,pow,name;
-    if(m==='tai'){ base=9; pow=att.d.tai; name=pick(att.d.tm||TAI_MOVES); att.ch=Math.min(maxCh(att.d),att.ch+3); }
+    if(m==='tai'){ base=9; pow=att.d.tai; name=pick(att.d.tm||TAI_MOVES); att.ch=Math.min(maxCh(att.d),att.ch+(press?0:cons?R.consCh:3)); if(cons) fill(att,R.consGauge); }
     else if(m==='nin'){ base=12; pow=att.d.nin; name=pick(att.d.mv||NIN_MOVES); att.ch-=C.nin; }
     else if(m==='gen'){ base=3; pow=att.d.gen; name=(att.d.gj&&att.d.gj.length)?pick(att.d.gj):'an illusion'; att.ch-=C.gen; }
     else { base=26; pow=att.d[st]; name=att.d.sig; att.ch-=C.sig; att.cd=3; }
 
+    const ctr=close&&def.stance==='counter';
+    if(ctr) def.stance=null;
+    const tk={pr:press,cons,parry:ctr};
+    if(press){ att.open=R.pressOpen; name='All-out '+name.replace(/^an? /,''); }
     let dodge=dodgeOf(att,def);
     if(m==='sig') dodge*=0.6;
-    if(Math.random()<dodge){
-      say((gn?gn.trim()+' ':'')+pick(DODGES).replace('{d}',d).replace('{m}',name),m==='sig'?'sig':m,{att:att.i,mv:m,name,dodge:true,st,gate,heal:gate?att.gh||0:0});
+    if(press) dodge*=R.pressDodge;
+    dodge+=adapted(def,m);
+    if(!ctr&&Math.random()<dodge){
+      say((gn?gn.trim()+' ':'')+pick(DODGES).replace('{d}',d).replace('{m}',name),m==='sig'?'sig':m,Object.assign({att:att.i,mv:m,name,dodge:true,st,gate,heal:gate?att.gh||0:0},tk));
       return;
     }
     if(m==='gen'){
-      const p=clamp(0.3+(att.d.gen-def.d.int)/150,0.08,0.8);
+      const p=trapOf(att,def);
       if(Math.random()<p){ def.stun=1; def.hp-=3; gain(att,def,3); say(`${a} catches ${d} with ${name}. ${d} is stunned.`,'gen',{att:att.i,mv:'gen',name,tgt:def.i,dmg:3,stun:true,ko:def.hp<=0,st}); }
       else say(`${d} sees through ${a}'s ${name.replace(/^an? /,'')}.`,'gen',{att:att.i,mv:'gen',name,resist:true,st});
       return;
@@ -1547,19 +1613,27 @@ function makeDuel(A,B,opt){
     let dmg=base*(0.82+0.42*pow/100)*Math.max(0.62,1.12-(def.d.tai+def.d.sta)/650)*(0.65+Math.random()*0.7)*att.form*pwOf(att);
     const crit=Math.random()<att.d.int/600+0.04;
     if(crit) dmg*=1.4;
-    dmg*=(opt.dmg||1)*(SD(att.i).dmg||1);
+    dmg*=(opt.dmg||1)*(SD(att.i).dmg||1)*(press?R.pressPow:cons?R.consPow:1)*def.open;
     dmg=Math.max(1,Math.round(dmg));
     let notes='', guard=false, surv=false, stunned=false;
-    if(def.guarding){ dmg=Math.max(1,Math.round(dmg*R.guardMul)); notes+=` ${d} was guarding.`; guard=true; }
+    if(ctr){ dmg=Math.max(1,Math.round(dmg*R.counterTake)); notes+=` ${d} parries it.`; guard=true; }
+    else if(def.guarding){ dmg=Math.max(1,Math.round(dmg*R.guardMul)); notes+=` ${d} was guarding.`; guard=true; }
     else if(def.d.guard&&Math.random()<def.d.guard){ dmg=Math.max(1,Math.round(dmg*0.5)); notes+=` ${d} blocks half of it.`; guard=true; }
     def.hp-=dmg; gain(att,def,dmg);
     if(def.hp<=0&&def.d.last&&!def.used){ def.used=true; def.hp=12; notes+=` ${d} refuses to fall and survives with 12 HP.`; surv=true; }
     const tag=crit?' Critical hit!':'';
     if(m==='sig'){
       if(st==='gen'&&Math.random()<0.5&&def.hp>0){ def.stun=1; notes+=` ${d} is stunned.`; stunned=true; }
-      say(`${gn.trim()}${gn?' ':''}${a} unleashes ${name}. ${dmg} damage.${tag}${notes}`,'sig',{att:att.i,mv:m,name,tgt:def.i,dmg,crit,guard,surv,stun:stunned,ko:def.hp<=0,st,gate,heal:gate?att.gh||0:0});
+      say(`${gn.trim()}${gn?' ':''}${a} unleashes ${name}. ${dmg} damage.${tag}${notes}`,'sig',Object.assign({att:att.i,mv:m,name,tgt:def.i,dmg,crit,guard,surv,stun:stunned,ko:def.hp<=0,st,gate,heal:gate?att.gh||0:0},tk));
     } else {
-      say(`${gn.trim()}${gn?' ':''}${a} lands ${name} on ${d}. ${dmg} damage.${tag}${notes}`,m,{att:att.i,mv:m,name,tgt:def.i,dmg,crit,guard,surv,ko:def.hp<=0,st,gate,heal:gate?att.gh||0:0});
+      say(`${gn.trim()}${gn?' ':''}${a} ${press?'goes all out:':cons?'saves chakra with':'lands'} ${name} on ${d}. ${dmg} damage.${tag}${notes}`,m,Object.assign({att:att.i,mv:m,name,tgt:def.i,dmg,crit,guard,surv,ko:def.hp<=0,st,gate,heal:gate?att.gh||0:0},tk));
+    }
+    // Counter: the parried attacker eats an answer that cannot be dodged (harder if they went all out)
+    if(ctr&&def.hp>0&&att.hp>0){
+      const s=strike(def,att,R.counterPow), cn=pick(def.d.tm||TAI_MOVES).replace(/^an? /,'');
+      att.hp-=s.dmg; gain(def,att,s.dmg); let cs=false;
+      if(att.hp<=0&&att.d.last&&!att.used){ att.used=true; att.hp=12; cs=true; }
+      say(`${d} counters with ${cn}. ${s.dmg} damage.${s.crit?' Critical hit!':''}${cs?` ${a} refuses to fall and survives with 12 HP.`:''}`,'tai',{att:def.i,mv:'tai',name:cn,tgt:att.i,dmg:s.dmg,crit:s.crit,surv:cs,ko:att.hp<=0,st:def.d.sigType,ctr:true});
     }
   }
 
@@ -1573,7 +1647,7 @@ function makeDuel(A,B,opt){
     let ud=(sup?R.supBase:R.ultBase)*(0.82+0.42*att.d[st]/100)*Math.max(0.62,1.12-(def.d.tai+def.d.sta)/650)*(0.8+Math.random()*0.4)*att.form*pwOf(att);
     const uc=Math.random()<att.d.int/600+0.06; if(uc) ud*=R.bigCrit;
     const DM=(opt.dmg||1)*(SD(att.i).dmg||1);
-    ud=Math.max(8,Math.min(Math.round((sup?R.supCap:R.ultCap)*DM),Math.round(ud*DM))); let un='', ug=false, us=false;
+    ud=Math.max(8,Math.min(Math.round((sup?R.supCap:R.ultCap)*DM),Math.round(ud*DM*def.open))); let un='', ug=false, us=false;
     if(def.guarding){ ud=Math.max(1,Math.round(ud*R.guardMul)); un+=` ${d} was guarding and takes only ${ud}.`; ug=true; }
     else if(def.d.guard&&Math.random()<def.d.guard*.4){ ud=Math.round(ud*.6); un+=` ${d} braces and cuts the damage.`; ug=true; }
     def.hp-=ud;
@@ -1589,12 +1663,14 @@ function makeDuel(A,B,opt){
     if(k==='sig') return att.ch>=C.sig&&att.cd<=0;
     if(k==='ult') return !att.usedUlt&&att.um>=R.ultAt&&att.readyT<D.turn&&(opt.noSup||!(att.um>=R.supAt&&att.superT<D.turn));
     if(k==='super') return !opt.noSup&&!att.usedUlt&&att.um>=R.supAt&&att.superT<D.turn;
-    if(k==='guard') return true;
+    if(k==='guard'||k==='read'||k==='counter'||k==='pressure'||k==='conserve') return true;
     if(k==='focus') return att.ch<maxCh(att.d)-1;
     return false;
   }
   D.f=f; D.log=log; D.say=say; D.maxCh=maxCh;
   D.act=(i,choice)=>act(f[i],f[1-i],choice);
+  D.aiChoice=i=>f[i].stun>0?undefined:aiPick(f[i],f[1-i]); // a controlled fight picks the AI's move before ordering the turn
+  D.habit=habit;
   D.over=()=>D.turn>=(opt.noCap?90:28)||f[0].hp<=0||f[1].hp<=0;
   D.order=()=>{ const s0=spdOf(f[0])*(0.75+Math.random()*0.5), s1=spdOf(f[1])*(0.75+Math.random()*0.5); return s0>=s1?[0,1]:[1,0]; };
   // what fighter i can do right now, with the odds the rules use (for the command bar)
@@ -1602,14 +1678,16 @@ function makeDuel(A,B,opt){
     const att=f[i], def=f[1-i], dg=dodgeOf(att,def), pct=x=>Math.round(x*100);
     return {
       tai:{ok:true,hit:pct(1-dg)},
-      nin:{ok:canUse(att,def,'nin'),hit:pct(1-dg),cost:C.nin},
-      gen:{ok:canUse(att,def,'gen'),trap:pct((1-dg)*clamp(0.3+(att.d.gen-def.d.int)/150,0.08,0.8)),cost:C.gen,stunned:def.stun>0},
+      nin:{ok:canUse(att,def,'nin'),hit:pct(1-dg-adapted(def,'nin')),cost:C.nin},
+      gen:{ok:canUse(att,def,'gen'),trap:pct((1-dg)*trapOf(att,def)),cost:C.gen,stunned:def.stun>0},
       sig:{ok:canUse(att,def,'sig'),hit:pct(1-dg*0.6),cost:C.sig,cd:att.cd},
       ult:{ok:canUse(att,def,'ult'),hit:pct(1-dg*R.ultDodge),gauge:Math.round(Math.min(100,att.um)),used:att.usedUlt,soon:!att.usedUlt&&att.um>=R.ultAt&&att.readyT>=D.turn},
       super:{ok:canUse(att,def,'super'),banned:!!opt.noSup,hit:pct(1-dg*R.supDodge),gauge:att.usedUlt||opt.noSup?0:Math.round(clamp((att.um-R.ultAt)/(R.supAt-R.ultAt)*100,0,100))},
       guard:{ok:true,gain:Math.round(Math.min(R.guardChakra,maxCh(att.d)-att.ch))},
       threat:canUse(def,att,'super')?'super':canUse(def,att,'ult')?'ult':'',
       focus:{ok:canUse(att,def,'focus'),gain:Math.round(Math.min(30,maxCh(att.d)-att.ch))},
+      read:{ok:true},counter:{ok:true},conserve:{ok:true,hit:pct(1-dg)},pressure:{ok:true,hit:pct(1-dg*R.pressDodge)},
+      plan:def.plan&&def.plan.t===D.turn?def.plan.k:null, reading:reading(att), habit:D.player===i?habit():null, adapt:def.adapt>=D.turn,
       gate:{ok:canUse(att,def,'gate'),open:att.gates,max:att.d.gates||0,next:GATES[att.gates+1]||null,pw:Math.round((pwOf(att)-1)*100),dr:GATES[att.gates].dr,hit:pct(1-dg)},
       taiOnly:taiOnly(att.d),
       ch:Math.round(att.ch),max:Math.round(maxCh(att.d)),stun:att.stun>0
@@ -1617,7 +1695,7 @@ function makeDuel(A,B,opt){
   };
   D.endTurn=()=>{
     f.forEach(x=>{
-      x.ch=Math.min(maxCh(x.d),x.ch+5*(opt.chRegen===undefined?1:opt.chRegen)); fill(x,R.gainTurn); if(x.cd>0) x.cd--; x.guarding=false;
+      x.ch=Math.min(maxCh(x.d),x.ch+5*(opt.chRegen===undefined?1:opt.chRegen)); fill(x,R.gainTurn); if(x.cd>0) x.cd--; x.guarding=false; x.stance=null;
       const dr=Math.min(GATES[x.gates].dr,Math.ceil(x.hp)-1);
       if(dr>0&&f[0].hp>0&&f[1].hp>0){ x.hp-=dr; say(`${x.d.short} burns ${dr} HP holding the ${GATES[x.gates].n} open.`,'drain',{who:x.i,dmg:dr}); }
       if(x.hp>0&&x.d.regen&&x.hp<100&&f[0].hp>0&&f[1].hp>0){
@@ -2324,7 +2402,7 @@ class Stage{
     if(e.mv==='ult') this.popup(e.sup?(e.crit?`CRITICAL ${KINU}!`:`${KINU}!`):e.crit?'CRITICAL ULTIMATE!':'ULTIMATE!',D.x,GY-256,e.sup?'#ffe9a0':'#ffd84d',e.crit?26:32,e.sup?'#7a1a5a':'#5a3a00');
     else if(e.crit) this.popup('CRITICAL!',D.x,GY-236,'#ffd84d',26,'#5a3a00');
   }
-  guardFx(D){ this.ring(D.x,GY-95,'#7fe3ff',20,70,320,4); this.popup('GUARD',D.x+(D.face*-30),GY-150,'#7fe3ff',20,'#0a3a4a'); }
+  guardFx(D,e){ const p=e&&e.parry; this.ring(D.x,GY-95,p?'#ffb35a':'#7fe3ff',20,70,320,4); this.popup(p?'PARRY':'GUARD',D.x+(D.face*-30),GY-150,p?'#ffb35a':'#7fe3ff',20,p?'#4a2200':'#0a3a4a'); }
   async survive(D){
     this.flash('#ffd36b',.55); this.ring(D.x,GY-95,'#ffd36b',10,120,520,5);
     this.popup('REFUSES TO FALL!',D.x,GY-250,'#ffd36b',24,'#5a3a00'); this.sfx('boom');
@@ -2382,7 +2460,7 @@ class Stage{
     D.flash=1; this.shake(big?(e.crit?16:12):5,big?260:160); this.stopFor(big?90:45); this.flash(fx.c,big?.45:.15); this.addExcite(big?.8:.3);
     this.sfx(big?'boom':'hit');
     this.hp(e); this.popupDmg(e,D);
-    if(e.guard) this.guardFx(D);
+    if(e.guard) this.guardFx(D,e);
     if(e.surv) await this.survive(D);
     this.knock(A,D,kn!==undefined?kn:(big?60:20)); this.pose(D,'hurt',this.d(70));
   }
@@ -2662,6 +2740,8 @@ class Stage{
       else if(e.type==='drain') await this.drain(e);
       else if(e.type==='focus') await this.focus(e);
       else if(e.type==='guard') await this.guardUp(e);
+      else if(e.type==='read') await this.readUp(e);
+      else if(e.type==='counter') await this.counterUp(e);
       else if(e.skip) await this.stunSkip(e);
       else if(e.att!==null&&e.mv){
         const A=this.f[e.att], D=this.f[1-e.att];
@@ -2727,6 +2807,29 @@ class Stage{
     await this.wait(this.d(620));
     A.aura=0; await this.pose(A,'idle',this.d(140));
   }
+  // Read: the fighter's eyes lock on the foe, a scanning ring sweeps over them
+  async readUp(e){
+    const A=this.f[e.att], D=this.f[1-e.att]; this.front=A.i;
+    this.pose(A,'block',this.d(140)); this.sfx('chirp');
+    const ex=A.x+A.face*10, ey=GY-150, ef=this.fxAdd(this.d(760),(ctx,k)=>{
+      ctx.save(); ctx.globalAlpha=Math.sin(Math.PI*k)*.9; ctx.strokeStyle='#c9b3ff'; ctx.lineWidth=2; ctx.setLineDash([6,6]); ctx.lineDashOffset=-k*60;
+      ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(D.x,GY-110); ctx.stroke(); ctx.setLineDash([]);
+      ctx.lineWidth=3; ctx.beginPath(); ctx.ellipse(D.x,GY-95,46+k*10,96+k*14,0,0,Math.PI*2); ctx.stroke();
+      const sy=GY-190+k*190; ctx.globalAlpha*=.6; ctx.beginPath(); ctx.moveTo(D.x-50,sy); ctx.lineTo(D.x+50,sy); ctx.stroke(); ctx.restore();
+    });
+    this.popup('READ',A.x,GY-196,'#c9b3ff',24,'#2a1a4a');
+    await this.wait(this.d(760)); ef.t=ef.dur;
+    await this.pose(A,'idle',this.d(140));
+  }
+  // Counter: a low, coiled stance with a flicker of light on the lead hand
+  async counterUp(e){
+    const A=this.f[e.att]; this.front=A.i;
+    await this.pose(A,'block',this.d(140)); this.sfx('thud');
+    this.ring(A.x+A.face*30,GY-100,'#ffb35a',18,80,this.d(420),3); this.sparks(A.x+A.face*36,GY-110,'#ffd59a',6);
+    this.popup('COUNTER STANCE',A.x,GY-196,'#ffb35a',22,'#4a2200');
+    await this.wait(this.d(420));
+    await this.pose(A,'idle',this.d(140));
+  }
   async stunSkip(e){
     const A=this.f[e.att]; A.dizzy=true; this.pose(A,'stun',this.d(120));
     this.popup('STUNNED',A.x,GY-196,'#ffd84d',24,'#5a3a00'); this.sfx('poof');
@@ -2736,7 +2839,9 @@ class Stage{
 
   async tai(e,A,D){
     const fx=A.fx, strikes=e.ko||e.crit?3:(Math.random()<.45?2:1);
-    if(e.name&&!/^an? /.test(e.name)) this.caption(e.name+'!',fx.c);
+    if(e.name&&!/^an? /.test(e.name)) this.caption(e.name+'!',e.ctr?'#ffb35a':fx.c);
+    if(e.ctr) this.popup('COUNTER!',A.x,GY-206,'#ffb35a',28,'#4a2200');
+    if(e.pr){ this.popup('ALL OUT',A.x,GY-206,'#ff8a5a',24,'#5a1a00'); A.aura=1; }
     const hits=e.dodge?Math.min(2,strikes):strikes;
     const parts=[]; { let left=e.dmg||0; for(let i=0;i<hits;i++){ const v=i===hits-1?left:Math.max(1,Math.round(left*rand(.25,.45))); parts.push(v); left-=v; } }
     const P=this.pupFree(A), S=P||A; // a puppet master's puppet does the fighting while they pull the threads
@@ -2758,9 +2863,9 @@ class Stage{
         const o2={mv:'tai',dmg:parts[i],crit:e.crit,guard:e.guard,surv:e.surv,ko:e.ko};
         if(e.ko){ this.popup(`-${parts[i]}`,D.x,GY-196,'#fff',44,'#8a1a10'); this.hp(e); await this.finisher(A,D,fx,hx,hy); }
         else{
-          this.shake(e.crit?15:8,200); this.stopFor(e.crit?120:60); if(e.crit) this.flash('#ffffff',.5);
+          this.shake(e.crit||e.pr||e.ctr?15:8,200); this.stopFor(e.crit||e.pr||e.ctr?120:60); if(e.crit) this.flash('#ffffff',.5); if(e.pr||e.ctr) this.ring(hx,hy,e.pr?'#ff8a5a':'#ffb35a',10,110,this.d(360),5);
           this.popupDmg(Object.assign({},e,{dmg:parts[i],mv:'tai'}),D); this.hp(e);
-          if(e.guard) this.guardFx(D);
+          if(e.guard) this.guardFx(D,e);
           if(e.surv) await this.survive(D);
           this.knock(A,D,e.crit?40:16); this.pose(D,'hurt',this.d(70));
           await this.wait(this.d(120));
@@ -2773,6 +2878,8 @@ class Stage{
       }
     }
     if(ev) await ev;
+    if(e.pr) A.aura=0;
+    if(e.cons) this.popup('+CHAKRA',A.x,GY-196,'#7fd0ff',18,'#0a2a4a');
     if(!e.ko&&!D.dead) await Promise.all([this.recover(A),this.recover(D)]); else await this.recover(A);
   }
 
@@ -2855,7 +2962,7 @@ class Stage{
     this.burst(hx,hy,fx.c,34,.9,6); this.ring(hx,hy,'#ffffff',8,150,420,6); this.ring(hx,hy,fx.c,4,110,480,4);
     this.shake(e.crit?20:14,300); this.stopFor(130); this.addExcite(.9);
     this.hp(e); this.popupDmg(e,D);
-    if(e.guard) this.guardFx(D);
+    if(e.guard) this.guardFx(D,e);
     if(e.surv) await this.survive(D);
     this.knock(A,D,70); this.pose(D,'hurt',this.d(70));
     await this.wait(this.d(260));
@@ -2879,7 +2986,7 @@ class Stage{
       }
       if(e.ko){ this.hp(e); this.popupDmg(e,D); this.mood=null; await this.finisher(A,D,fx,D.x,GY-95); A.eye=0; await this.recover(A); return; }
       this.flash('#ffffff',.9); this.hp(e); this.popupDmg(e,D); this.sfx('boom'); this.shake(14,260); this.stopFor(100);
-      if(e.guard) this.guardFx(D);
+      if(e.guard) this.guardFx(D,e);
       if(e.surv) await this.survive(D);
       if(e.stun){ D.dizzy=true; this.pose(D,'stun',this.d(100)); this.popup('TRAPPED!',D.x,GY-250,'#d7b8ff',26,'#2a1250'); } else this.pose(D,'hurt',this.d(70));
       await this.wait(this.d(260));
@@ -4884,7 +4991,13 @@ const LINES={
   gate:['{a} forces open the {g}!','{a} opens the {g}! The power keeps climbing!','Gate {n}, the {g}! {a} is glowing!'],
   gateDeath:['{a} OPENS THE GATE OF DEATH! There is no coming back from this!','The Eighth Gate! {a} is burning his own life force!'],
   drain:['The gates are burning {x} up: -{h} HP.','{x} pays for the open gates, -{h} HP.','Steam pours off {x}. -{h} HP.'],
-  focus:['{x} steps back to gather chakra.','{x} focuses: +{h} chakra.','{x} takes a breath and refills, +{h} chakra.']
+  focus:['{x} steps back to gather chakra.','{x} recovers: +{h} chakra.','{x} takes a breath and refills, +{h} chakra.'],
+  read:['{x} studies every move {y} makes.','{x} watches {y} closely.','{x} is reading {y}.'],
+  counterUp:['{x} waits for {y} to come in close.','{x} sets a trap: a counter stance.','{x} invites {y} to attack.'],
+  counter:['COUNTER! {a} saw it coming: {dmg} damage!','{a} parries and punishes, {dmg} damage!','Read and punished! {a} hits back for {dmg}!'],
+  ctrPre:['{a} saw it coming!','{a} was waiting for that!','Right into the counter!'],
+  pressPre:['{a} goes all out!','{a} drops the guard and attacks with everything!','All-out attack from {a}!'],
+  consPre:['{a} keeps it light and saves chakra.','A measured strike from {a}.']
 };
 class Announcer{
   constructor(a,b,isMine){ this.d=[a,b]; this.isMine=isMine||(()=>false); this.hp=[100,100]; this.streak=[0,0]; this.lead=-1; this.lastIdx={}; this.ready=[false,false]; this.sready=[false,false]; }
@@ -4907,6 +5020,11 @@ class Announcer{
     if(e.type==='heal') return this.fill(this.line('heal'),v);
     if(e.type==='focus') return this.fill(this.line('focus'),v);
     if(e.type==='guard') return this.fill(this.line('guardUp'),v);
+    if(e.type==='read') return this.fill(this.line('read'),Object.assign(v,{y:this.d[1-e.who].short}));
+    if(e.type==='counter') return this.fill(this.line('counterUp'),Object.assign(v,{y:this.d[1-e.who].short}));
+    if(e.ctr) return this.fill(this.line('ctrPre'),v);
+    if(e.pr) return this.fill(this.line('pressPre'),v);
+    if(e.cons) return this.fill(this.line('consPre'),v);
     if(e.type==='drain') return this.fill(this.line('drain'),Object.assign(v,{h:e.dmg}));
     if(e.skip) return this.fill(this.line('skip'),v);
     if(e.gate) return this.fill(this.line(e.gate>=8?'gateDeath':'gate'),Object.assign(v,{g:GATES[e.gate].n,n:e.gate}));
@@ -4921,6 +5039,7 @@ class Announcer{
     if(e.ko) t=this.fill(this.line('ko'),v);
     else if(e.surv) t=this.fill(LINES.surv,v);
     else if(e.mv==='gen') t=this.fill(this.line(e.stun?'trapped':'resisted'),v);
+    else if(e.ctr) t=this.fill(this.line('counter'),v);
     else if(e.crit) t=this.fill(this.line('crit'),v);
     else if(e.mv==='ult') t=this.fill(this.line(e.sup?'hitSup':'hitUlt'),v);
     else t=this.fill(this.line(e.mv==='sig'?'hitSig':e.mv==='nin'?'hitNin':'hitTai'),v);
@@ -6369,27 +6488,45 @@ function afterSim(last){
 }
 
 /* ---------- fight it yourself: you pick each move, the opponent uses the same AI as the simulation ---------- */
-const MOVE_KEYS=['tai','nin','gen','sig','big','guard','focus'];
+const MOVE_KEYS=['tai','nin','gen','sig','big','guard','focus'];  // keys 1-7 (6 and 7 stay as Guard and Recover)
+const TAC_KEYS={q:'guard',w:'read',e:'counter',r:'pressure',t:'conserve',y:'focus'}; // the tactics row is the letter row under the numbers
+const TAC_NAME={tai:'Taijutsu',nin:'Ninjutsu',gen:'Genjutsu',sig:'their signature',ult:'their Ultimate',super:KIN,gate:'a gate and a strike',guard:'Guard',read:'Read',counter:'a counter stance',pressure:'an all-out attack',conserve:'a light strike to save chakra',focus:'Recover'};
+// what beats each move: shown when a Read reveals the foe's next move
+const TAC_TIP={tai:'Counter (E) parries it and hits back.',pressure:'Counter (E) punishes it hard.',conserve:'Counter (E) parries it.',gate:'Counter (E) parries the strike.',sig:'Counter (E) parries it.',
+  nin:'Counter will not stop a ranged jutsu: hit first or Guard (Q).',gen:'Read (W) again makes the illusion likely to fail.',ult:'Guard (Q) cuts it to 40%.',super:'Guard (Q) cuts it to 40%.',
+  counter:'Do not come in close: use Ninjutsu, Genjutsu, or Recover (Y) for free.',read:'It will be hard to hit: build up with Conserve (T) or Recover (Y).',focus:'A free turn: Pressure (R).',guard:'Build up while they turtle.'};
 function duelPanel(){
   const S=state.duel, D=S.D, o=D.options(S.me), me=D.f[S.me].d, foe=D.f[1-S.me].d, w=S.waiting;
-  const b=(k,i,cls,title,sub,ok)=>`<button class="cbtn ${cls}" data-action="move" data-val="${k}" ${w&&ok?'':'disabled'} aria-keyshortcuts="${i+1}"><kbd>${i+1}</kbd><b>${title}</b><small>${sub}</small></button>`;
-  const head=S.done?'Fight over.':w?(S.auto?'The AI is fighting for you.':`Your move, turn ${D.turn}.<span class="kh"> Pick a technique or press 1 to 7.</span>`):o.stun?`${me.short} is trapped in a genjutsu and loses this turn...`:`Turn ${D.turn} is playing out...`;
+  // sub can be [long, short]: the short text is what fits on a phone
+  const b=(k,key,cls,title,sub,ok)=>`<button class="cbtn ${cls}" data-action="move" data-val="${k}" ${w&&ok?'':'disabled'} aria-keyshortcuts="${key}"><kbd>${key.toUpperCase()}</kbd><b>${title}</b><small>${Array.isArray(sub)?`<span class="lg">${sub[0]}</span><span class="st">${sub[1]}</span>`:sub}</small></button>`;
+  const head=S.done?'Fight over.':w?(S.auto?'The AI is fighting for you.':`Your move, turn ${D.turn}.<span class="kh"> Keys 1 to 5 attack, Q to Y are tactics.</span>`):o.stun?`${me.short} is trapped in a genjutsu and loses this turn...`:`Turn ${D.turn} is playing out...`;
+  const plan=o.plan&&w?`<div class="intel" role="status"><b>Read:</b> ${foe.short} is going for ${o.plan==='sig'?foe.sig:TAC_NAME[o.plan]} this turn. ${TAC_TIP[o.plan]||''}</div>`:'';
+  const habit=o.habit&&w&&!o.plan?`<div class="intel warn">${foe.short} has seen you use ${TAC_NAME[o.habit]==='their signature'?me.sig:o.habit==='focus'?'Recover':TAC_NAME[o.habit].replace(/^(a|an) /,'')} twice in three turns and may be ready for it. Mix it up.</div>`:'';
   return `<div class="cmd ${w?'live':''}">
     <div class="cmdh"><span class="you">You: <b>${me.short}</b></span><span>Chakra <b>${o.ch}</b>/${o.max}</span><span>${o.ult.used?'Big move <b>spent</b>':o.super.gauge>0?`${KIN} <b>${o.super.gauge}%</b>`:`Ultimate <b>${o.ult.gauge}%</b>`}</span><span class="cmds">${head}</span></div>
-    <div class="cmdg">
-      ${b('tai',0,'tai','Taijutsu',`Hit ${o.tai.hit}%, +3 chakra`,o.tai.ok)}
-      ${o.taiOnly?b('gate',1,'gate',o.gate.next?`Gate ${o.gate.open+1}: ${o.gate.next.n.replace('Gate of ','')}`:'All gates open',o.gate.next?`+${Math.round((o.gate.next.pw-1)*100)}% power${o.gate.next.dr?`, -${o.gate.next.dr} HP/turn`:''}, and strike`:`${o.gate.open} of ${o.gate.max} open, +${o.gate.pw}% power`,o.gate.ok)
-        :b('nin',1,'nin','Ninjutsu',o.nin.ok?`10 chakra, hit ${o.nin.hit}%`:'Needs 10 chakra',o.nin.ok)}
-      ${o.taiOnly?b('gen',2,'gen','Genjutsu','Taijutsu only',false)
-        :b('gen',2,'gen','Genjutsu',o.gen.stunned?`${foe.short} is already trapped`:o.gen.ok?`8 chakra, trap ${o.gen.trap}%`:'Needs 8 chakra',o.gen.ok)}
-      ${b('sig',3,'sig',me.sig,o.sig.cd>0?`Ready in ${o.sig.cd} turn${o.sig.cd>1?'s':''}`:o.sig.ok?`28 chakra, hit ${o.sig.hit}%`:'Needs 28 chakra',o.sig.ok)}
-      ${o.ult.used?b('ult',4,'ult','Big move','Spent this fight',false)
-        :o.super.ok?b('super',4,'ult sup',KINU,`${supOf(me).n}. READY, hit ${o.super.hit}%`,true)
-        :b('ult',4,'ult','ULTIMATE',`${ultOf(me).n}. ${o.ult.ok?`READY, hit ${o.ult.hit}%. ${o.super.banned?`${KIN} banned this fight`:o.super.gauge>0?`${KIN} charging ${o.super.gauge}%`:`Hold it to unseal the ${KIN}`}`:o.ult.soon?'Ready next turn':`Gauge ${o.ult.gauge}%`}`,o.ult.ok)}
-      ${b('guard',5,'grd'+(o.threat&&w?' hot':''),'Guard',`All damage this turn x0.4${o.guard.gain?`, +${o.guard.gain} chakra`:''}`,o.guard.ok)}
-      ${b('focus',6,'foc','Focus',o.focus.ok?`Skip the attack, +${o.focus.gain} chakra`:'Chakra is full',o.focus.ok)}
+    <div class="cmdl">Attack</div>
+    <div class="cmdg att">
+      ${b('tai','1','tai','Taijutsu',`Hit ${o.tai.hit}%, +3 chakra`,o.tai.ok)}
+      ${o.taiOnly?b('gate','2','gate',o.gate.next?`Gate ${o.gate.open+1}: ${o.gate.next.n.replace('Gate of ','')}`:'All gates open',o.gate.next?`+${Math.round((o.gate.next.pw-1)*100)}% power${o.gate.next.dr?`, -${o.gate.next.dr} HP/turn`:''}, and strike`:`${o.gate.open} of ${o.gate.max} open, +${o.gate.pw}% power`,o.gate.ok)
+        :b('nin','2','nin','Ninjutsu',o.nin.ok?`${o.nin.cost} chakra, hit ${o.nin.hit}%`:`Needs ${o.nin.cost} chakra`,o.nin.ok)}
+      ${o.taiOnly?b('gen','3','gen','Genjutsu','Taijutsu only',false)
+        :b('gen','3','gen','Genjutsu',o.gen.stunned?`${foe.short} is already trapped`:o.gen.ok?`${o.gen.cost} chakra, trap ${o.gen.trap}%`:`Needs ${o.gen.cost} chakra`,o.gen.ok)}
+      ${b('sig','4','sig',me.sig,o.sig.cd>0?`Ready in ${o.sig.cd} turn${o.sig.cd>1?'s':''}`:o.sig.ok?`${o.sig.cost} chakra, hit ${o.sig.hit}%`:`Needs ${o.sig.cost} chakra`,o.sig.ok)}
+      ${o.ult.used?b('ult','5','ult','Big move','Spent this fight',false)
+        :o.super.ok?b('super','5','ult sup',KINU,`${supOf(me).n}. READY, hit ${o.super.hit}%`,true)
+        :b('ult','5','ult','ULTIMATE',`${ultOf(me).n}. ${o.ult.ok?`READY, hit ${o.ult.hit}%. ${o.super.banned?`${KIN} banned this fight`:o.super.gauge>0?`${KIN} charging ${o.super.gauge}%`:`Hold it to unseal the ${KIN}`}`:o.ult.soon?'Ready next turn':`Gauge ${o.ult.gauge}%`}`,o.ult.ok)}
     </div>
-    ${o.threat&&w?`<div class="threat" role="alert">${foe.short}'s ${o.threat==='super'?KINU:'Ultimate'} is READY. Guard (key 6) cuts it to 40%.</div>`:''}
+    <div class="cmdl">Tactics</div>
+    <div class="cmdg tac">
+      ${b('guard','q','grd'+(o.threat&&w?' hot':''),'Guard',[`All damage x${RULES.guardMul}${o.guard.gain?`, +${o.guard.gain} chakra`:''}. Best against big moves`,`Damage x${RULES.guardMul}`],o.guard.ok)}
+      ${b('read','w','rd','Read',[o.reading?`Reading: +${Math.round(RULES.readDodge*100)}% dodge now. Read again to see their next move`:`No attack. +${Math.round(RULES.readDodge*100)}% dodge this turn and next, and see their next move`,`+${Math.round(RULES.readDodge*100)}% dodge, see next move`],o.read.ok)}
+      ${b('counter','e','ctr','Counter',[`Parry a close-range hit and strike back x${RULES.counterPow}. Ranged moves get through`,'Beats close range'],o.counter.ok)}
+      ${b('pressure','r','prs','Pressure',[`Taijutsu x${RULES.pressPow}, hit ${o.pressure.hit}%. You take x${RULES.pressOpen} until your next move`,`Hit x${RULES.pressPow}, take x${RULES.pressOpen}`],o.pressure.ok)}
+      ${b('conserve','t','cns','Conserve',[`Light hit (${Math.round(RULES.consPow*100)}%), hit ${o.conserve.hit}%, +${RULES.consCh} chakra, +${RULES.consGauge} gauge`,`${Math.round(RULES.consPow*100)}% hit, +${RULES.consCh} chakra`],o.conserve.ok)}
+      ${b('focus','y','foc','Recover',o.focus.ok?[`No attack, +${o.focus.gain} chakra, +${RULES.recGauge} gauge`,`+${o.focus.gain} chakra, no attack`]:'Chakra is full',o.focus.ok)}
+    </div>
+    ${plan}${habit}
+    ${o.threat&&w?`<div class="threat" role="alert">${foe.short}'s ${o.threat==='super'?KINU:'Ultimate'} is READY. Guard (Q) cuts it to 40%.</div>`:''}
     <div class="row cmdr">
       ${speedSeg()}
       <button class="btn small" data-action="sound">Sound: ${Sfx.on?'on':'off'}</button>
@@ -6418,7 +6555,7 @@ function chooseMove(k){
 function abandonDuel(){ const S=state.duel; if(S&&S.choose) S.choose(null); state.duel=null; }
 // play one fight with the player controlling side `me` (0 = a, 1 = b). Returns the simFight-style result, or null if abandoned.
 async function playControlled(a,b,me,o){
-  const run=state.run, D=makeDuel(a,b,o.opt);
+  const run=state.run, D=makeDuel(a,b,o.opt); D.player=me;
   state.busy=true; state.paused=false;
   state.duel={D,me,waiting:false,choose:null,auto:false,done:false};
   const st=buildArena(a,b,o.label,o.notes||[],`You control ${[a,b][me].short}`,o.theme);
@@ -6448,8 +6585,10 @@ async function playControlled(a,b,me,o){
     if(D.f[me].stun>0){ renderDuel(); }
     else { choice=await askMove(); if(choice===null||gone()) return null; }
     renderDuel();
-    const ord=choice==='guard'?[me,1-me]:D.order(); // a guard goes up before anyone moves
-    for(const i of ord){ if(D.f[0].hp<=0||D.f[1].hp<=0) break; D.act(i,i===me?choice:undefined); if(!await playNew()) return null; }
+    // the AI commits to its move before the turn is ordered (it answers your habits, never this turn's pick); stances go up first
+    const ai=D.aiChoice(1-me), st1=STANCES.includes(choice), st2=STANCES.includes(ai);
+    const ord=st1&&!st2?[me,1-me]:st2&&!st1?[1-me,me]:D.order();
+    for(const i of ord){ if(D.f[0].hp<=0||D.f[1].hp<=0) break; D.act(i,i===me?choice:ai); if(!await playNew()) return null; }
     D.endTurn(); if(!await playNew()) return null;
   }
   const res=D.result(); st.skipping=false;
@@ -6532,7 +6671,7 @@ function startVersus(){
 document.addEventListener('keydown',e=>{
   if(!state.duel||!state.duel.waiting||e.ctrlKey||e.metaKey||e.altKey) return;
   const t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='SELECT'||t.tagName==='TEXTAREA')) return;
-  let k=MOVE_KEYS[+e.key-1]; if(!k) return;
+  let k=MOVE_KEYS[(e.key==='0'?10:+e.key)-1]||TAC_KEYS[(e.key||'').toLowerCase()]; if(!k) return;
   const o=state.duel.D.options(state.duel.me);
   if(k==='big') k=o.super.ok?'super':'ult';
   if(k==='nin'&&o.taiOnly) k='gate'; // key 2 opens a gate for Lee and Guy

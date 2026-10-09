@@ -99,7 +99,7 @@ const path = require('path');
     click('cback2'); out.back = state.screen === 'circuit' && !state.circuitRun && state.settings.mode !== 'c_genin';
     // rewards (forced into the reward phase so every branch runs)
     const reward = () => { CIRC.phase = 'reward'; rollOffer(); renderCircuit(); };
-    reward(); const sp = PROF.spins; click('creward', 'spins'); out.spins = PROF.spins === sp + 6 && CIRC.phase === 'ready';
+    reward(); const sp = PROF.spins; click('creward', 'spins'); out.spins = PROF.spins >= sp + 6 && CIRC.phase === 'ready'; // +80 XP can also level up (+5 spins)
     reward(); const rid = CIRC.offer.recruits[0], n0 = CIRC.squad.length, sameBase = CIRC.squad.some(id => byId(id).base === byId(rid).base);
     click('crecruit', rid); out.recruit = CIRC.squad.includes(rid) && CIRC.squad.length === (sameBase ? n0 : n0 + 1);
     reward(); click('creward', 'risk'); out.risk = CIRC.risk === true;
@@ -134,6 +134,61 @@ const path = require('path');
   await page.evaluate(() => window.scrollTo(0, 0)); await shot('5_circuit');
   await page.reload(); await page.addScriptTag({ path: path.join(__dirname, 'harness.js') });
   ok(await page.evaluate(() => !!CIRC && CIRC.hard && CIRC.phase === 'ready' && CIRC.squad.length === 3), 'circuit lost on reload');
+
+  // 6. combat tactics: each one does what it says, the AI answers habits, no single option wins, AI-vs-AI fights never use them
+  const tc = await page.evaluate(() => {
+    const out = {}, A = byId('kakashi1'), L = byId('lee1');
+    const fresh = (a, b) => { const D = makeDuel(a, b); D.player = 0; D.turn = 1; return D; };
+    // Counter parries a close-range hit and answers it; a ranged jutsu goes through
+    let D = fresh(A, L); D.act(0, 'counter'); D.act(1, 'tai');
+    const par = D.log.find(e => e.parry), ctr = D.log.find(e => e.ctr);
+    out.counter = !!par && !!ctr && ctr.att === 0 && !D.f[0].stance;
+    D = fresh(A, byId('itachi1')); D.act(0, 'counter'); D.act(1, 'nin'); out.ranged = !D.log.some(e => e.parry || e.ctr);
+    // Read: the dodge goes up, the foe's next move is revealed and played
+    D = fresh(A, L); const dg0 = D.options(0).tai.hit; D.act(0, 'read'); D.turn++;
+    const o = D.options(0), planned = o.plan; out.read = !!planned && D.aiChoice(1) === (D.f[1].stun ? undefined : planned) || planned === 'gate';
+    out.readDodge = D.options(1).tai.hit <= dg0 - 30;
+    // Pressure leaves you open until your next move; Conserve gathers chakra
+    D = fresh(A, L); D.f[0].ch = 10; D.act(0, 'pressure'); out.press = D.f[0].open === RULES.pressOpen; D.act(0, 'tai'); out.press2 = D.f[0].open === 1;
+    D = fresh(A, L); D.f[0].ch = 10; D.act(0, 'conserve'); out.conserve = D.f[0].ch === 10 + RULES.consCh;
+    // the AI answers a habit: two taijutsu in three turns draws a counter
+    const keep = RULES.aiAnswer; RULES.aiAnswer = 1;
+    D = fresh(A, L); D.hist = ['tai', 'tai']; D.turn = 5; out.habit = D.aiChoice(1) === 'counter' && D.options(0).habit === 'tai';
+    D = fresh(A, byId('itachi1')); D.hist = ['nin', 'nin']; D.turn = 5; D.aiChoice(1); out.adapt = D.options(0).adapt && D.options(0).nin.hit < fresh(A, byId('itachi1')).options(0).nin.hit;
+    RULES.aiAnswer = keep;
+    // AI vs AI is untouched
+    let tactic = 0; for (let i = 0; i < 200; i++) { const a = pick(ROSTER); let b = pick(ROSTER); while (b.base === a.base) b = pick(ROSTER); simFight(a, b).log.forEach(e => { if (['read', 'counter'].includes(e.type) || e.pr || e.cons || e.ctr) tactic++; }); }
+    out.aiVsAi = tactic === 0;
+    // strategies against similarly rated AI: spamming one option loses, mixing wins
+    const best = o => o.super.ok ? 'super' : o.ult.ok ? 'ult' : o.sig.ok ? 'sig' : o.nin.ok && !o.taiOnly ? 'nin' : 'tai';
+    const close = ['tai', 'pressure', 'conserve', 'gate', 'sig'];
+    const P = { tai: () => 'tai', counter: () => 'counter', pressure: () => 'pressure', read: () => 'read', guard: () => 'guard',
+      mixed: (o, D) => o.plan ? (close.includes(o.plan) ? 'counter' : o.plan === 'ult' || o.plan === 'super' ? 'guard' : best(o)) : o.threat && !o.reading ? 'read' : o.sig.ok || o.super.ok ? best(o) : !o.reading && D.hist[D.hist.length - 1] !== 'read' ? 'read' : best(o) };
+    const pairs = []; for (let i = 0; i < 300; i++) { const a = pick(ROSTER); let b = pick(ROSTER), g = 0; while ((b.base === a.base || Math.abs(b.ovr - a.ovr) > 5) && g++ < 500) b = pick(ROSTER); pairs.push([a, b]); }
+    const wr = {};
+    for (const [k, pol] of Object.entries(P)) { let w = 0; for (const [a, b] of pairs) { const D = makeDuel(a, b); D.player = 0;
+      while (!D.over()) { D.turn++; const ch = D.f[0].stun > 0 ? undefined : pol(D.options(0), D), ai = D.aiChoice(1), s1 = STANCES.includes(ch), s2 = STANCES.includes(ai);
+        const ord = s1 && !s2 ? [0, 1] : s2 && !s1 ? [1, 0] : D.order(); for (const i of ord) { if (D.f[0].hp <= 0 || D.f[1].hp <= 0) break; D.act(i, i === 0 ? ch : ai); } D.endTurn(); }
+      if (D.result().winner === a) w++; } wr[k] = Math.round(w / 3); }
+    out.spam = ['tai', 'counter', 'pressure', 'read', 'guard'].every(k => wr[k] <= 35); out.mixed = wr.mixed >= 65; out.wr = wr;
+    return out;
+  });
+  const tcw = tc.wr; delete tc.wr;
+  ok(Object.values(tc).every(v => v === true), 'tactics ' + JSON.stringify(tc) + ' ' + JSON.stringify(tcw));
+  console.log('tactics win rates vs similar AI (%):', JSON.stringify(tcw));
+  // the command bar: letter keys pick tactics in a real fight
+  const keyed = await page.evaluate(async () => {
+    renderDraft(); document.querySelector('[data-action="quick"]').click(); state.vs.me = 'kakashi1'; state.vs.foe = 'lee1'; renderVersus(); state.settings.speed = 4;
+    document.querySelector('[data-action="vsfight"]').click();
+    for (let i = 0; i < 400 && !(state.duel && state.duel.waiting); i++) await new Promise(r => setTimeout(r, 50));
+    const rows = document.querySelectorAll('#cmdslot .cmdg').length, n = document.querySelectorAll('#cmdslot .cbtn').length;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'w' }));
+    const D = state.duel.D; for (let i = 0; i < 400 && !D.log.some(e => e.type === 'read'); i++) await new Promise(r => setTimeout(r, 50));
+    const read = D.log.some(e => e.type === 'read' && e.att === state.duel.me);
+    abandonDuel(); state.run++; state.busy = false;
+    return { rows, n, read };
+  });
+  ok(keyed.rows === 2 && keyed.n === 11 && keyed.read, 'tactics command bar ' + JSON.stringify(keyed));
 
   if (errors.length) fail.push(...errors);
   console.log(fail.length ? 'FAILED:\n' + fail.join('\n') : 'season ok');
