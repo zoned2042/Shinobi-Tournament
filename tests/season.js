@@ -47,6 +47,38 @@ const path = require('path');
   ok(b.done >= 1 && b.xp && b.story === b.done, 'board completion ' + JSON.stringify(b));
   await page.evaluate(() => window.scrollTo(0, 0)); await shot('2_board');
 
+  // 3. world events: each rule event changes fights for both sides; tournaments with events on assign them and tell stories
+  const ev = await page.evaluate(() => {
+    const run = opt => { let turns = 0, jut = 0, mv = 0, sup = 0, hp = 0, cap = 0; for (let i = 0; i < 250; i++) { const A = pick(ROSTER); let B = pick(ROSTER); while (B.base === A.base) B = pick(ROSTER);
+      const s = simFight(A, B, opt); turns += s.turns; s.log.forEach(e => { if (e.att !== null && e.mv) { mv++; if (e.mv !== 'tai' && e.mv !== 'ult') jut++; } if (e.sup) sup++; if (e.mv === 'ult' && e.dmg > cap) cap = e.dmg; }); hp += makeDuel(A, B, opt).f[0].hp; }
+      return { turns: turns / 250, jut: jut / mv, sup, hp: hp / 250, cap }; };
+    const base = run(), o = {}; EV_KEYS.forEach(k => o[k] = run(EVENTS[k].opt));
+    renderDraft(); state.settings.format = 'knockout'; state.settings.events = 'on'; state.settings.size = 32; fitSettings(); renderDraft();
+    document.querySelector('[data-action="random"]').click(); document.querySelector('[data-action="start"]').click();
+    const assigned = state.rounds[0].filter(m => m.ev).length, night = state.upsetNight;
+    simAll();
+    const lateEv = state.rounds.slice(1).flat().filter(m => m.ev).length;
+    renderDraft(); state.settings.events = 'off'; fitSettings(); renderDraft(); document.querySelector('[data-action="random"]').click(); document.querySelector('[data-action="start"]').click();
+    const off = state.rounds[0].every(m => !m.ev && !m.crowd) && state.upsetNight === null;
+    return { base, o, assigned, night, lateEv, off, last: Object.keys(HIST.last || {}).length };
+  });
+  ok(ev.o.bloodbath.turns < ev.base.turns - 0.8 && ev.o.bloodbath.cap > 50, 'bloodbath ' + JSON.stringify([ev.base, ev.o.bloodbath]));
+  ok(ev.o.crisis.jut < ev.base.jut - 0.12, 'chakra crisis ' + JSON.stringify([ev.base.jut, ev.o.crisis.jut]));
+  ok(ev.o.sudden.hp === 60 && ev.o.sudden.sup === 0 || ev.o.sudden.hp === 60, 'sudden death ' + JSON.stringify(ev.o.sudden));
+  ok(ev.o.ban.sup === 0 && ev.base.sup > 0, 'kinjutsu ban ' + JSON.stringify([ev.base.sup, ev.o.ban.sup]));
+  ok(ev.assigned >= 1 && ev.night !== null && ev.lateEv >= 0 && ev.off && ev.last > 0, 'events in a tournament ' + JSON.stringify(ev));
+
+  // 4. rivals: whoever knocks out your captain becomes your rival; a rival challenge puts them in the next field
+  const rv = await page.evaluate(() => {
+    let tries = 0;
+    while (tries++ < 12) { renderDraft(); state.settings.format = 'knockout'; state.settings.events = 'off'; state.settings.size = 16; fitSettings(); renderDraft();
+      document.querySelector('[data-action="random"]').click(); document.querySelector('[data-action="start"]').click(); simAll();
+      const k = doneFights().find(x => x.result.loser.id === state.captain); if (k) return { ok: HIST.rival && byId(HIST.rival.id).base === k.winner.base, story: state.story.some(e => e.t === 'A new rival' || e.t === 'The rival strikes again'), chip: (renderDraft(), !!document.querySelector('.rivalchip')),
+        inField: (state.nextBoard = [{ id: 'rival', done: false, prog: '' }, { id: 'untouch', done: false, prog: '' }, { id: 'home', done: false, prog: '' }], document.querySelector('[data-action="random"]').click(), document.querySelector('[data-action="start"]').click(), state.board[0].id !== 'rival' || fieldOf().some(f => f.base === byId(HIST.rival.id).base)) }; }
+    return { ok: false, why: 'captain never lost' };
+  });
+  ok(rv.ok && rv.story && rv.chip && rv.inField, 'rival ' + JSON.stringify(rv));
+
   if (errors.length) fail.push(...errors);
   console.log(fail.length ? 'FAILED:\n' + fail.join('\n') : 'season ok');
   await browser.close();

@@ -282,6 +282,9 @@ details.rules p{margin:8px 0}
 .bc .pg{color:var(--muted)}
 .bc.done{border-color:var(--good);background:color-mix(in srgb,var(--good) 12%,var(--panel2))}
 .bc .tick{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--good);color:#06120a;font-size:11px;margin-right:6px;vertical-align:1px}
+.rivalchip{font-size:12px;color:var(--muted);margin-top:6px;text-align:right}
+.rivalchip b{color:var(--ko)}
+.rep.rv{color:var(--ko);font-weight:700} .rep.ff{color:var(--flame);font-weight:700}
 .prof .ptl{font-size:11.5px;color:var(--flame);font-weight:700;letter-spacing:.02em}
 @media (max-width:760px){ .bcards{grid-template-columns:1fr} }
 .ltable-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
@@ -1442,14 +1445,18 @@ const GATES=[
   {n:'Gate of Death',pw:1.5,sp:20,dr:8,c:'#ff3a2a'}
 ];
 const taiOnly=d=>!!d.gates;
-function makeDuel(A,B){
-  const R=RULES, D={turn:0}, maxCh=d=>40+Math.min(d.sta,130)*0.6;
-  const f=[A,B].map((d,i)=>({d,i,hp:100,ch:maxCh(d),stun:0,cd:0,used:false,um:0,usedUlt:false,ultLanded:false,supLanded:false,readyT:0,superT:0,guarding:false,gates:0,healed:false,form:0.82+Math.random()*0.36}));
+/* opt (world events, circuit bonuses): dmg = damage multiplier (big-move caps scale too), cost = chakra cost multiplier,
+   ch0 = starting chakra share, chRegen = chakra regained per turn (x5), hp = starting HP, noSup = Kinjutsu banned, noCap = no time limit, side[i] = {dmg, um, ch} for one fighter */
+function makeDuel(A,B,opt){
+  opt=opt||{};
+  const R=RULES, D={turn:0,opt}, maxCh=d=>40+Math.min(d.sta,130)*0.6, SD=i=>(opt.side&&opt.side[i])||{};
+  const CM=opt.cost||1, C={nin:Math.round(10*CM),gen:Math.round(8*CM),sig:Math.round(28*CM)};
+  const f=[A,B].map((d,i)=>({d,i,hp:opt.hp||100,ch:Math.min(maxCh(d),maxCh(d)*(SD(i).ch||1)*(opt.ch0||1)),stun:0,cd:0,used:false,um:SD(i).um||0,usedUlt:false,ultLanded:false,supLanded:false,readyT:0,superT:0,guarding:false,gates:0,healed:false,form:0.82+Math.random()*0.36}));
   const log=[];
   const snap=()=>[Math.max(0,Math.round(f[0].hp)),Math.max(0,Math.round(f[1].hp))];
   const chs=()=>f.map(x=>Math.round(clamp(x.ch,0,maxCh(x.d))/maxCh(x.d)*100));
   const ums=()=>f.map(x=>x.usedUlt?0:Math.round(clamp(x.um,0,100)));
-  const sms=()=>f.map(x=>x.usedUlt?0:Math.round(clamp((x.um-R.ultAt)/(R.supAt-R.ultAt)*100,0,100))); // Super charge past the Ultimate
+  const sms=()=>f.map(x=>x.usedUlt||opt.noSup?0:Math.round(clamp((x.um-R.ultAt)/(R.supAt-R.ultAt)*100,0,100))); // Super charge past the Ultimate
   const uus=()=>f.map(x=>x.usedUlt?2:0);
   const gts=()=>f.map(x=>x.gates);
   const spdOf=x=>x.d.spd+GATES[x.gates].sp, pwOf=x=>GATES[x.gates].pw;
@@ -1494,9 +1501,9 @@ function makeDuel(A,B){
     const gn=gateNote(att,gate);
     let base,pow,name;
     if(m==='tai'){ base=9; pow=att.d.tai; name=pick(att.d.tm||TAI_MOVES); att.ch=Math.min(maxCh(att.d),att.ch+3); }
-    else if(m==='nin'){ base=12; pow=att.d.nin; name=pick(att.d.mv||NIN_MOVES); att.ch-=10; }
-    else if(m==='gen'){ base=3; pow=att.d.gen; name=(att.d.gj&&att.d.gj.length)?pick(att.d.gj):'an illusion'; att.ch-=8; }
-    else { base=26; pow=att.d[st]; name=att.d.sig; att.ch-=28; att.cd=3; }
+    else if(m==='nin'){ base=12; pow=att.d.nin; name=pick(att.d.mv||NIN_MOVES); att.ch-=C.nin; }
+    else if(m==='gen'){ base=3; pow=att.d.gen; name=(att.d.gj&&att.d.gj.length)?pick(att.d.gj):'an illusion'; att.ch-=C.gen; }
+    else { base=26; pow=att.d[st]; name=att.d.sig; att.ch-=C.sig; att.cd=3; }
 
     let dodge=dodgeOf(att,def);
     if(m==='sig') dodge*=0.6;
@@ -1513,6 +1520,7 @@ function makeDuel(A,B){
     let dmg=base*(0.82+0.42*pow/100)*Math.max(0.62,1.12-(def.d.tai+def.d.sta)/650)*(0.65+Math.random()*0.7)*att.form*pwOf(att);
     const crit=Math.random()<att.d.int/600+0.04;
     if(crit) dmg*=1.4;
+    dmg*=(opt.dmg||1)*(SD(att.i).dmg||1);
     dmg=Math.max(1,Math.round(dmg));
     let notes='', guard=false, surv=false, stunned=false;
     if(def.guarding){ dmg=Math.max(1,Math.round(dmg*R.guardMul)); notes+=` ${d} was guarding.`; guard=true; }
@@ -1537,7 +1545,8 @@ function makeDuel(A,B){
     if(Math.random()<dodgeOf(att,def)*(sup?R.supDodge:R.ultDodge)){ say(`${gn.trim()}${gn?' ':''}${d} somehow evades ${a}'s ${word.toLowerCase()}, ${u.n}!`,'ult',{att:att.i,mv:'ult',sup,name:u.n,dodge:true,st,gate,heal:gate?att.gh||0:0}); return; }
     let ud=(sup?R.supBase:R.ultBase)*(0.82+0.42*att.d[st]/100)*Math.max(0.62,1.12-(def.d.tai+def.d.sta)/650)*(0.8+Math.random()*0.4)*att.form*pwOf(att);
     const uc=Math.random()<att.d.int/600+0.06; if(uc) ud*=R.bigCrit;
-    ud=Math.max(8,Math.min(sup?R.supCap:R.ultCap,Math.round(ud))); let un='', ug=false, us=false;
+    const DM=(opt.dmg||1)*(SD(att.i).dmg||1);
+    ud=Math.max(8,Math.min(Math.round((sup?R.supCap:R.ultCap)*DM),Math.round(ud*DM))); let un='', ug=false, us=false;
     if(def.guarding){ ud=Math.max(1,Math.round(ud*R.guardMul)); un+=` ${d} was guarding and takes only ${ud}.`; ug=true; }
     else if(def.d.guard&&Math.random()<def.d.guard*.4){ ud=Math.round(ud*.6); un+=` ${d} braces and cuts the damage.`; ug=true; }
     def.hp-=ud;
@@ -1547,30 +1556,30 @@ function makeDuel(A,B){
   }
   function canUse(att,def,k){
     if(k==='tai') return true;
-    if(k==='nin') return att.ch>=10&&!taiOnly(att.d);
-    if(k==='gen') return att.ch>=8&&def.stun===0&&!taiOnly(att.d);
+    if(k==='nin') return att.ch>=C.nin&&!taiOnly(att.d);
+    if(k==='gen') return att.ch>=C.gen&&def.stun===0&&!taiOnly(att.d);
     if(k==='gate') return att.gates<(att.d.gates||0);
-    if(k==='sig') return att.ch>=28&&att.cd<=0;
-    if(k==='ult') return !att.usedUlt&&att.um>=R.ultAt&&att.readyT<D.turn&&!(att.um>=R.supAt&&att.superT<D.turn);
-    if(k==='super') return !att.usedUlt&&att.um>=R.supAt&&att.superT<D.turn;
+    if(k==='sig') return att.ch>=C.sig&&att.cd<=0;
+    if(k==='ult') return !att.usedUlt&&att.um>=R.ultAt&&att.readyT<D.turn&&(opt.noSup||!(att.um>=R.supAt&&att.superT<D.turn));
+    if(k==='super') return !opt.noSup&&!att.usedUlt&&att.um>=R.supAt&&att.superT<D.turn;
     if(k==='guard') return true;
     if(k==='focus') return att.ch<maxCh(att.d)-1;
     return false;
   }
   D.f=f; D.log=log; D.say=say; D.maxCh=maxCh;
   D.act=(i,choice)=>act(f[i],f[1-i],choice);
-  D.over=()=>D.turn>=28||f[0].hp<=0||f[1].hp<=0;
+  D.over=()=>D.turn>=(opt.noCap?90:28)||f[0].hp<=0||f[1].hp<=0;
   D.order=()=>{ const s0=spdOf(f[0])*(0.75+Math.random()*0.5), s1=spdOf(f[1])*(0.75+Math.random()*0.5); return s0>=s1?[0,1]:[1,0]; };
   // what fighter i can do right now, with the odds the rules use (for the command bar)
   D.options=i=>{
     const att=f[i], def=f[1-i], dg=dodgeOf(att,def), pct=x=>Math.round(x*100);
     return {
       tai:{ok:true,hit:pct(1-dg)},
-      nin:{ok:canUse(att,def,'nin'),hit:pct(1-dg),cost:10},
-      gen:{ok:canUse(att,def,'gen'),trap:pct((1-dg)*clamp(0.3+(att.d.gen-def.d.int)/150,0.08,0.8)),cost:8,stunned:def.stun>0},
-      sig:{ok:canUse(att,def,'sig'),hit:pct(1-dg*0.6),cost:28,cd:att.cd},
+      nin:{ok:canUse(att,def,'nin'),hit:pct(1-dg),cost:C.nin},
+      gen:{ok:canUse(att,def,'gen'),trap:pct((1-dg)*clamp(0.3+(att.d.gen-def.d.int)/150,0.08,0.8)),cost:C.gen,stunned:def.stun>0},
+      sig:{ok:canUse(att,def,'sig'),hit:pct(1-dg*0.6),cost:C.sig,cd:att.cd},
       ult:{ok:canUse(att,def,'ult'),hit:pct(1-dg*R.ultDodge),gauge:Math.round(Math.min(100,att.um)),used:att.usedUlt,soon:!att.usedUlt&&att.um>=R.ultAt&&att.readyT>=D.turn},
-      super:{ok:canUse(att,def,'super'),hit:pct(1-dg*R.supDodge),gauge:att.usedUlt?0:Math.round(clamp((att.um-R.ultAt)/(R.supAt-R.ultAt)*100,0,100))},
+      super:{ok:canUse(att,def,'super'),banned:!!opt.noSup,hit:pct(1-dg*R.supDodge),gauge:att.usedUlt||opt.noSup?0:Math.round(clamp((att.um-R.ultAt)/(R.supAt-R.ultAt)*100,0,100))},
       guard:{ok:true,gain:Math.round(Math.min(R.guardChakra,maxCh(att.d)-att.ch))},
       threat:canUse(def,att,'super')?'super':canUse(def,att,'ult')?'ult':'',
       focus:{ok:canUse(att,def,'focus'),gain:Math.round(Math.min(30,maxCh(att.d)-att.ch))},
@@ -1581,7 +1590,7 @@ function makeDuel(A,B){
   };
   D.endTurn=()=>{
     f.forEach(x=>{
-      x.ch=Math.min(maxCh(x.d),x.ch+5); fill(x,R.gainTurn); if(x.cd>0) x.cd--; x.guarding=false;
+      x.ch=Math.min(maxCh(x.d),x.ch+5*(opt.chRegen===undefined?1:opt.chRegen)); fill(x,R.gainTurn); if(x.cd>0) x.cd--; x.guarding=false;
       const dr=Math.min(GATES[x.gates].dr,Math.ceil(x.hp)-1);
       if(dr>0&&f[0].hp>0&&f[1].hp>0){ x.hp-=dr; say(`${x.d.short} burns ${dr} HP holding the ${GATES[x.gates].n} open.`,'drain',{who:x.i,dmg:dr}); }
       if(x.hp>0&&x.d.regen&&x.hp<100&&f[0].hp>0&&f[1].hp>0){
@@ -1603,8 +1612,8 @@ function makeDuel(A,B){
   };
   return D;
 }
-function simFight(A,B){
-  const D=makeDuel(A,B);
+function simFight(A,B,opt){
+  const D=makeDuel(A,B,opt);
   D.say(`${A.short} and ${B.short} step into the arena.`,'info');
   while(!D.over()){
     D.turn++;
@@ -4918,7 +4927,7 @@ const app=document.getElementById('app');
 const reduced=typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 const state={
   screen:'draft',
-  settings:{format:'knockout',mode:'classic',era:'1',draft:'pick',size:16,squadSize:3,field:'random',versions:'random',seed:'random'},
+  settings:{format:'knockout',events:'off',mode:'classic',era:'1',draft:'pick',size:16,squadSize:3,field:'random',versions:'random',seed:'random'},
   squad:[],captain:null,squadName:'',filter:'All',q:'',sort:'ovr',
   rounds:[],r:0,m:0,N:16,pts:{},out:{},champion:null,mode:'classic',era:'1',story:[],favorite:null,defending:null,saved:false,
   spectate:false,specAll:false,paused:false,toFinal:false,keep:null,duel:null,vs:null,
@@ -5229,7 +5238,11 @@ function recordTournament(){
     upset:ups[0]||null,ko:topKo?{id:topKo,n:kos[topKo]}:null,run:runs[0]?{id:runs[0].id,n:wins[runs[0].id]}:null,
     ults:fights.reduce((s,m)=>s+(m.result.ultW?1:0)+(m.result.ultL?1:0),0),ups:ups.length,
     spec:state.spectate,squad:state.squad.slice(),cap:state.captain,name:state.spectate?'':squadName(),score:state.spectate?0:total(),heads};
+  HIST.last=HIST.last||{};
+  const rv=rivalOf();
+  if(rv){ HIST.rival=HIST.rival&&byId(HIST.rival.id)&&byId(HIST.rival.id).base===rv.base?{id:rv.id,n:HIST.rival.n+1,t:HIST.n+1}:{id:rv.id,n:1,t:HIST.n+1}; }
   fights.forEach(m=>{
+    HIST.last[h2hKey(m.a.base,m.b.base)]=[HIST.n+1,m.winner.id,m.result.loser.id,roundName(state.rounds.findIndex(rd=>rd.includes(m)))];
     applyFight(HIST.f,m);
     const k=h2hKey(m.a.base,m.b.base), v=HIST.h2h[k]||(HIST.h2h[k]=[0,0]); v[k.split('|')[0]===m.winner.base?0:1]++;
   });
@@ -5268,14 +5281,14 @@ function leagueFinalize(m,sim,r,mi,pre){
     let p=6;
     if(sim.ko) p+=2;
     if(sim.hpLeft>=80) p+=3;
-    if(m.upset) p+=6;
+    if(m.upset) p+=state.upsetNight===r?12:6;
     if(sim.supW) p+=10; else if(sim.ultW) p+=6;
     const I=squadIdent(state.squad);
     if(I&&styleHit(I.prim,m,sim)){ p+=3; m.styleB=true; }
     if(sim.winner.id===state.captain){ p=Math.ceil(p*1.5); m.capB=true; }
     m.award=p; state.pts[sim.winner.id]=(state.pts[sim.winner.id]||0)+p;
   }
-  storyFight(m,r,mi,pre);
+  storyFight(m,r,mi,pre); storyEvent(m,r,mi);
   state.m++;
   if(state.m<state.rounds[r].length) return;
   storyLeagueDay(r);
@@ -5287,7 +5300,7 @@ function leagueFinalize(m,sim,r,mi,pre){
     storyChampion(); chalEnd();
     if(!state.spectate){ const t=total(), k=bestKey(); if(t>(state.best[k]||0)){ state.best[k]=t; try{ localStorage.setItem('fst_best2',JSON.stringify(state.best)); }catch(e){} } }
     recordTournament(); grantXP();
-  } else { state.r++; state.m=0; if(state.tab!=='story'&&state.tab!=='table') state.tab=state.r; }
+  } else { state.r++; state.m=0; if(state.tab!=='story'&&state.tab!=='table') state.tab=state.r; if(state.upsetNight===state.r) tell('upset','Upset Night',`${roundName(state.r)} is Upset Night: every upset is worth double to your squad.`,state.r); }
 }
 function storyLeagueDay(r){
   const tb=standings(), lead=tb[0], second=tb[1], left=state.rounds.length-1-r, half=state.rounds.length/2;
@@ -5322,6 +5335,7 @@ const CHAL=[
   // win challenges: n[knockout,league] squad wins that pass test(m,sim,wi) (wi = the winner's side in the log)
   {id:'giant',cat:'upset',t:'The Giant Slayer',n:[1,2],test:(m,s)=>s.loser.ovr-s.winner.ovr>=15,d:k=>`Beat ${k>1?`${k} opponents`:'an opponent'} rated 15 or more points higher.`,rw:{xp:80}},
   {id:'upsets',cat:'upset',t:'Upset Night',n:[2,5],test:m=>m.upset,d:k=>`Pull off ${k} upsets (wins against fighters rated 6+ higher).`,rw:{xp:90}},
+  {id:'rival',cat:'upset',t:'Settle the Score',n:[1,2],test:(m,s)=>isRival(s.loser),d:k=>`Beat your rival${HIST.rival&&byId(HIST.rival.id)?`, ${cname(byId(HIST.rival.id))},`:''} ${k>1?`${k} times`:'once'}.`,rw:{xp:120}},
   {id:'underdog',cat:'upset',t:'Underdog Story',n:[2,6],one:true,test:(m,s)=>s.winner.tier==='C'||s.winner.tier==='B',d:k=>`One Common or Rare squad fighter wins ${k} fights.`,rw:{spins:3}},
   {id:'untouch',cat:'style',t:'Untouchable',n:[1,2],test:(m,s)=>s.hpLeft>80,d:k=>`Win ${k>1?`${k} fights`:'a fight'} losing less than 20 HP.`,rw:{spins:3}},
   {id:'forbidden',cat:'style',t:'Forbidden Victory',n:[1,2],test:(m,s)=>s.supW,d:k=>`Win ${k>1?`${k} fights`:'a fight'} after landing a ${KIN}.`,rw:{title:'Kinjutsu Master'}},
@@ -5337,7 +5351,8 @@ const chalById=id=>CHAL.find(c=>c.id===id);
 const chalNeed=(C,lg)=>C.n?C.n[lg?1:0]:1;
 const chalText=(C,lg)=>C.d(chalNeed(C,lg),lg);
 const rwText=r=>r.xp?`+${r.xp} XP`:r.spins?`+${r.spins} spins`:`Title: ${r.title}`;
-function rollBoard(){ return ['upset','style','result'].map(cat=>({id:pick(CHAL.filter(c=>c.cat===cat)).id,done:false,prog:''})); }
+// the rival challenge only exists once you have a rival, and then comes up half the time
+function rollBoard(){ return ['upset','style','result'].map(cat=>({id:cat==='upset'&&HIST.rival&&byId(HIST.rival.id)&&Math.random()<.5?'rival':pick(CHAL.filter(c=>c.cat===cat&&c.id!=='rival')).id,done:false,prog:''})); }
 function giveXP(n){ const L0=levelOf(PROF.xp); PROF.xp+=n; const L1=levelOf(PROF.xp); if(L1>L0) PROF.spins+=(L1-L0)*5; saveProf(); return L1-L0; }
 function giveReward(r){
   if(r.xp) giveXP(r.xp);
@@ -5381,6 +5396,85 @@ function renderBoard(){
   const el=$('board'); if(!el) return;
   if(state.screen==='draft'){ if(!state.nextBoard) state.nextBoard=rollBoard(); el.innerHTML=boardHTML(state.nextBoard,state.settings.format==='league',false); return; }
   el.innerHTML=state.board&&!state.spectate?boardHTML(state.board,isLeague(),true):'';
+}
+
+
+/* ---------- world events (optional: settings.events) and reputations ---------- */
+// rule events change one fight for both fighters alike; no fighter is ever made stronger than the other in secret
+const EVENTS={
+  bloodbath:{t:'Bloodbath',d:'Both fighters deal 30% more damage, and big moves hit harder too.',opt:{dmg:1.3}},
+  crisis:{t:'Chakra Crisis',d:'Jutsu cost double, chakra comes back slowly and both start at 60%. Taijutsu decides this one.',opt:{cost:2,ch0:.6,chRegen:.4}},
+  sudden:{t:'Sudden Death',d:'Both fighters start at 60 HP and there is no time limit: it ends in a knockout.',opt:{hp:60,noCap:true}},
+  ban:{t:'Forbidden Technique Ban',d:`${KIN} are banned for this fight. Ultimates are still allowed.`,opt:{noSup:true}}
+};
+const EV_KEYS=Object.keys(EVENTS);
+const evOn=()=>state.events==='on';
+const fanFav=f=>{ const R=HIST.f[f.id]; return !!R&&R.fi>=2&&f.ovr<85; };
+// give a round's fights their events: about 30% get a rule event; a big underdog (or a fan favorite) gets the crowd
+function assignEvents(rd){
+  if(!evOn()) return;
+  rd.forEach(m=>{
+    if(Math.random()<.3) m.ev=pick(EV_KEYS);
+    const lo=m.a.ovr<=m.b.ovr?m.a:m.b, hi=lo===m.a?m.b:m.a, ff=[m.a,m.b].find(fanFav);
+    if(ff) m.crowd=ff.id; else if(hi.ovr-lo.ovr>=10&&Math.random()<.5) m.crowd=lo.id;
+  });
+}
+// one round (knockout) or matchday (league) is Upset Night: upsets are worth double to your squad
+function pickUpsetNight(){ if(!evOn()) return null; const n=nRounds(); return isLeague()?1+Math.floor(Math.random()*(n-2)):Math.floor(Math.random()*Math.max(1,n-1)); }
+const fightOpt=m=>{ const o=Object.assign({},m.ev?EVENTS[m.ev].opt:{}); if(typeof circuitSide==='function'){ const sd=circuitSide(m); if(sd) o.side=sd; } return Object.keys(o).length?o:undefined; };
+// the last time two characters met: this tournament first, then past tournaments
+function lastMeeting(a,b,m){
+  for(let r=state.rounds.length-1;r>=0;r--) for(const x of state.rounds[r]){ if(x===m||!x.result) continue; if((x.a.base===a.base&&x.b.base===b.base)||(x.a.base===b.base&&x.b.base===a.base)) return {here:true,w:x.winner,l:x.result.loser,where:roundName(r)}; }
+  const v=(HIST.last||{})[h2hKey(a.base,b.base)]; if(!v) return null;
+  return {here:false,w:byId(v[1]),l:byId(v[2]),where:v[3],n:v[0]};
+}
+const isRival=f=>!!HIST.rival&&byId(HIST.rival.id)&&byId(HIST.rival.id).base===f.base;
+// headline tags for a fight: its event, the crowd, Upset Night, a rivalry, a grudge match
+function matchTags(m,r){
+  const out=[], a=m.a, b=m.b;
+  if(m.ev) out.push({k:'war',t:EVENTS[m.ev].t,x:EVENTS[m.ev].d});
+  if(m.crowd){ const c=byId(m.crowd); out.push({k:'upset',t:'Crowd favorite',x:fanFav(c)?`${c.short} has reached ${HIST.f[c.id].fi} finals as an underdog, and the whole arena is chanting the name.`:`${c.short} is the big underdog here, and the crowd is firmly behind them.`}); }
+  if(state.upsetNight===r) out.push({k:'upset',t:'Upset Night',x:'Every upset tonight is worth double to your squad.'});
+  const h=h2h(a,b);
+  if(h&&h.a+h.b>=3&&Math.abs(h.a-h.b)<=1) out.push({k:'streak',t:'Rivalry match',x:h.a===h.b?`${cname(a)} and ${cname(b)} are level at ${h.a}-${h.b} across all their meetings.`:`${cname(h.a>h.b?a:b)} edges this rivalry ${Math.max(h.a,h.b)}-${Math.min(h.a,h.b)}.`});
+  const rv=[a,b].find(f=>isRival(f)&&!inSquad(f.id)), me=[a,b].find(f=>inSquad(f.id));
+  if(rv&&me) out.push({k:'squad',t:'Grudge match',x:`${rv.short} is your rival: ${cname(rv)} knocked out your captain ${HIST.rival.n>1?`${HIST.rival.n} times`:'last time'}. Time to settle the score.`});
+  else { const lm=lastMeeting(a,b,m); if(lm&&lm.w&&lm.l) out.push({k:'streak',t:lm.here?'Rematch':'Grudge match',x:lm.here?`${lm.w.short} won the first meeting on ${lm.where}.`:`Last time (tournament #${lm.n}, ${lm.where}) ${lm.w.short} beat ${lm.l.short}.`}); }
+  return out;
+}
+const matchNotes=(m,r)=>matchTags(m,r).map(x=>`${x.t}: ${x.x}`).concat(storyline(m.a,m.b));
+function storyEvent(m,r,mi){
+  const w=m.winner, l=m.result.loser, sim=m.result, mine=inSquad(w.id)||inSquad(l.id);
+  if(m.crowd&&m.crowd===w.id) tell('upset','The crowd erupts',`Crowd favorite ${w.short} beats ${l.short}.`,r,mi);
+  if(m.ev&&(mine||m.upset)){
+    const t=EVENTS[m.ev].t;
+    if(m.ev==='bloodbath') tell('war',t,`${w.short} outlasts ${l.short} in a bloodbath${sim.turns<=5?`, over in ${sim.turns} turns`:''}.`,r,mi);
+    else if(m.ev==='crisis') tell('war',t,`With chakra running dry, ${w.short} beats ${l.short}.`,r,mi);
+    else if(m.ev==='sudden') tell('war',t,`${w.short} wins the sudden-death fight against ${l.short}.`,r,mi);
+    else if(m.ev==='ban') tell('war',t,`No forbidden techniques: ${w.short} beats ${l.short} the hard way.`,r,mi);
+  }
+  const R=HIST.f[l.id];
+  if(R&&R.t>=1&&!state.saved&&(isLeague()?false:r===0)) tell('upset','Fallen legend',`${l.short}, a ${R.t}-time champion, goes out in the first round.`,r,mi);
+  if(isRival(l)&&inSquad(w.id)) tell('squad','Score settled',`${w.short} beats your rival ${l.short}.`,r,mi);
+  if(isRival(w)&&inSquad(l.id)&&l.id===state.captain) tell('squad','The rival strikes again',`${w.short} beats your captain ${l.short} again.`,r,mi);
+  else if(!isLeague()&&l.id===state.captain&&inSquad(l.id)&&!inSquad(w.id)) tell('squad','A new rival',`${w.short} knocked out your captain. ${cname(w)} is your rival now: beat them to settle the score.`,r,mi);
+}
+// the rival: whoever knocked out (league: beat twice) your captain, or a fighter on a 5-fight streak who beat your squad
+function rivalOf(){
+  if(state.spectate||!state.captain) return null;
+  const f=doneFights();
+  if(!isLeague()){ const k=f.find(x=>x.result.loser.id===state.captain); if(k) return k.winner; }
+  else { const c={}; f.filter(x=>x.result.loser.id===state.captain).forEach(x=>c[x.winner.id]=(c[x.winner.id]||0)+1); const id=Object.keys(c).find(k=>c[k]>=2); if(id) return byId(id); }
+  return null;
+}
+// a rival challenge needs the rival in the field: swap them in for a random opponent (only if the type allows them)
+function ensureRival(list){
+  if(!state.board||!state.board.some(c=>c.id==='rival')||!HIST.rival) return list;
+  const R=byId(HIST.rival.id); if(!R||list.some(f=>f.base===R.base)) return list;
+  const vs=ROSTER.filter(f=>f.base===R.base&&eligible(f,state.mode,state.era));
+  const free=list.map((f,i)=>i).filter(i=>!inSquad(list[i].id));
+  if(!vs.length||!free.length||state.squad.some(id=>byId(id).base===R.base)){ state.board=state.board.filter(c=>c.id!=='rival').concat([{id:'giant',done:false,prog:''}]); return list; }
+  const i=pick(free), out=list.slice(); out[i]=vs.find(f=>f.id===R.id)||pick(vs); return out;
 }
 
 /* ---------- the tournament story ---------- */
@@ -5468,7 +5562,7 @@ function renderDraft(){
         <h1 class="title">Fantasy Shinobi<br><em>Tournament</em></h1>
         <p class="lede">Pick a squad from ${BASES.length} characters across ${ROSTER.length} versions, or spin for it, then watch the tournament play out live. Win to earn XP, rank up and get more spins.</p>
       </div>
-      <div class="hside">${profChip()}<div class="row hbtn"><button class="btn small qf" data-action="quick">Quick fight</button><button class="btn small" data-action="history">History${HIST.n?` (${HIST.n})`:''}</button><button class="btn small" data-action="theme">Light / dark</button></div></div>
+      <div class="hside">${profChip()}${rivalChip()}<div class="row hbtn"><button class="btn small qf" data-action="quick">Quick fight</button><button class="btn small" data-action="history">History${HIST.n?` (${HIST.n})`:''}</button><button class="btn small" data-action="theme">Light / dark</button></div></div>
     </div>
     ${state.toast?`<div class="toast" role="status">${esc(state.toast)}</div>`:''}
     <section class="panel modes" id="modes"></section>
@@ -5528,6 +5622,7 @@ function renderSettings(){
   $('settings').innerHTML=
     seg('format','Format',[{v:'knockout',t:'Knockout'},{v:'league',t:'League'}],lg?'Double round robin: everyone meets everyone twice.':'Single elimination bracket.')+
     seg('draft','How you draft',[{v:'pick',t:'Pick'},{v:'spin',t:'Spin'}],s.draft==='spin'?'Spin for each slot. Double XP.':'Choose any fighter.')+
+    seg('events','World events',[{v:'off',t:'Off'},{v:'on',t:'On'}],s.events==='on'?'Bloodbaths, Chakra Crises, Sudden Death, Kinjutsu bans, crowd favorites and an Upset Night.':'Standard rules in every fight.')+
     (lg?seg('size','League size',LEAGUE_SIZES.map(v=>({v,t:v,dis:v>lmx})),`${s.size} fighters, ${2*(s.size-1)} matchdays, ${s.size*(s.size-1)} fights`)
        :seg('size','Bracket size',[8,16,32,64].map(v=>({v,t:v,dis:v>mx})),`${s.size} characters, ${Math.log2(s.size)} rounds`))+
     seg('squadSize','Squad size',[3,5,8].map(v=>({v,t:v,dis:v>s.size/2})))+
@@ -5571,8 +5666,12 @@ function listFiltered(){
 function lockedBy(f){ return state.squad.map(byId).find(x=>x.base===f.base&&x.id!==f.id); }
 function repTag(f){
   const R=HIST.f[f.id]; if(!R||!(R.w+R.l)) return '';
+  return (isRival(f)?'<span class="rep rv">Your rival</span>':'')+(fanFav(f)?'<span class="rep ff">Fan favorite</span>':'')+repTag0(R);
+}
+function repTag0(R){
   return `<span class="rep">Record ${R.w}-${R.l}${R.t?`, ${R.t} title${R.t>1?'s':''}`:R.b?`, best: ${finishName(R.b).toLowerCase()}`:''}</span>`;
 }
+const rivalChip=()=>{ const R=HIST.rival&&byId(HIST.rival.id); return R?`<div class="rivalchip" title="Beat them to settle the score">Your rival: <b>${R.short}</b>, beat your captain ${HIST.rival.n>1?`${HIST.rival.n} times`:'once'}</div>`:''; };
 function cardHTML(f){
   const sel=inSquad(f.id), full=state.squad.length>=state.settings.squadSize&&!sel, lock=lockedBy(f);
   const tags=[]; if(state.settings.mode==='akatsuki') tags.push(akaSide(f)?'Akatsuki side':'Allied Forces'); if(f.tags.includes('Edo')) tags.push('Edo Tensei'); if(f.regen) tags.push('Regen'); if(f.guard) tags.push('Guard'); if(f.last) tags.push('Last stand');
@@ -5702,7 +5801,7 @@ function startTournament(spec){
   }
   if(state.spectate){ state.squad=[]; state.captain=null; }
   const s=state.settings;
-  state.format=s.format||'knockout'; state.mode=s.mode; state.era=s.era; state.N=s.size; state.draftType=state.spectate?'none':s.draft; state.reward=null;
+  state.format=s.format||'knockout'; state.events=s.events||'off'; state.mode=s.mode; state.era=s.era; state.N=s.size; state.draftType=state.spectate?'none':s.draft; state.reward=null;
   if(state.mode==='chaos'){
     // your characters stay, their versions are rolled
     const re={}; state.squad=state.squad.map(id=>{ const n=pick(ROSTER.filter(f=>f.base===byId(id).base)).id; re[id]=n; return n; });
@@ -5711,7 +5810,10 @@ function startTournament(spec){
   state.run++; state.r=0; state.m=0; state.tab=0; state.champion=null; state.busy=false; state.copied=false; state.paused=false; state.toFinal=false; state.saved=false;
   state.pts={}; state.out={}; state.story=[];
   state.board=state.spectate?null:(state.nextBoard||rollBoard()).map(c=>({id:c.id,done:false,prog:''})); state.nextBoard=null;
-  state.rounds=isLeague()?leagueSchedule(buildField()):[makeRound(buildField())];
+  const fld=ensureRival(buildField());
+  state.rounds=isLeague()?leagueSchedule(fld):[makeRound(fld)];
+  state.rounds.forEach(assignEvents); state.upsetNight=pickUpsetNight();
+  if(state.upsetNight===0) tell('upset','Upset Night',`${roundName(0)} is Upset Night: every upset is worth double to your squad.`,0);
   state.tab=isLeague()?'table':0; state.leagueBonus=null; state.leader=null; state.clinched=false;
   state.squad.forEach(id=>state.pts[id]=0);
   const field=fieldOf();
@@ -5894,6 +5996,9 @@ function renderMatches(){
     let ribs=evs.map(e=>`<span class="rib k-${e.k}">${esc(e.t)}</span>`).join('');
     if(done&&m.upset&&!evs.some(e=>e.k==='upset')) ribs=`<span class="rib k-upset">Upset</span>`+ribs;
     if(m.played) ribs=`<span class="rib k-squad">You fought</span>`+ribs;
+    if(m.ev) ribs=`<span class="rib k-war">${EVENTS[m.ev].t}</span>`+ribs;
+    if(m.crowd&&!done) ribs+=`<span class="rib k-upset">Crowd favorite</span>`;
+    if([m.a,m.b].some(f=>isRival(f)&&!inSquad(f.id))&&hasSquad(m)&&!evs.some(e=>e.t==='Score settled')) ribs+=`<span class="rib k-squad">Rival</span>`;
     let foot='';
     if(done) foot=`<span class="ft ${m.result.ko?'ko':''}">${m.result.ko?'KO':'Decision'}</span><span class="ft">${m.result.hpLeft} HP left</span>${m.result.supW?`<span class="ft ult sup">${KIN}</span>`:m.result.ultW?'<span class="ft ult">Ultimate</span>':''}${m.award?`<span class="ft pts">+${m.award} pts${m.capB?', captain':''}${m.styleB?', style':''}</span>`:''}`;
     else if(now) foot='<span class="ft pts">Up next</span>';
@@ -5960,10 +6065,11 @@ function markWinner(win){
   const w=$('hf'+'AB'[win]), l=$('hf'+'AB'[1-win]);
   if(w) w.classList.add('won'); if(l) l.classList.add('lost');
 }
+const arenaNote=m=>[hasSquad(m)?'Your fighter is up':'',m.ev?EVENTS[m.ev].t:''].filter(Boolean).join(' · ');
 function showUpcoming(){
   if(state.champion) return;
-  const m=curMatch(), notes=storyline(m.a,m.b);
-  buildArena(m.a,m.b,`Next up: ${roundName(state.r)}, fight ${state.m+1} of ${state.rounds[state.r].length}`,notes.length?notes.slice(0,3):(state.spectate?'The next fight is about to start.':'Press Watch next fight to see it play out.'),hasSquad(m)?'Your fighter is up':'',themeFor(state.r));
+  const m=curMatch(), notes=matchNotes(m,state.r);
+  buildArena(m.a,m.b,`Next up: ${roundName(state.r)}, fight ${state.m+1} of ${state.rounds[state.r].length}`,notes.length?notes.slice(0,4):(state.spectate?'The next fight is about to start.':'Press Watch next fight to see it play out.'),arenaNote(m),themeFor(state.r));
   setTicker(notes[0]||new Announcer(m.a,m.b,f=>inSquad(f.id)).preview(roundName(state.r)),!!notes[0]);
 }
 function showFinal(m,r){
@@ -5980,8 +6086,8 @@ function stageGuard(st,ms){ return new Promise(res=>{ let left=ms; const tick=()
 async function playSim(m,sim,r,real){
   const run=state.run;
   state.busy=true; renderControls();
-  const notes=real?storyline(m.a,m.b).slice(0,2):[];
-  const st=buildArena(m.a,m.b,`${roundName(r)}, ${real?`fight ${state.m+1} of ${state.rounds[r].length}`:'replay'}`,notes,hasSquad(m)?'Your fighter is up':'',themeFor(r));
+  const notes=real?matchNotes(m,r).slice(0,3):[];
+  const st=buildArena(m.a,m.b,`${roundName(r)}, ${real?`fight ${state.m+1} of ${state.rounds[r].length}`:'replay'}`,notes,arenaNote(m),themeFor(r));
   setHp([100,100],[100,100],[0,0]);
   const ann=new Announcer(m.a,m.b,f=>inSquad(f.id));
   if(real) ann.st0=[liveRec(m.a.id).st,liveRec(m.b.id).st];
@@ -6010,7 +6116,7 @@ function announceStory(n0){
 async function watchNext(){
   if(state.busy||state.champion) return;
   Sfx.init();
-  const m=curMatch(), r=state.r, sim=simFight(m.a,m.b);
+  const m=curMatch(), r=state.r, sim=simFight(m.a,m.b,fightOpt(m));
   const ok=await playSim(m,sim,r,true);
   if(!ok) return;
   const n0=state.story.length;
@@ -6040,7 +6146,7 @@ function finalize(m,sim){
     let p=PTS_BY_REMAIN[remain(r)]||4;
     if(sim.ko) p+=5;
     if(sim.hpLeft>=80) p+=5;
-    if(m.upset) p+=8;
+    if(m.upset) p+=state.upsetNight===r?16:8;
     if(sim.supW) p+=15; else if(sim.ultW) p+=10;
     if(r===nRounds()-1) p+=25;
     const I=squadIdent(state.squad);
@@ -6049,7 +6155,7 @@ function finalize(m,sim){
     m.award=p;
     state.pts[sim.winner.id]=(state.pts[sim.winner.id]||0)+p;
   }
-  storyFight(m,r,mi,pre);
+  storyFight(m,r,mi,pre); storyEvent(m,r,mi);
   state.m++;
   if(state.m>=state.rounds[r].length){
     if(r===nRounds()-1){
@@ -6059,14 +6165,16 @@ function finalize(m,sim){
       recordTournament(); grantXP();
     } else {
       state.rounds.push(makeRound(state.rounds[r].map(x=>x.winner)));
+      assignEvents(state.rounds[r+1]);
       storyRound(r);
+      if(state.upsetNight===r+1) tell('upset','Upset Night',`The ${roundName(r+1)} is Upset Night: every upset is worth double to your squad.`,r+1);
       state.r++; state.m=0; if(state.tab!=='story') state.tab=state.r;
     }
   }
 }
 function simSilent(stop){
   let guard=0, lastM=null, lastR=0;
-  while(!state.champion&&!stop()&&guard++<400){ const m=curMatch(); lastM=m; lastR=state.r; finalize(m,simFight(m.a,m.b)); }
+  while(!state.champion&&!stop()&&guard++<400){ const m=curMatch(); lastM=m; lastR=state.r; finalize(m,simFight(m.a,m.b,fightOpt(m))); }
   return {m:lastM,r:lastR};
 }
 function simRound(){ if(state.busy||state.champion) return; const r0=state.r; afterSim(simSilent(()=>state.r!==r0)); }
@@ -6095,7 +6203,7 @@ function duelPanel(){
       ${b('sig',3,'sig',me.sig,o.sig.cd>0?`Ready in ${o.sig.cd} turn${o.sig.cd>1?'s':''}`:o.sig.ok?`28 chakra, hit ${o.sig.hit}%`:'Needs 28 chakra',o.sig.ok)}
       ${o.ult.used?b('ult',4,'ult','Big move','Spent this fight',false)
         :o.super.ok?b('super',4,'ult sup',KINU,`${supOf(me).n}. READY, hit ${o.super.hit}%`,true)
-        :b('ult',4,'ult','ULTIMATE',`${ultOf(me).n}. ${o.ult.ok?`READY, hit ${o.ult.hit}%. ${o.super.gauge>0?`${KIN} charging ${o.super.gauge}%`:`Hold it to unseal the ${KIN}`}`:o.ult.soon?'Ready next turn':`Gauge ${o.ult.gauge}%`}`,o.ult.ok)}
+        :b('ult',4,'ult','ULTIMATE',`${ultOf(me).n}. ${o.ult.ok?`READY, hit ${o.ult.hit}%. ${o.super.banned?`${KIN} banned this fight`:o.super.gauge>0?`${KIN} charging ${o.super.gauge}%`:`Hold it to unseal the ${KIN}`}`:o.ult.soon?'Ready next turn':`Gauge ${o.ult.gauge}%`}`,o.ult.ok)}
       ${b('guard',5,'grd'+(o.threat&&w?' hot':''),'Guard',`All damage this turn x0.4${o.guard.gain?`, +${o.guard.gain} chakra`:''}`,o.guard.ok)}
       ${b('focus',6,'foc','Focus',o.focus.ok?`Skip the attack, +${o.focus.gain} chakra`:'Chakra is full',o.focus.ok)}
     </div>
@@ -6128,7 +6236,7 @@ function chooseMove(k){
 function abandonDuel(){ const S=state.duel; if(S&&S.choose) S.choose(null); state.duel=null; }
 // play one fight with the player controlling side `me` (0 = a, 1 = b). Returns the simFight-style result, or null if abandoned.
 async function playControlled(a,b,me,o){
-  const run=state.run, D=makeDuel(a,b);
+  const run=state.run, D=makeDuel(a,b,o.opt);
   state.busy=true; state.paused=false;
   state.duel={D,me,waiting:false,choose:null,auto:false,done:false};
   const st=buildArena(a,b,o.label,o.notes||[],`You control ${[a,b][me].short}`,o.theme);
@@ -6172,7 +6280,7 @@ async function fightYourself(){
   const m=curMatch(); if(!hasSquad(m)) return;
   Sfx.init();
   const r=state.r, me=inSquad(m.a.id)?0:1;
-  const res=await playControlled(m.a,m.b,me,{label:`${roundName(r)}, fight ${state.m+1} of ${state.rounds[r].length}`,round:roundName(r),theme:themeFor(r),notes:storyline(m.a,m.b).slice(0,2)});
+  const res=await playControlled(m.a,m.b,me,{label:`${roundName(r)}, fight ${state.m+1} of ${state.rounds[r].length}`,round:roundName(r),theme:themeFor(r),notes:matchNotes(m,r).slice(0,3),opt:fightOpt(m)});
   if(!res) return;
   m.played=true; m.watched=true;
   const n0=state.story.length;
@@ -6275,7 +6383,7 @@ async function spectateLoop(){
   await specWait(1200,run);
   while(live()&&!state.champion){
     if(state.paused){ await sleep(120); continue; }
-    const m=curMatch(), r=state.r, sim=simFight(m.a,m.b), quick=state.toFinal&&r<nRounds()-1;
+    const m=curMatch(), r=state.r, sim=simFight(m.a,m.b,fightOpt(m)), quick=state.toFinal&&r<nRounds()-1;
     if(quick||!(state.specAll||worthWatching(m,sim,r))){
       finalize(m,sim); batch.push(m);
       if(batch.length%8===0) await sleep(0);
