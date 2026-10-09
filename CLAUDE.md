@@ -150,7 +150,7 @@ Verified (Oct 2026):
   moves, signatures (lava flame / iai) and Ultimate/Kinjutsu (Quicklime Prison bind + Golem Mountain Drop; Twin Blade
   Storm + Great Chakra Hammer). Unused: the stone fist props, Madara's long-robe and Hashirama-cells forms, the scythe.
   Builder: `parts.frontLeg`, and `partsAt {arm, head, headFrom, headBack}` for part files drawn around another origin
-  (Pain's head is drawn from the waist and goes behind the cloak); with `partsAt` the grafted arms/legs are the skeleton's.
+  (Pain's head is drawn from the waist and goes behind the cloak; `headScale` shrinks a head part drawn bigger than its body, Pain 0.62); with `partsAt` the grafted arms/legs are the skeleton's.
   2,680 move runs, smoke, meta, layout, balance pass.
 - Fifth batch (Oct 2026), replacing per the user (Tobirama keeps his Senju figure): Peck Akatsuki pack now draws
   Itachi, Kisame (+ the old pack's Samehada), Kakuzu, Sasori, Konan, Tobi, Black Zetsu and the new Hidan; their Edo
@@ -167,7 +167,8 @@ Verified (Oct 2026):
   2,680 move runs, smoke, meta, layout pass.
 - Renderer fidelity pass (Oct 2026), after the user said the figures looked chopped and Konan was not Konan:
   Stick Nodes draws CIRCLE nodes (type 2, the only circle type the packs use) as FILLED discs; they used to be drawn as
-  rings, which left faces, joints, eyes and the Rasengan hollow. Also now honoured (semantics from sticknodes-rs
+  rings, which left faces, joints, eyes and the Rasengan hollow. The disc's radius is length/2 + line width/2 (the
+  outer edge of the old ring): a small circle with a thick line is a big head (Gaara's face vanished without it). Also now honoured (semantics from sticknodes-rs
   node.rs): segment scale (offset AND thickness x node scale when `use_segment_scale`), the figure colour for nodes and
   polyfills that do not use their own, trapezoid end ratio (was read for ellipses by mistake, so trapezoids drew as
   rectangles), curved segments (`K`, degrees of bend, also along polyfill edges; direction is a best guess: no

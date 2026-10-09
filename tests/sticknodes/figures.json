@@ -56,7 +56,8 @@
    "arm": 221,
    "head": 222,
    "headFrom": 0,
-   "headBack": true
+   "headBack": true,
+   "headScale": 0.62
   }
  },
  "zetsu": {

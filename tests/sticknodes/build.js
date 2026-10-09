@@ -10,8 +10,9 @@ const hex = c => c.slice(0, 3).map(v => v.toString(16).padStart(2, '0')).join(''
 /* graft another .nodes file onto node `at` of N (its root merges into `at`); `front` draws it over everything,
    otherwise under everything. `from` (default `at`): the node where the part's root really sits, when the part hangs
    from `at` but was drawn around another origin (Pain's head is drawn from the waist). Returns the graft's first node. */
-function graftFile(N, file, at, front, polys, from) {
+function graftFile(N, file, at, front, polys, from, scale) {
   const GF = load(path.join(PACKS, file)), G = GF.nodes, base = N.length;
+  if (scale) G.forEach(g => { if (g.parent > 0) { g.x *= scale; g.y *= scale; } if (g.parent >= 0) g.th *= scale; }); // a part drawn at another size (Pain's head); its root connector keeps its length so it still lands on the neck
   const dis = N.map(m => m.di), lo = Math.min(...dis), hi = Math.max(...dis), gmax = Math.max(...G.map(g => g.di));
   const off = front ? hi + 1 : lo - gmax - 1, mapDi = d => d === G[0].di ? N[at].di : d + off;
   const fr = from === undefined ? at : from, dx = N[fr].X - N[at].X, dy = N[fr].Y - N[at].Y;
@@ -36,7 +37,7 @@ function build(file, o) {
     if (P.backArm) pb.backArm = graftFile(N, P.backArm, arm, false, F.polys);
     if (P.frontLeg) pb.frontLeg = graftFile(N, P.frontLeg, 0, false, F.polys); // legs go under the body (Pain's cloak covers the thighs)
     if (P.backLeg) pb.backLeg = graftFile(N, P.backLeg, 0, false, F.polys);
-    if (P.head) graftFile(N, P.head, hd, !PA.headBack, F.polys, PA.headFrom);
+    if (P.head) graftFile(N, P.head, hd, !PA.headBack, F.polys, PA.headFrom, PA.headScale);
     if (P.frontArm) pb.frontArm = graftFile(N, P.frontArm, arm, true, F.polys); }
   // extra: more part files hung from the torso top (Hokage Naruto's cape behind him, its collar in front)
   if (o.extra) for (const x of o.extra) graftFile(N, x.file, top0, !!x.front, F.polys);
