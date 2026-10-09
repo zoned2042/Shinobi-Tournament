@@ -178,6 +178,8 @@ Verified (Oct 2026):
   x1.2). Konan, Itachi (+Edo), Kisame, Kakuzu (+Edo), Sasori (+Edo) and Tobi went back to The Akatsuki pack figures,
   which look like the characters once circles are filled; Peck Akatsuki is kept only for Black Zetsu and Hidan.
   Zabuza's pack figure was dropped (its parts did not assemble into a usable body); Zabuza is drawn again.
+  Builder `drape: [[startNode, angleDeg, bendDeg], ...]` re-aims cloth chains a pack saved flung out in an action pose
+  so they hang (Kazekage Gaara's coat tails stuck out sideways like wings).
 - Stick Nodes figures (Oct 2026): six packs the user sent (Naruto Pack 8, The Akatsuki, Senju Brothers, Kakashi Hatake,
   Kimimaro Kaguya, Obito 360) drive 30 versions. Naruto Pack 8 also added two versions: Shippuden Naruto (`narutoS`, B tier,
   ~40% vs random, tears up at 50/25 HP) and The Last Naruto (`narutoL`, ~68%); neither regenerates, which kept the Ultimate

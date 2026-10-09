@@ -40,6 +40,11 @@ function build(file, o) {
     if (P.frontArm) pb.frontArm = graftFile(N, P.frontArm, arm, true, F.polys); }
   // extra: more part files hung from the torso top (Hokage Naruto's cape behind him, its collar in front)
   if (o.extra) for (const x of o.extra) graftFile(N, x.file, top0, !!x.front, F.polys);
+  // drape: cloth chains saved flung out in an action pose (Gaara's coat tails) hang down instead: each listed chain
+  // start and its single-child descendants are re-aimed at angle a (degrees, y-up; -90 = straight down), bending by `bend`
+  if (o.drape) { for (const [start, a, bend] of o.drape) { let i = start, ang = a;
+      for (;;) { const n = N[i], L = Math.hypot(n.x, n.y), r = ang * Math.PI / 180; n.x = L * Math.cos(r); n.y = L * Math.sin(r); ang += bend || 0; if (n.kids.length !== 1) break; i = n.kids[0]; } }
+    N.forEach(m => { if (m.parent >= 0) { m.X = N[m.parent].X + m.x; m.Y = N[m.parent].Y - m.y; } }); }
   let D = o.prop ? null : detect(F);
   if (D && o.partsAt && pb.frontArm && pb.backArm) {
     const limb = i => { const n = N[i], a = Math.atan2(n.y, n.x); const k = n.kids.map(j => N[j]).sort((p, q) => Math.hypot(q.x, q.y) * (1 + Math.cos(Math.atan2(q.y, q.x) - a)) - Math.hypot(p.x, p.y) * (1 + Math.cos(Math.atan2(p.y, p.x) - a)))[0]; return { i, kid: k.i }; };

@@ -145,7 +145,19 @@
   }
  },
  "gaara2": {
-  "file": "Bijuu-and-Gaara-Pack/gaara shippuden.nodes"
+  "file": "Bijuu-and-Gaara-Pack/gaara shippuden.nodes",
+  "drape": [
+   [
+    1,
+    -70,
+    -6
+   ],
+   [
+    232,
+    -110,
+    6
+   ]
+  ]
  },
  "danzo": {
   "file": "Danzo-Pack/Danzo.nodes"
